@@ -339,6 +339,33 @@ class GraphStore:
             level=level, unit=unit, radius=radius_m, lat=lat, lon=lon, sensor=sensor_id)
         return rows[0] if rows else {}
 
+    def upsert_vision_hazard(self, hazard_id: str, *, name: str, hazard_type: str, entity_id: str, ts: datetime, source: str,
+                             confidence: float, ref: str, event_id: str, lat: float | None, lon: float | None, radius_m: float,
+                             description: str | None = None) -> dict[str, Any]:
+        """A hazard seen by a camera (fire, smoke, flood water) at an entity: same node shape as a sensor hazard, but
+        DETECTED_BY nothing (no sensor) and AFFECTS the entity it was seen at. Added 2026-09-25 (Shresth)."""
+        rows = self.write_dicts(
+            "MERGE (h:Entity:Hazard {id:$id}) "
+            "ON CREATE SET h.kind='hazard', h.name=$name, h.aliases=[$name], h.hazard_type=$type, h.status='inactive', "
+            "h.created_at=datetime(), h.seeded=false "
+            "SET h.status_since = CASE WHEN h.status = 'active' THEN h.status_since ELSE $ts END, "
+            "h.source = CASE WHEN h.status = 'active' THEN h.source ELSE $source END, "
+            "h.raw_evidence_ref = CASE WHEN h.status = 'active' THEN h.raw_evidence_ref ELSE $ref END, "
+            "h.status_event_id = CASE WHEN h.status = 'active' THEN h.status_event_id ELSE $eid END, "
+            "h.confidence = CASE WHEN h.status = 'active' AND h.confidence > $conf THEN h.confidence ELSE $conf END "
+            "SET h.status='active', h.last_confirmed=$ts, h.last_confirmed_source=$source, h.last_confirmed_evidence_ref=$ref, "
+            "h.radius_m=$radius, h.lat=$lat, h.lon=$lon, h.description=$desc, h.detected_by_camera=true, h.updated_at=datetime(), "
+            "h.location = CASE WHEN $lat IS NULL OR $lon IS NULL THEN h.location ELSE point({latitude:$lat, longitude:$lon}) END "
+            "WITH h MATCH (e:Entity {id:$entity}) "
+            "MERGE (h)-[a:AFFECTS]->(e) ON CREATE SET a.active=false, a.evidence_refs=[], a.event_ids=[] "
+            "SET a.since = CASE WHEN a.active THEN a.since ELSE $ts END "
+            "SET a.active=true, a.ended_at=null, a.last_confirmed=$ts, a.source=$source, a.confidence=$conf, "
+            "a.evidence_refs=a.evidence_refs + $ref, a.event_ids=a.event_ids + $eid "
+            "RETURN h.id AS id, h.status_since AS status_since, e.id AS affects",
+            id=hazard_id, name=name, type=hazard_type, ts=ts, source=source, conf=confidence, ref=ref, eid=event_id,
+            radius=radius_m, lat=lat, lon=lon, desc=description, entity=entity_id)
+        return rows[0] if rows else {}
+
     def link_hazard_affects(self, hazard_id: str, sensor_id: str, *, ts: datetime, source: str, confidence: float,
                             ref: str, event_id: str) -> list[str]:
         rows = self.write_dicts(

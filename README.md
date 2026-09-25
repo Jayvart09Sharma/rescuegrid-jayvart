@@ -72,6 +72,17 @@ Scenario result (`scripts/verify_graph.py`): Building 14 collapsed (drone 0.91, 
 Rescue Team 4 `NEAR` Building 14 with sources `[gps, drone_vision]` and confidence 0.991; gas hazard `AFFECTS` Building 14 and
 Rescue Team 4 `NEAR` it; Bridge Street blocked (drone 0.85) **with a conflict** retained from radio "open" (0.70), both events linked `CONFLICTS_WITH`.
 
+## Changes by Shresth, 2026-09-25 evening (integration; originals backed up in the session scratchpad)
+
+* `fusion/policy.py`: `TEAM_PROGRESSION`. A unit's status stepping along available -> en_route -> on_scene (-> available)
+  is an update, not a contradiction, even when two sources report the steps within the conflict window (radio says
+  en route, the crew's report says on scene). Backward steps and out_of_service still go through the conflict rule.
+  `tests/test_policy.py` passes (14).
+* `fusion/rules.py`: `VisionHazardRule` + `graph.py::upsert_vision_hazard`. A drone_vision event whose
+  `details.hazard` contains fire / smoke / structure_fire / wildfire_smoke / flooded_road creates
+  `Hazard-<fire|water>-<entity>` (active, AFFECTS the entity, units inside the radius NEAR it, Qwen's description on
+  the node, `detected_by_camera=true`, no DETECTED_BY). Vision never clears it. Verified through the bus.
+
 ## Conflict handling (built, minimal)
 
 Two sources disagreeing about one entity inside the window are never silently merged: the node's `status` follows the

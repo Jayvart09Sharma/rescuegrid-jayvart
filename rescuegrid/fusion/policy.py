@@ -10,6 +10,12 @@ from ..contracts import Event
 
 Action = str  # 'create' | 'override' | 'confirm' | 'stale' | 'conflict' | 'confirm_competing' | 'resolve_conflict'
 
+# A unit's status moves along a progression during a response. Two sources reporting successive steps of it
+# (radio says en_route, then the crew's report says on_scene) are not disagreeing about the same fact, so these
+# transitions never open a conflict: the later step overrides. Backward steps (on_scene -> en_route) and
+# out_of_service are still judged by the normal conflict rule. Added 2026-09-25 (Shresth, agreed with Kenil's design).
+TEAM_PROGRESSION = {("available", "en_route"), ("en_route", "on_scene"), ("available", "on_scene"), ("on_scene", "available"), ("en_route", "available")}
+
 
 @dataclass
 class Decision:
@@ -59,6 +65,10 @@ def decide(current: Optional[dict[str, Any]], ev: Event, *, conflict_window_s: f
     # ---- a new source agreeing with the competing side of an open conflict -> flip
     if in_conflict and competing == ev.claim and ev.source not in (cur_src, conflict_src):
         return Decision("confirm_competing", f"third source {ev.source} confirms competing claim '{ev.claim}' - status flips")
+
+    # ---- a unit reporting the next step of its response is an update, not a contradiction
+    if current.get("kind") == "team" and (status, ev.claim) in TEAM_PROGRESSION:
+        return Decision("override", f"unit progression '{status}' -> '{ev.claim}' by {ev.source}")
 
     # ---- contradiction: someone other than this source stands behind the current status, recently, with comparable confidence
     backers = {cur_src, *(current.get("confirmed_sources") or [])} - {ev.source, None}

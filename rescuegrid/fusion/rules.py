@@ -149,6 +149,41 @@ class SensorHazardRule(Rule):
                 ctx.note(f"no active hazard for {s['id']} - reading recorded only")
 
 
+VISION_HAZARDS = {"fire": "fire", "structure_fire": "fire", "smoke": "fire", "wildfire_smoke": "fire", "burning_building": "fire",
+                  "flooded_road": "water", "flood_water": "water"}
+
+
+class VisionHazardRule(Rule):
+    """A camera sees fire / smoke / flood water at an entity (Aditya's vision v2 puts the detector classes in
+    details.hazard) -> a Hazard node, active, AFFECTS that entity, units within the hazard radius NEAR it. The
+    entity's own status claim (damaged / blocked) is handled by the policy as usual; this rule adds the zone.
+    Vision never clears a hazard (a hazard leaving the frame is not evidence it is out). Added 2026-09-25 (Shresth)."""
+
+    name = "vision_hazard"
+
+    def matches(self, ctx: Context) -> bool:
+        kinds = ctx.ev.details.get("hazard") or []
+        return ctx.ev.source == "drone_vision" and any(str(k) in VISION_HAZARDS for k in kinds)
+
+    def apply(self, ctx: Context) -> None:
+        ev, g, e = ctx.ev, ctx.g, ctx.entity
+        types = {VISION_HAZARDS[str(k)] for k in ev.details.get("hazard") or [] if str(k) in VISION_HAZARDS}
+        vlm = ev.details.get("vlm") if isinstance(ev.details.get("vlm"), dict) else {}
+        for htype in sorted(types):
+            hazard_id = f"Hazard-{htype}-{e['id']}"
+            radius = float(ev.details.get("radius_m") or HAZARD_RADIUS_M.get(htype, 100.0))
+            h = g.upsert_vision_hazard(hazard_id, name=f"{htype.capitalize()} hazard at {e.get('name') or e['id']}", hazard_type=htype,
+                                       entity_id=e["id"], ts=ev.timestamp, source=ev.source, confidence=ev.confidence, ref=ev.raw_evidence_ref,
+                                       event_id=ev.event_id, lat=e.get("lat"), lon=e.get("lon"), radius_m=radius, description=vlm.get("description"))
+            ctx.rel(f"Hazard {hazard_id} active (seen by {ev.details.get('camera') or 'camera'}) AFFECTS {h.get('affects', e['id'])}")
+            if e.get("lat") is not None and e.get("lon") is not None:
+                for t in g.teams_within(e["lat"], e["lon"], radius):
+                    r = g.upsert_near(t["id"], hazard_id, ts=ev.timestamp, source=ev.source, confidence=ev.confidence,
+                                      ref=ev.raw_evidence_ref, event_id=ev.event_id, distance_m=t["distance_m"])
+                    if not r.get("stale"):
+                        ctx.rel(f"{t['id']} NEAR {hazard_id} ({t['distance_m']} m) - unit inside hazard radius")
+
+
 class TeamAssignmentRule(Rule):
     """Field report / radio: '<unit> on_scene at <target>' -> ASSIGNED_TO relationship
     (status itself is handled by the generic status policy)."""
@@ -174,4 +209,4 @@ class TeamAssignmentRule(Rule):
         ctx.rel(f"ASSIGNED_TO {target['id']} ({ev.claim})")
 
 
-DEFAULT_RULES: list[Rule] = [ProximityRule(), VisionNearRule(), SensorHazardRule(), TeamAssignmentRule()]
+DEFAULT_RULES: list[Rule] = [ProximityRule(), VisionNearRule(), SensorHazardRule(), VisionHazardRule(), TeamAssignmentRule()]
