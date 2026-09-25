@@ -757,7 +757,9 @@ def react_to(rec: dict, ev: dict):
     """Fire consequences for an applied event, once per (entity, claim) per incident."""
     if not REACTIVE["enabled"]: return
     res = rec.get("result") or {}; src = rec["event"]
-    if src.get("details", {}).get("simulated"): return                       # never chain off our own simulated feeds
+    d0 = src.get("details") or {}
+    is_quake = src.get("source") == "sensor" and str(src.get("claim", "")).lower() == "spike" and (d0.get("sensor_type") == "seismic" or "Seismic" in str(src.get("entity", "")))
+    if d0.get("simulated") and not is_quake: return                          # never chain off our own simulated feeds (the quake itself is allowed: its consequences are the point)
     if res.get("action") not in ("override", "confirm", "conflict", "near", "create"): return
     gid = res.get("entity_id") or ""; claim = str(src.get("claim", "")).lower(); key = (gid, claim)
     if key in REACTIVE["fired"]: return
@@ -793,6 +795,34 @@ def react_to(rec: dict, ev: dict):
         def chain():
             time.sleep(4)
             sim_radio(f"All units, dispatch. {ent.get('name') or gid} is {claim}, {'avoid it' if claim == 'blocked' else 'expect delays'}. Units heading to County General use an alternate route.", "Dispatch", VOICE_FOR["Dispatch"])
+        go(chain)
+
+    elif is_quake:
+        REACTIVE["fired"].add(key)
+        def chain():
+            # structural damage across the district, scaled to the magnitude: 911 callers and the triage team report the
+            # other seeded buildings over the next minute (simulated reports; the drone's own claims stay real)
+            mag = float(d0.get("reading") or 5.0)
+            bl = G.read_dicts("MATCH (b:Building) WHERE b.lat IS NOT NULL RETURN b.id AS id, b.name AS name, b.lat AS lat, b.lon AS lon, b.floors AS floors, b.status AS status ORDER BY b.id")
+            epi = G.read_dicts("MATCH (s:Sensor {sensor_type:'seismic'}) RETURN s.lat AS lat, s.lon AS lon LIMIT 1")
+            elat, elon = (epi[0]["lat"], epi[0]["lon"]) if epi else (None, None)
+            rng = __import__("random").Random(int(mag * 100))
+            for b in bl:
+                if b["id"] == "Building-14": continue                        # the drone reports Building 14 itself
+                dist = haversine_m(elat, elon, b["lat"], b["lon"]) if elat is not None else 500
+                sev = (mag - 4.5) * 1.2 - dist / 900 + (b.get("floors") or 2) * 0.12 + rng.uniform(-0.3, 0.3)
+                claim = "collapsed" if sev > 1.05 else "damaged" if sev > 0.35 else None
+                if not claim: continue
+                delay = 8 + rng.uniform(0, 40)
+                def report(b=b, claim=claim, delay=delay):
+                    time.sleep(delay)
+                    if not REACTIVE["enabled"]: return
+                    txt = (f"Caller reports {b['name']} has collapsed, people may be inside." if claim == "collapsed"
+                           else f"Structural triage: {b['name']} has facade cracks and displaced floors, residents evacuating.")
+                    sim_post({"source": "field_report", "timestamp": scen_now_iso(), "confidence": 0.75 if claim == "collapsed" else 0.7, "entity": b["id"], "claim": claim,
+                              "raw_evidence_ref": f"sim/fieldreport/911/{b['id']}/{int(time.time())}", "details": {"text": txt, "reporter": "911 caller" if claim == "collapsed" else "Structural triage team", "magnitude": mag}},
+                             f"quake damage report: {b['name']} {claim}")
+                go(report)
         go(chain)
 
     elif ent.get("kind") == "hazard" and claim == "spike" or (ent.get("kind") == "sensor" and claim == "spike"):

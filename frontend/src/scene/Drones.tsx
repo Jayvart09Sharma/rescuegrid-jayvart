@@ -173,8 +173,7 @@ function Drone({ id }: { id: string }) {
     acc.current += dt
     if (acc.current > 0.12) {
       acc.current = 0
-      drawAerial(ctx, FW, FH, useStore.getState().nodes, { cx: p.x, cz: p.z, span: SPAN, time: t })
-      tex.needsUpdate = true
+      // (the ground projector that streamed a synthetic frame down as coloured points was removed: it read as noise)
       const st = useStore.getState()
       if (st.mode === 'live' || st.playing) paint(p.x, p.z)
     }
@@ -234,7 +233,6 @@ function Drone({ id }: { id: string }) {
           </mesh>
         ))}
       </group>
-      <points geometry={geo} material={projMat} frustumCulled={false} />
     </>
   )
 }

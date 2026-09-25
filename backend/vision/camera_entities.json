@@ -6,11 +6,16 @@
     "bridge": "Bridge Street"
   },
   "drone-2": {
-    "road": "Road-Bridge",
+    "building": "Building-7",
+    "road": "Oak Avenue",
     "bridge": "Bridge Street"
   },
   "roadcam-3": {
     "road": "Road-River",
     "report_open": true
+  },
+  "drone-3": {
+    "building": "Building-22",
+    "road": "3rd Street"
   }
 }
