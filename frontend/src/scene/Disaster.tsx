@@ -154,7 +154,6 @@ export function Disaster() {
   const list = Object.values(nodes)
   const incident = list.find((n) => n.label === 'Incident') ?? list.find((n) => n.label === 'Sensor' && (n.props.kind === 'seismic') && n.status === 'danger')
   const quake = Boolean(incident) || list.some((n) => n.label === 'Building' && n.props.collapsed)
-  const collapsed = list.filter((n) => n.label === 'Building' && n.props.collapsed)
   const blocked = list.filter((n) => (n.label === 'Road' || n.label === 'Bridge') && n.status === 'danger' && Array.isArray(n.props.a) && Array.isArray(n.props.b))
   const epi = incident ? nodePos(incident) : null
   return (
