@@ -39,10 +39,27 @@ class UnsafeCypher(ValueError):
     pass
 
 
+_OPEN_FENCE = re.compile(r"^\s*```(?:cypher)?\s*", re.I)
+
+
 def extract_cypher(text: str) -> str:
     m = _FENCE.search(text)
-    cy = (m.group(1) if m else text).strip()
+    cy = (m.group(1) if m else _OPEN_FENCE.sub("", text)).strip()   # an unterminated fence (truncated output) is still Cypher
+    cy = re.sub(r"```.*$", "", cy, flags=re.S).strip()
     return cy.rstrip(";").strip()
+
+
+_CONNECTS_DIRECTED = re.compile(r"-\s*\[(\s*\w*\s*:\s*`?CONNECTS_TO`?[^\]]*)\]\s*->|<-\s*\[(\s*\w*\s*:\s*`?CONNECTS_TO`?[^\]]*)\]\s*-", re.I)
+
+
+def normalize_cypher(cypher: str) -> str:
+    """Deterministic rewrites that need no model round-trip: CONNECTS_TO is stored one way but means
+    an undirected road link, so an arrowed pattern silently returns half the graph or nothing."""
+    return _CONNECTS_DIRECTED.sub(lambda m: f"-[{m.group(1) or m.group(2)}]-", cypher)
+
+
+class UnknownEntity(ValueError):
+    """The query names an id that does not exist: answer 'no such entity' without further model calls."""
 
 
 def validate_cypher(cypher: str, default_limit: int = 25, max_limit: int = 100) -> str:
@@ -85,9 +102,10 @@ class Text2CypherResult:
 
 
 class Text2Cypher:
-    def __init__(self, llm: BaseLLM, graph: GraphStore, max_repairs: int = 2, cfg: Settings | None = None):
-        self.llm, self.g, self.max_repairs = llm, graph, max_repairs
+    def __init__(self, llm: BaseLLM, graph: GraphStore, max_repairs: int | None = None, cfg: Settings | None = None):
         self.cfg = cfg or default_settings
+        self.llm, self.g = llm, graph
+        self.max_repairs = self.cfg.qa_max_repairs if max_repairs is None else max_repairs
         self._known_ids: set[str] | None = None
 
     def known_ids(self) -> set[str]:
@@ -127,10 +145,16 @@ class Text2Cypher:
             except LLMError as e:
                 return Text2CypherResult(cypher or "", [], attempts, error=str(e))
             cypher = extract_cypher(raw)
+            truncated = getattr(self.llm, "last_finish", None) == "length"
             try:
-                cypher = validate_cypher(cypher)
+                cypher = normalize_cypher(validate_cypher(cypher))
+                if truncated:
+                    raise UnsafeCypher("the query was cut off at the token limit; write a SHORTER query (fewer RETURN columns, no OPTIONAL MATCH)")
                 if enabled(self.cfg, "schema_check"):
                     chk = check_cypher(cypher, self.known_ids(), name_to_id)
+                    missing = [p for p in chk.problems if "does not exist in the graph" in p]
+                    if missing and len(missing) == len(chk.problems):
+                        raise UnknownEntity(missing[0])
                     if not chk.ok:
                         error = "schema check: " + "; ".join(chk.problems[:4])
                         attempts.append({"cypher": cypher, "outcome": error})
@@ -149,6 +173,9 @@ class Text2Cypher:
                 if not rows and prev_zero is not None and cypher.strip() != prev_zero.strip():
                     pass  # second attempt also empty: accept as a genuine empty result
                 return Text2CypherResult(cypher, [to_native(r) for r in rows], attempts)
+            except UnknownEntity as e:
+                attempts.append({"cypher": cypher, "outcome": f"unknown entity: {e}"})
+                return Text2CypherResult(cypher, [], attempts, error=f"unknown entity: {e}")
             except UnsafeCypher as e:
                 error = f"rejected by read-only guard: {e}"
             except Neo4jError as e:

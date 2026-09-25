@@ -52,9 +52,9 @@ def test_baseline_prompt_is_pinned():
 
 def test_dynamic_selection_prefers_relevant_examples():
     qs = [e["q"] for e in select_examples("Which units are within 200 metres of the hospital?", 3, EXAMPLES_V2)]
-    assert qs[0] == "Which units are within 200 metres of the hospital?"
+    assert "List units no more than 150 metres from the shelter." in qs
     qs = [e["q"] for e in select_examples("Which reports about the bridge disagree?", 3, EXAMPLES_V2)]
-    assert "Are there any conflicting reports?" in qs
+    assert "Which entities have disputed status right now?" in qs
     assert len(select_examples("zzz qqq", 3, EXAMPLES_V2)) == 3  # no overlap -> deterministic fallback
 
 
@@ -106,3 +106,69 @@ def test_router_v2_time_range_and_declines(graph):
     assert "staged at County General Hospital" in r.answer and "Facility-CountyGeneral" in r.highlight.ids
     base = QAEngine(graph, llm=None, auto_llm=False).answer("Which blocked roads have buildings on them?", mode="fallback")
     assert base.intent == "blocked_roads"                                     # baseline behaviour unchanged without the flag
+
+
+# ---------------------------------------------------------------- D1 parser / loop fixes (pure)
+def test_unterminated_fence_and_trailing_fence_are_stripped():
+    from rescuegrid.qa.text2cypher import extract_cypher
+    assert extract_cypher("```cypher\nMATCH (n) RETURN n.id AS id\nORDER BY") == "MATCH (n) RETURN n.id AS id\nORDER BY"
+    assert extract_cypher("```cypher\nMATCH (n) RETURN n.id AS id;\n```\nDone") == "MATCH (n) RETURN n.id AS id"
+    assert extract_cypher("MATCH (n) RETURN n.id AS id") == "MATCH (n) RETURN n.id AS id"
+
+
+def test_connects_to_is_made_undirected():
+    from rescuegrid.qa.text2cypher import normalize_cypher
+    assert normalize_cypher("MATCH (r:Road)-[:CONNECTS_TO]->(o:Road {id:'Road-Oak'}) RETURN r.id AS id") == "MATCH (r:Road)-[:CONNECTS_TO]-(o:Road {id:'Road-Oak'}) RETURN r.id AS id"
+    assert normalize_cypher("MATCH (a)<-[c:CONNECTS_TO]-(b) RETURN a.id AS id") == "MATCH (a)-[c:CONNECTS_TO]-(b) RETURN a.id AS id"
+    assert normalize_cypher("MATCH p=(s)-[:CONNECTS_TO*0..6]-(d) RETURN p") == "MATCH p=(s)-[:CONNECTS_TO*0..6]-(d) RETURN p"
+    assert normalize_cypher("MATCH (a)-[:ON_ROAD]->(r) RETURN a.id AS id") == "MATCH (a)-[:ON_ROAD]->(r) RETURN a.id AS id"
+
+
+class _ScriptedLLM:
+    """Returns scripted Cypher strings in order and records finish reasons."""
+    name = "scripted"
+
+    def __init__(self, outputs, finishes=None):
+        self.outputs, self.finishes, self.calls, self.last_finish = list(outputs), list(finishes or []), [], None
+
+    def complete(self, system, user, *, max_tokens=1024, temperature=0.0, thinking=None):
+        self.calls.append(user)
+        i = len(self.calls) - 1
+        self.last_finish = self.finishes[i] if i < len(self.finishes) else "stop"
+        return self.outputs[min(i, len(self.outputs) - 1)]
+
+    def complete_json(self, system, user, model_cls, *, max_tokens=1024, thinking=None):
+        return model_cls(answer="unused")
+
+
+@requires_neo4j
+def test_unknown_id_short_circuits_without_repairs(graph):
+    import dataclasses
+    from datetime import datetime, timezone
+    from rescuegrid.config import settings
+    from rescuegrid.qa.text2cypher import Text2Cypher
+    llm = _ScriptedLLM(["```cypher\nMATCH (n:Entity {id: 'Building-500'}) RETURN n.id AS id, n.status AS status\n```"])
+    t2c = Text2Cypher(llm, graph, cfg=dataclasses.replace(settings, qa_features=frozenset({"schema_check"})))
+    res = t2c.run("What is the status of Building 500?", datetime(2026, 9, 25, 14, 2, 45, tzinfo=timezone.utc))
+    assert res.error.startswith("unknown entity") and len(llm.calls) == 1 and res.rows == []
+
+
+@requires_neo4j
+def test_truncated_query_gets_a_shorten_repair(graph):
+    from datetime import datetime, timezone
+    from rescuegrid.qa.text2cypher import Text2Cypher
+    llm = _ScriptedLLM(["```cypher\nMATCH (r:Road) RETURN r.id AS id, r.name AS name, r.status AS status, r.lanes AS lanes, r.source AS src", "```cypher\nMATCH (r:Road) RETURN r.id AS id\n```"], finishes=["length", "stop"])
+    res = Text2Cypher(llm, graph).run("Which roads exist?", datetime(2026, 9, 25, 14, 2, 45, tzinfo=timezone.utc))
+    assert len(llm.calls) == 2 and "cut off at the token limit" in llm.calls[1] and len(res.rows) == 5
+
+
+@requires_neo4j
+def test_det_render_skips_the_compose_call(graph):
+    import dataclasses
+    from rescuegrid.config import settings
+    from rescuegrid.qa import QAEngine
+    llm = _ScriptedLLM(["```cypher\nMATCH (n:Entity {id: 'Building-14'}) RETURN n.id AS id, n.name AS name, n.status AS status, n.status_since AS status_since, n.source AS source, n.confidence AS confidence\n```"])
+    e = QAEngine(graph, llm=llm, cfg=dataclasses.replace(settings, qa_features=frozenset({"det_render"})))
+    r = e.answer("What is the status of Building 14?", mode="llm")
+    assert r.answer == "Building 14 is collapsed since 14:00:15Z (drone_vision, 0.91)." and r.highlight.id == "Building-14"
+    assert any("template" in w for w in r.warnings) and len(llm.calls) == 1

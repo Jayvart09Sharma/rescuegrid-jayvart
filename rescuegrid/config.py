@@ -28,7 +28,8 @@ class Settings:
     llm_model: str = field(default_factory=lambda: _env("LLM_MODEL", "llm"))
     llm_api_key: str = field(default_factory=lambda: _env("LLM_API_KEY", "not-needed"))
     llm_thinking: bool = field(default_factory=lambda: _env("LLM_THINKING", "false").lower() == "true")
-    llm_timeout_s: float = field(default_factory=lambda: float(_env("LLM_TIMEOUT_S", "120")))
+    llm_timeout_s: float = field(default_factory=lambda: float(_env("LLM_TIMEOUT_S", "60")))
+    qa_max_repairs: int = field(default_factory=lambda: int(_env("QA_MAX_REPAIRS", "2")))
 
     near_radius_m: float = field(default_factory=lambda: float(_env("NEAR_RADIUS_M", "75")))
     conflict_window_s: float = field(default_factory=lambda: float(_env("CONFLICT_WINDOW_S", "300")))

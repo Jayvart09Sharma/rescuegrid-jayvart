@@ -41,8 +41,18 @@ def instrument():
         def create(**kw):
             t = time.time()
             r = old(**kw)
-            CALLS.append({"prompt_tokens": r.usage.prompt_tokens, "completion_tokens": r.usage.completion_tokens, "seconds": round(time.time() - t, 3),
-                          "max_tokens": kw.get("max_tokens"), "json": bool(kw.get("response_format")), "finish": r.choices[0].finish_reason})
+            is_json = bool(kw.get("response_format"))
+            user = next((m["content"] for m in kw.get("messages", []) if m.get("role") == "user"), "")
+            if is_json:
+                role = "compose_retry" if "previous answer stated facts not in the rows" in user else "compose"
+            elif "returned 0 rows" in user:
+                role = "zero_row_retry"
+            elif "Your previous query failed" in user:
+                role = f"repair_{sum(1 for c in CALLS if c['role'].startswith('repair')) + 1}"
+            else:
+                role = "cypher"
+            CALLS.append({"role": role, "prompt_tokens": r.usage.prompt_tokens, "completion_tokens": r.usage.completion_tokens, "seconds": round(time.time() - t, 3),
+                          "max_tokens": kw.get("max_tokens"), "json": is_json, "finish": r.choices[0].finish_reason})
             return r
         self.client.chat.completions.create = create
     compat.OpenAICompatLLM.__init__ = init
@@ -110,6 +120,43 @@ ABSTAIN_RX = re.compile(r"no (?:matching )?record|not (?:track|in the graph)|can
                         r"no (?:data|information|records?) (?:on|about|for|available)|not available in the graph|graph (?:has|contains) no|do(?:es)? not (?:have|contain|include|provide) (?:any )?(?:data|record|information|forecast)|unknown to the graph|is not (?:tracked|recorded|provided|available|included)|not provided|no (?:forecast|weather|helicopter)", re.I)
 
 
+def fingerprint(sha):
+    dirty = bool(subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=ROOT).stdout.strip())
+    mem = {}
+    try:
+        for line in open("/proc/meminfo"):
+            if line.startswith(("MemFree", "MemAvailable")):
+                k, v = line.split(":"); mem[k] = int(v.split()[0]) // 1024
+    except Exception:
+        pass
+    llm_models = None
+    try:
+        import urllib.request
+        llm_models = [m["id"] for m in json.load(urllib.request.urlopen(Settings().llm_base_url.rstrip("/") + "/models", timeout=3))["data"]]
+    except Exception:
+        pass
+    return {"git": sha, "dirty": dirty, "qa_features": sorted(Settings().qa_features), "qa_max_repairs": Settings().qa_max_repairs, "llm_thinking": Settings().llm_thinking,
+            "llm_model": Settings().llm_model, "llm_models_served": llm_models, "mem_free_mb": mem.get("MemFree"), "mem_available_mb": mem.get("MemAvailable"), "python": sys.version.split()[0]}
+
+
+def _toks(t):
+    return set(re.findall(r"[a-z0-9]+", t.lower()))
+
+
+def seen_flags(questions):
+    """Contamination flag: a question is 'seen' if it is verbatim or token-Jaccard >= 0.7 to any few-shot question in the bank
+    the current QA_FEATURES would render (rendered-bank hash recorded)."""
+    from rescuegrid.qa.fewshot import bank
+    import hashlib
+    bank_qs = [ex["q"] for ex in bank(Settings().qa_features)]
+    h = hashlib.sha1("\n".join(bank_qs).encode()).hexdigest()[:12]
+    out = {}
+    for q in questions:
+        best = max((len(_toks(q["question"]) & _toks(b)) / max(1, len(_toks(q["question"]) | _toks(b))) for b in bank_qs), default=0.0)
+        out[q["id"]] = {"seen": best >= 0.7, "bank_jaccard": round(best, 2)}
+    return out, h
+
+
 def run(args):
     questions = json.load(open(ROOT / "bench" / args.questions))
     if args.only:
@@ -118,6 +165,29 @@ def run(args):
     g = GraphStore(Settings())
     engine = QAEngine(g)
     sha = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, cwd=ROOT).stdout.strip() or "nogit"
+    fp = fingerprint(sha); seen, bank_hash = seen_flags(questions)
+    if fp["dirty"]:
+        print("!! git tree is dirty: results will be marked dirty=true")
+    all_runs = []
+    for rep in range(1, args.repeats + 1):
+        if rep > 1:
+            subprocess.run([sys.executable, str(ROOT / "scripts" / "ingest.py"), "--reset", "--quiet"], cwd=ROOT, capture_output=True)
+            engine = QAEngine(g)
+        all_runs.append(_run_once(args, questions, g, engine, sha, fp, seen, bank_hash, rep))
+    if args.repeats > 1:
+        ids = [q["id"] for q in questions]
+        per = {i: [next(r for r in run["results"] if r["id"] == i)["correct"] for run in all_runs] for i in ids}
+        rates = [run["summary"]["correct_rate"] for run in all_runs]
+        pass_k = round(sum(all(v) for v in per.values()) / len(ids), 3)
+        mean = round(statistics.mean(rates), 3); se = round(statistics.stdev(rates) / (len(rates) ** 0.5), 3) if len(rates) > 1 else 0.0
+        print(f"\n=== K={args.repeats}: correct mean {mean} +/- {se} (SE), pass^{args.repeats} = {pass_k}, per-run {rates} ===")
+        agg = {"label": args.label, "git": sha, "repeats": args.repeats, "correct_mean": mean, "correct_se": se, "pass_k": pass_k, "runs": [run["path"] for run in all_runs],
+               "flaky_ids": sorted(i for i, v in per.items() if len(set(v)) > 1)}
+        path = ROOT / "bench" / "results" / f"{args.label}-{sha}-k{args.repeats}.json"
+        json.dump(agg, open(path, "w"), indent=1); print(f"saved {path}")
+
+
+def _run_once(args, questions, g, engine, sha, fp, seen, bank_hash, rep):
     results = []
     for i, q in enumerate(questions, 1):
         gold_rows = []
@@ -153,19 +223,25 @@ def run(args):
             rec["abstain"] = bool(ABSTAIN_RX.search(ans)) and not [m for m in q.get("must_not_mention", []) if m.lower() in ans.lower()]
             rec["correct"] = rec["abstain"]
         rec["guard_rejections"] = sum(1 for w in (r.warnings if r else []) if "read-only guard" in w)
+        rec["schema_rejections"] = sum(1 for w in (r.warnings if r else []) if w.startswith("schema check"))
         rec["repairs"] = max(0, len([c for c in CALLS if not c["json"]]) - 1)
+        rec["seen"] = seen[q["id"]]["seen"]; rec["bank_jaccard"] = seen[q["id"]]["bank_jaccard"]
+        rec["tier"] = q.get("tier"); rec["abstain_reason"] = q.get("abstain_reason")
         results.append(rec)
         flag = "OK " if rec["correct"] else "BAD"
         print(f"[{i:2d}/{len(questions)}] {flag} {rec['wall_seconds']:5.1f}s tok={rec['prompt_tokens']}+{rec['completion_tokens']} [{rec['mode_used']}] {q['id']}: {ans[:90]}", flush=True)
     summary = summarize(results)
-    out = {"label": args.label, "git": sha, "mode": args.mode, "questions_file": args.questions, "graph": os.environ["NEO4J_URI"],
-           "timestamp": datetime.now(timezone.utc).isoformat(), "summary": summary, "results": results}
-    path = ROOT / "bench" / "results" / f"{args.label}-{sha}.json"
+    out = {"label": args.label, "git": sha, "mode": args.mode, "questions_file": args.questions, "graph": os.environ["NEO4J_URI"], "repeat": rep,
+           "fingerprint": fp, "bank_hash": bank_hash, "timestamp": datetime.now(timezone.utc).isoformat(), "summary": summary, "results": results}
+    suffix = f"-r{rep}" if args.repeats > 1 else ""
+    path = ROOT / "bench" / "results" / f"{args.label}-{sha}{suffix}.json"
     if path.exists():
-        path = ROOT / "bench" / "results" / f"{args.label}-{sha}-{int(time.time())}.json"
+        path = ROOT / "bench" / "results" / f"{args.label}-{sha}{suffix}-{int(time.time())}.json"
     json.dump(out, open(path, "w"), indent=1, default=str)
+    out["path"] = str(path)
     print("\n" + table([out]))
     print(f"\nsaved {path}")
+    return out
 
 
 def pct(xs, p):
@@ -177,8 +253,10 @@ def summarize(results):
     ans = [r for r in results if r["answerable"]]; un = [r for r in results if not r["answerable"]]
     llm = [r for r in results if r["calls"]]
     execd = [r for r in ans if r.get("exec_acc") is not None]
-    s = {"n": len(results), "n_answerable": len(ans), "n_unanswerable": len(un),
+    unseen = [r for r in results if not r.get("seen")]
+    s = {"n": len(results), "n_answerable": len(ans), "n_unanswerable": len(un), "n_seen": len(results) - len(unseen),
          "correct_rate": round(sum(r["correct"] for r in results) / max(1, len(results)), 3),
+         "correct_unseen": round(sum(r["correct"] for r in unseen) / max(1, len(unseen)), 3),
          "exec_acc": round(sum(bool(r["exec_acc"]) for r in execd) / max(1, len(execd)), 3),
          "grounded_rate": round(sum(bool(r.get("grounded")) for r in ans) / max(1, len(ans)), 3),
          "facts_rate": round(sum(bool(r.get("facts")) for r in ans) / max(1, len(ans)), 3),
@@ -192,15 +270,23 @@ def summarize(results):
          "calls_per_llm_q": round(statistics.mean([len(r["calls"]) for r in llm]), 2) if llm else 0,
          "latency_p50_s": round(pct([r["wall_seconds"] for r in results], 0.5), 2), "latency_p95_s": round(pct([r["wall_seconds"] for r in results], 0.95), 2),
          "latency_llm_p50_s": round(pct([r["wall_seconds"] for r in llm], 0.5), 2) if llm else 0,
-         "guard_rejections": sum(r["guard_rejections"] for r in results), "repairs": sum(r["repairs"] for r in results),
-         "by_category": {}}
+         "guard_rejections": sum(r["guard_rejections"] for r in results), "schema_rejections": sum(r.get("schema_rejections", 0) for r in results),
+         "repairs": sum(r["repairs"] for r in results), "truncations": sum(1 for r in results for c in r["calls"] if c.get("finish") == "length"),
+         "tokens_by_role": {}, "by_category": {}, "by_tier": {}}
+    roles = sorted({c.get("role", "?") for r in results for c in r["calls"]})
+    for role in roles:
+        cs = [c for r in results for c in r["calls"] if c.get("role") == role]
+        s["tokens_by_role"][role] = {"calls": len(cs), "prompt": sum(c["prompt_tokens"] for c in cs), "completion": sum(c["completion_tokens"] for c in cs), "seconds": round(sum(c["seconds"] for c in cs), 1)}
+    for tier in sorted({r.get("tier") for r in results if r.get("tier")}):
+        rs = [r for r in results if r.get("tier") == tier]
+        s["by_tier"][tier] = {"n": len(rs), "correct": round(sum(r["correct"] for r in rs) / len(rs), 2)}
     for cat in sorted({r["category"] for r in results}):
         rs = [r for r in results if r["category"] == cat]
         s["by_category"][cat] = {"n": len(rs), "correct": round(sum(r["correct"] for r in rs) / len(rs), 2), "tokens": round(statistics.mean([r["prompt_tokens"] + r["completion_tokens"] for r in rs])), "p50_s": round(pct([r["wall_seconds"] for r in rs], 0.5), 2)}
     return s
 
 
-COLS = [("correct_rate", "correct"), ("exec_acc", "exec_acc"), ("grounded_rate", "grounded"), ("abstain_rate", "abstain"), ("error_rate", "errors"),
+COLS = [("correct_rate", "correct"), ("correct_unseen", "unseen"), ("exec_acc", "exec_acc"), ("grounded_rate", "grounded"), ("abstain_rate", "abstain"), ("error_rate", "errors"),
         ("prompt_tokens_per_q", "prompt/q"), ("completion_tokens_per_q", "compl/q"), ("calls_per_llm_q", "calls/llmq"), ("latency_p50_s", "p50 s"), ("latency_p95_s", "p95 s"), ("repairs", "repairs")]
 
 
@@ -220,6 +306,7 @@ if __name__ == "__main__":
     ap.add_argument("--questions", default="questions.json")
     ap.add_argument("--only", nargs="*", help="question ids or categories")
     ap.add_argument("--compare", nargs="*", help="result files to tabulate instead of running")
+    ap.add_argument("--repeats", type=int, default=1, help="K repeats (graph reset between); reports mean, SE and pass^K")
     a = ap.parse_args()
     if a.compare:
         runs = [json.load(open(p)) for p in a.compare]

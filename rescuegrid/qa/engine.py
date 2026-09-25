@@ -17,7 +17,9 @@ from ..contracts import Conflict, Highlight, Provenance, QAResponse
 from ..fusion.resolve import AmbiguousEntity, EntityResolver
 from ..graph import GraphStore, to_native
 from .fallback import KIND_TO_TYPE, Fallback
+from .features import enabled
 from .llm import BaseLLM, LLMError, make_llm
+from .render import render as render_rows
 from .schema_prompt import ANSWER_SYSTEM
 from .text2cypher import Text2Cypher
 
@@ -172,6 +174,9 @@ class QAEngine:
     def _llm_answer(self, question: str, now: datetime, allow_fallback: bool = True) -> QAResponse:
         t2c = self.t2c.run(question, now)
         attempts_warn = [a["outcome"] for a in t2c.attempts if not a["outcome"].startswith("ok")]
+        if t2c.error and t2c.error.startswith("unknown entity"):
+            return QAResponse(answer="The graph has no record of that entity: " + t2c.error.split(":", 1)[1].strip().replace(" does not exist in the graph", "") + ". No such id exists in the graph.",
+                              mode="llm", cypher=t2c.cypher, confidence=0.9, warnings=["abstained: unknown entity id"])
         if t2c.error and not t2c.rows:
             fb = self.fallback.answer(question, now) if allow_fallback else None
             if fb and not self.fallback.covers(question, fb.intent):
@@ -192,6 +197,14 @@ class QAEngine:
             return QAResponse(answer="The graph query found no matching records. That is not proof that none exist - the question may use terms the graph does not track.",
                               mode="llm", cypher=t2c.cypher, evidence=t2c.rows, confidence=0.3,
                               warnings=["query returned " + ("only zero counts" if all_zero else "0 rows") + "; not evidence of absence"] + attempts_warn)
+        if enabled(self.cfg, "det_render"):  # known row shapes are rendered without the model (template NLG)
+            text = render_rows(question, t2c.rows)
+            if text:
+                ids = self._row_entity_ids(t2c.rows)[:6]
+                kind = (self.g.get_entity(ids[0]) or {}).get("kind") if ids else None
+                return QAResponse(answer=text, mode="llm", cypher=t2c.cypher, evidence=t2c.rows, confidence=0.75,
+                                  highlight=Highlight(type=KIND_TO_TYPE.get(kind or "", "none"), id=ids[0] if ids else None, ids=ids[1:], action="fly_to" if ids else "none"),
+                                  provenance=self._provenance(t2c.rows), warnings=attempts_warn + ["rendered from rows (template), no compose call"])
         rows_json = json.dumps(t2c.rows[:25], default=_json_default)[:12000]
         user = f"Question: {question}\nScenario clock: {now.isoformat()}\nCypher run:\n{t2c.cypher}\nRows ({len(t2c.rows)}):\n{rows_json}"
         try:

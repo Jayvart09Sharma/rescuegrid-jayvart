@@ -18,7 +18,8 @@ class OpenAICompatLLM:
     def __init__(self, base_url: str, model: str, api_key: str = "not-needed", thinking: bool = False, timeout: float = 120.0):
         self.name = f"openai_compatible:{model}@{base_url}"
         self.model, self.thinking = model, thinking
-        self.client = OpenAI(base_url=base_url, api_key=api_key or "not-needed", timeout=timeout, max_retries=1)
+        self.client = OpenAI(base_url=base_url, api_key=api_key or "not-needed", timeout=timeout, max_retries=0)  # no hidden retries: every second must show in the ledger
+        self.last_finish: str | None = None
 
     def _extra_body(self, thinking: bool | None = None) -> dict:
         # Nemotron-specific: reasoning mode is a chat-template switch. Harmless on other servers.
@@ -31,6 +32,7 @@ class OpenAICompatLLM:
                 messages=[{"role": "system", "content": system}, {"role": "user", "content": user}])
         except (APIError, APITimeoutError) as e:
             raise LLMError(f"{self.name}: {e}") from e
+        self.last_finish = resp.choices[0].finish_reason
         return strip_thinking(resp.choices[0].message.content or "")
 
     def complete_json(self, system: str, user: str, model_cls: Type[M], *, max_tokens: int = 1024, thinking: bool | None = None) -> M:

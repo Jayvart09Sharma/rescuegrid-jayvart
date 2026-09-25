@@ -8,10 +8,11 @@ Set QA_FEATURES=entity_link,schema_check,dyn_fewshot,compact_schema,router_v2 (a
   dyn_fewshot     include only the k most similar few-shot examples instead of all of them
   compact_schema  terser schema description (fewer prompt tokens)
   router_v2       pre-baked router precision fixes (explicit time ranges, greedy road intent, staged-at)
+  det_render      render known row shapes (entity status, event list, single aggregate) with templates instead of the compose call
 """
 from __future__ import annotations
 
-ALL = ("entity_link", "schema_check", "fewshot_v2", "dyn_fewshot", "compact_schema", "router_v2")
+ALL = ("entity_link", "schema_check", "fewshot_v2", "dyn_fewshot", "compact_schema", "router_v2", "det_render")
 
 
 def enabled(cfg, name: str) -> bool:

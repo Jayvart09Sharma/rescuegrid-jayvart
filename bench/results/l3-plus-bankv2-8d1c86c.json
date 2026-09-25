@@ -1,0 +1,4963 @@
+{
+ "label": "l3-plus-bankv2",
+ "git": "8d1c86c",
+ "mode": "llm",
+ "questions_file": "questions.json",
+ "graph": "bolt://127.0.0.1:7687",
+ "timestamp": "2026-09-25T01:36:52.938674+00:00",
+ "summary": {
+  "n": 60,
+  "n_answerable": 54,
+  "n_unanswerable": 6,
+  "correct_rate": 0.7,
+  "exec_acc": 0.765,
+  "grounded_rate": 0.944,
+  "facts_rate": 0.741,
+  "abstain_rate": 0.833,
+  "error_rate": 0.033,
+  "llm_questions": 59,
+  "prompt_tokens_per_q": 5479.9,
+  "completion_tokens_per_q": 244.1,
+  "prompt_tokens_per_llm_q": 5572.8,
+  "completion_tokens_per_llm_q": 248.2,
+  "calls_per_llm_q": 2.36,
+  "latency_p50_s": 5.78,
+  "latency_p95_s": 11.97,
+  "latency_llm_p50_s": 5.78,
+  "guard_rejections": 0,
+  "repairs": 28,
+  "by_category": {
+   "aggregation": {
+    "n": 6,
+    "correct": 0.67,
+    "tokens": 4516,
+    "p50_s": 4.28
+   },
+   "conflict": {
+    "n": 4,
+    "correct": 1.0,
+    "tokens": 4323,
+    "p50_s": 6.13
+   },
+   "paraphrase": {
+    "n": 6,
+    "correct": 0.83,
+    "tokens": 5576,
+    "p50_s": 6.21
+   },
+   "provenance": {
+    "n": 7,
+    "correct": 0.57,
+    "tokens": 5058,
+    "p50_s": 4.54
+   },
+   "proximity": {
+    "n": 6,
+    "correct": 0.5,
+    "tokens": 5761,
+    "p50_s": 7.21
+   },
+   "route": {
+    "n": 5,
+    "correct": 0.8,
+    "tokens": 7555,
+    "p50_s": 8.49
+   },
+   "status": {
+    "n": 8,
+    "correct": 0.88,
+    "tokens": 4739,
+    "p50_s": 5.48
+   },
+   "temporal": {
+    "n": 7,
+    "correct": 0.43,
+    "tokens": 6764,
+    "p50_s": 6.25
+   },
+   "unanswerable": {
+    "n": 6,
+    "correct": 0.83,
+    "tokens": 5790,
+    "p50_s": 3.78
+   },
+   "units": {
+    "n": 5,
+    "correct": 0.6,
+    "tokens": 7570,
+    "p50_s": 5.78
+   }
+  }
+ },
+ "results": [
+  {
+   "id": "st01",
+   "category": "status",
+   "question": "What is the status of Building 14?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (n:Entity {id: 'Building-14'})\nRETURN n.id AS id, n.name AS name, n.status AS status, n.status_since AS status_since, n.source AS source, n.confidence AS confidence, n.raw_evidence_ref AS raw_evidence_ref, n.conflict AS conflict, n.conflict_claim AS conflict_claim, n.conflict_source AS conflict_source, n.conflict_confidence AS conflict_confidence, n.conflict_since AS conflict_since LIMIT 1",
+   "answer": "Building 14 is collapsed (status_since 14:00:15Z, drone_vision, 0.91).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "building",
+    "id": "Building-14",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.3352,
+    "lon": -121.8893
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Building-14",
+     "name": "Building 14",
+     "status": "collapsed",
+     "status_since": "2026-09-25 14:00:15+00:00",
+     "source": "drone_vision",
+     "confidence": 0.91,
+     "raw_evidence_ref": "drone/cam1/frame_000450.jpg",
+     "conflict": false,
+     "conflict_claim": null,
+     "conflict_source": null,
+     "conflict_confidence": null,
+     "conflict_since": null
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Building-14",
+     "status": "collapsed"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3239,
+     "completion_tokens": 119,
+     "seconds": 3.077,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 821,
+     "completion_tokens": 102,
+     "seconds": 2.362,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4060,
+   "completion_tokens": 221,
+   "llm_seconds": 5.439,
+   "wall_seconds": 5.496,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "st02",
+   "category": "status",
+   "question": "Is Main Street open?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (r:Road {id: 'Road-Main'})\nWHERE r.status = 'open' OR r.conflict = true\nRETURN r.id AS id, r.status AS status, r.status_since AS status_since, r.source AS source, r.confidence AS confidence,\n       r.raw_evidence_ref AS raw_evidence_ref, r.conflict AS conflict\nLIMIT 1",
+   "answer": "The graph query found no matching records. That is not proof that none exist - the question may use terms the graph does not track.",
+   "confidence": 0.3,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [
+    "query returned 0 rows; not evidence of absence"
+   ],
+   "rows": [],
+   "gold_rows": [
+    {
+     "id": "Road-Main",
+     "status": "blocked"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3231,
+     "completion_tokens": 95,
+     "seconds": 2.789,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3432,
+     "completion_tokens": 92,
+     "seconds": 2.509,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 6663,
+   "completion_tokens": 187,
+   "llm_seconds": 5.298,
+   "wall_seconds": 5.343,
+   "exec_acc": false,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    "blocked"
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 1
+  },
+  {
+   "id": "st03",
+   "category": "status",
+   "question": "Which buildings are intact?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (b:Entity {kind: 'building'}) WHERE b.status = 'intact'\nRETURN b.id AS id, b.name AS name, b.status AS status, b.status_since AS status_since, b.source AS source, b.confidence AS confidence, b.raw_evidence_ref AS raw_evidence_ref, b.conflict AS conflict\nORDER BY b.status_since DESC\nLIMIT 25",
+   "answer": "Building 7, Building 22, and Building 3 are intact (status_since 13:00:00Z, seed_dataset, 1.0).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "building",
+    "id": "Building-7",
+    "ids": [
+     "Building-22",
+     "Building-3"
+    ],
+    "action": "fly_to",
+    "lat": 37.3374,
+    "lon": -121.887
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Building-7",
+     "name": "Building 7",
+     "status": "intact",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0,
+     "raw_evidence_ref": "seed/static_world_v1#Building-7",
+     "conflict": null
+    },
+    {
+     "id": "Building-22",
+     "name": "Building 22",
+     "status": "intact",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0,
+     "raw_evidence_ref": "seed/static_world_v1#Building-22",
+     "conflict": null
+    },
+    {
+     "id": "Building-3",
+     "name": "Building 3",
+     "status": "intact",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0,
+     "raw_evidence_ref": "seed/static_world_v1#Building-3",
+     "conflict": null
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Building-7"
+    },
+    {
+     "id": "Building-22"
+    },
+    {
+     "id": "Building-3"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3206,
+     "completion_tokens": 98,
+     "seconds": 2.619,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 946,
+     "completion_tokens": 83,
+     "seconds": 1.976,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4152,
+   "completion_tokens": 181,
+   "llm_seconds": 4.595,
+   "wall_seconds": 4.645,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "st04",
+   "category": "status",
+   "question": "What is the current status of every road?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (r:Road)\nRETURN r.id AS id, r.name AS name, r.status AS status, r.status_since AS status_since, r.source AS source, r.confidence AS confidence,\n       r.raw_evidence_ref AS raw_evidence_ref, r.conflict AS conflict\nORDER BY r.status_since DESC\nLIMIT 25",
+   "answer": "Bridge Street is blocked since 14:02:45Z (drone_vision, 0.85). Main Street is blocked since 14:00:32Z (radio_asr, 0.78). Oak Avenue, 3rd Street and River Road are open (seed_dataset, 1.0).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [
+     "Road-Main",
+     "Road-Oak",
+     "Road-3rd",
+     "Road-River"
+    ],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "highlighted entity has conflicting reports: Bridge Street blocked (drone_vision) vs open (radio_asr)"
+   ],
+   "rows": [
+    {
+     "id": "Road-Bridge",
+     "name": "Bridge Street",
+     "status": "blocked",
+     "status_since": "2026-09-25 14:02:45+00:00",
+     "source": "drone_vision",
+     "confidence": 0.85,
+     "raw_evidence_ref": "drone/cam2/frame_000910.jpg",
+     "conflict": true
+    },
+    {
+     "id": "Road-Main",
+     "name": "Main Street",
+     "status": "blocked",
+     "status_since": "2026-09-25 14:00:32+00:00",
+     "source": "radio_asr",
+     "confidence": 0.78,
+     "raw_evidence_ref": "radio/ch3/clip_000032.wav",
+     "conflict": false
+    },
+    {
+     "id": "Road-Oak",
+     "name": "Oak Avenue",
+     "status": "open",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0,
+     "raw_evidence_ref": "seed/static_world_v1#Road-Oak",
+     "conflict": null
+    },
+    {
+     "id": "Road-3rd",
+     "name": "3rd Street",
+     "status": "open",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0,
+     "raw_evidence_ref": "seed/static_world_v1#Road-3rd",
+     "conflict": null
+    },
+    {
+     "id": "Road-River",
+     "name": "River Road",
+     "status": "open",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0,
+     "raw_evidence_ref": "seed/static_world_v1#Road-River",
+     "conflict": null
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Road-Main",
+     "status": "blocked"
+    },
+    {
+     "id": "Road-Oak",
+     "status": "open"
+    },
+    {
+     "id": "Road-3rd",
+     "status": "open"
+    },
+    {
+     "id": "Road-River",
+     "status": "open"
+    },
+    {
+     "id": "Road-Bridge",
+     "status": "blocked"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3210,
+     "completion_tokens": 85,
+     "seconds": 2.341,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 1135,
+     "completion_tokens": 135,
+     "seconds": 3.092,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4345,
+   "completion_tokens": 220,
+   "llm_seconds": 5.433,
+   "wall_seconds": 5.481,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "st05",
+   "category": "status",
+   "question": "Which sensors are currently spiking?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (s:Sensor) WHERE s.status = 'spike' AND s.status_since <= $now\nRETURN s.id AS id, s.name AS name, s.sensor_type AS sensor_type, s.reading AS reading, s.unit AS unit, s.threshold AS threshold, s.status_since AS status_since, s.source AS source, s.confidence AS confidence\nORDER BY s.status_since DESC\nLIMIT 25",
+   "answer": "Gas Sensor 3 is spiking at 45.0 ppm (threshold 25.0) since 14:01:30Z (sensor, 0.97). Seismic Sensor 1 is spiking at 5.8 magnitude (threshold 4.0) since 14:00:00Z (sensor, 0.99).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "sensor",
+    "id": "Sensor-Gas3",
+    "ids": [
+     "Sensor-Seismic1"
+    ],
+    "action": "fly_to",
+    "lat": 37.335,
+    "lon": -121.8896
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Sensor-Gas3",
+     "name": "Gas Sensor 3",
+     "sensor_type": "gas",
+     "reading": 45.0,
+     "unit": "ppm",
+     "threshold": 25.0,
+     "status_since": "2026-09-25 14:01:30+00:00",
+     "source": "sensor",
+     "confidence": 0.97
+    },
+    {
+     "id": "Sensor-Seismic1",
+     "name": "Seismic Sensor 1",
+     "sensor_type": "seismic",
+     "reading": 5.8,
+     "unit": "magnitude",
+     "threshold": 4.0,
+     "status_since": "2026-09-25 14:00:00+00:00",
+     "source": "sensor",
+     "confidence": 0.99
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Sensor-Gas3"
+    },
+    {
+     "id": "Sensor-Seismic1"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3208,
+     "completion_tokens": 102,
+     "seconds": 2.71,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 859,
+     "completion_tokens": 121,
+     "seconds": 2.771,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4067,
+   "completion_tokens": 223,
+   "llm_seconds": 5.481,
+   "wall_seconds": 5.527,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "st06",
+   "category": "status",
+   "question": "How many beds does County General have available?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (f:Facility {id: 'Facility-CountyGeneral'})\nRETURN f.id AS id, f.name AS name, f.beds_available AS beds_available, f.capacity AS capacity, f.status AS status, f.status_since AS status_since, f.source AS source, f.confidence AS confidence, f.raw_evidence_ref AS raw_evidence_ref\nLIMIT 1",
+   "answer": "County General Hospital has 18 beds available (capacity 200), status open since 13:00:00Z (seed_dataset, 1.0).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "facility",
+    "id": "Facility-CountyGeneral",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.34,
+    "lon": -121.885
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Facility-CountyGeneral",
+     "name": "County General Hospital",
+     "beds_available": 18,
+     "capacity": 200,
+     "status": "open",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0,
+     "raw_evidence_ref": "seed/static_world_v1#Facility-CountyGeneral"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Facility-CountyGeneral",
+     "beds_available": 18
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3238,
+     "completion_tokens": 94,
+     "seconds": 2.799,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 770,
+     "completion_tokens": 320,
+     "seconds": 6.957,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "length"
+    },
+    {
+     "prompt_tokens": 780,
+     "completion_tokens": 65,
+     "seconds": 1.578,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4788,
+   "completion_tokens": 479,
+   "llm_seconds": 11.334,
+   "wall_seconds": 11.384,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "st07",
+   "category": "status",
+   "question": "What is the reading on Gas Sensor 3?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (s:Sensor {id: 'Sensor-Gas3'}) \nRETURN s.id AS id, s.reading AS reading, s.status_since AS status_since, s.source AS source, s.confidence AS confidence, s.raw_evidence_ref AS raw_evidence_ref\nLIMIT 1",
+   "answer": "Gas Sensor 3 reads 45.0 (sensor, 0.97).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "sensor",
+    "id": "Sensor-Gas3",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.335,
+    "lon": -121.8896
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Sensor-Gas3",
+     "reading": 45.0,
+     "status_since": "2026-09-25 14:01:30+00:00",
+     "source": "sensor",
+     "confidence": 0.97,
+     "raw_evidence_ref": "mqtt/sensors/gas/3/1790344890"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Sensor-Gas3",
+     "reading": 45.0,
+     "unit": "ppm"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3239,
+     "completion_tokens": 76,
+     "seconds": 2.156,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 736,
+     "completion_tokens": 38,
+     "seconds": 0.995,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 3975,
+   "completion_tokens": 114,
+   "llm_seconds": 3.151,
+   "wall_seconds": 3.188,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "st08",
+   "category": "status",
+   "question": "Which facilities are open?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (f:Facility) WHERE f.status = 'open' AND f.status_since <= $now\nRETURN f.id AS id, f.name AS name, f.status AS status, f.status_since AS status_since, f.source AS source, f.confidence AS confidence, f.raw_evidence_ref AS raw_evidence_ref\nORDER BY f.status_since DESC\nLIMIT 25",
+   "answer": "County General Hospital and Lincoln High School Shelter are open (status_since 13:00:00Z, seed_dataset, 1.0).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "facility",
+    "id": "Facility-CountyGeneral",
+    "ids": [
+     "Facility-LincolnHS"
+    ],
+    "action": "fly_to",
+    "lat": 37.34,
+    "lon": -121.885
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Facility-CountyGeneral",
+     "name": "County General Hospital",
+     "status": "open",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0,
+     "raw_evidence_ref": "seed/static_world_v1#Facility-CountyGeneral"
+    },
+    {
+     "id": "Facility-LincolnHS",
+     "name": "Lincoln High School Shelter",
+     "status": "open",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0,
+     "raw_evidence_ref": "seed/static_world_v1#Facility-LincolnHS"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Facility-CountyGeneral"
+    },
+    {
+     "id": "Facility-LincolnHS"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3206,
+     "completion_tokens": 95,
+     "seconds": 2.556,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 846,
+     "completion_tokens": 90,
+     "seconds": 2.112,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4052,
+   "completion_tokens": 185,
+   "llm_seconds": 4.668,
+   "wall_seconds": 4.707,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "pv01",
+   "category": "provenance",
+   "question": "Who reported that Building 14 collapsed, and how confident was it?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Event)-[:ABOUT]->(n:Entity {id: 'Building-14'})\nWHERE e.claim = 'collapsed'\nRETURN n.id AS id, n.name AS name, e.source AS source, e.confidence AS confidence, e.timestamp AS timestamp, e.raw_evidence_ref AS raw_evidence_ref\nORDER BY e.timestamp DESC LIMIT 5",
+   "answer": "Building 14 collapsed was reported by drone_vision with a confidence of 0.91 at 14:00:15Z.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "building",
+    "id": "Building-14",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.3352,
+    "lon": -121.8893
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Building-14",
+     "name": "Building 14",
+     "source": "drone_vision",
+     "confidence": 0.91,
+     "timestamp": "2026-09-25 14:00:15+00:00",
+     "raw_evidence_ref": "drone/cam1/frame_000450.jpg"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Building-14",
+     "source": "drone_vision",
+     "confidence": 0.91
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3244,
+     "completion_tokens": 90,
+     "seconds": 2.453,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 752,
+     "completion_tokens": 52,
+     "seconds": 1.297,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 3996,
+   "completion_tokens": 142,
+   "llm_seconds": 3.75,
+   "wall_seconds": 3.778,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "pv02",
+   "category": "provenance",
+   "question": "What evidence is there for Main Street being blocked?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Event)-[:ABOUT]->(r:Road {id: 'Road-Main'})\nWHERE e.source = 'radio_asr' AND e.timestamp >= $now - duration({minutes: 5})\nRETURN r.id AS id, r.status AS status, e.source AS source, e.confidence AS confidence, e.raw_evidence_ref AS raw_evidence_ref, e.claim AS claim, e.timestamp AS timestamp\nORDER BY e.timestamp DESC LIMIT 25",
+   "answer": "Main Street is blocked since 14:00:32Z (radio_asr, 0.78).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Main",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.3355,
+    "lon": -121.889
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Road-Main",
+     "status": "blocked",
+     "source": "radio_asr",
+     "confidence": 0.78,
+     "raw_evidence_ref": "radio/ch3/clip_000032.wav",
+     "claim": "blocked",
+     "timestamp": "2026-09-25 14:00:32+00:00"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Road-Main",
+     "source": "radio_asr",
+     "raw_evidence_ref": "radio/ch3/clip_000032.wav"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3236,
+     "completion_tokens": 110,
+     "seconds": 3.122,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 768,
+     "completion_tokens": 87,
+     "seconds": 2.039,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4004,
+   "completion_tokens": 197,
+   "llm_seconds": 5.161,
+   "wall_seconds": 5.219,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "pv03",
+   "category": "provenance",
+   "question": "When was the gas spike detected and by which sensor?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (s:Sensor)-[:MONITORS]->(e:Entity {kind: 'hazard', hazard_type: 'gas'})\nWHERE s.status = 'spike'\nRETURN s.id AS id, s.name AS name, s.status_since AS status_since, s.source AS source, s.confidence AS confidence, s.raw_evidence_ref AS raw_evidence_ref\nORDER BY s.status_since DESC LIMIT 25",
+   "answer": "The graph query found no matching records. That is not proof that none exist - the question may use terms the graph does not track.",
+   "confidence": 0.3,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [
+    "query returned 0 rows; not evidence of absence",
+    "schema check: MONITORS never ends at Hazard; the pattern is (Sensor)-[:MONITORS]->(Building|Facility|Road)"
+   ],
+   "rows": [],
+   "gold_rows": [
+    {
+     "id": "Hazard-gas-Sensor-Gas3",
+     "sensor": "Sensor-Gas3",
+     "status_since": "2026-09-25 14:01:30+00:00"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3212,
+     "completion_tokens": 118,
+     "seconds": 3.279,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3436,
+     "completion_tokens": 98,
+     "seconds": 2.877,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3359,
+     "completion_tokens": 102,
+     "seconds": 2.965,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 10007,
+   "completion_tokens": 318,
+   "llm_seconds": 9.121,
+   "wall_seconds": 9.189,
+   "exec_acc": false,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    "14:01:30",
+    [
+     "Gas Sensor 3",
+     "Sensor-Gas3",
+     "gas sensor"
+    ]
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 2
+  },
+  {
+   "id": "pv04",
+   "category": "provenance",
+   "question": "How confident are we that Bridge Street is blocked?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (r:Road {id: 'Road-Bridge'})\nRETURN r.id AS id, r.status AS status, r.source AS source, r.confidence AS confidence, r.raw_evidence_ref AS raw_evidence_ref, r.conflict AS conflict\nORDER BY r.status_since DESC LIMIT 1",
+   "answer": "Bridge Street is reported blocked by drone_vision with 85% confidence, but there is a conflict indicating disagreement.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "highlighted entity has conflicting reports: Bridge Street blocked (drone_vision) vs open (radio_asr)"
+   ],
+   "rows": [
+    {
+     "id": "Road-Bridge",
+     "status": "blocked",
+     "source": "drone_vision",
+     "confidence": 0.85,
+     "raw_evidence_ref": "drone/cam2/frame_000910.jpg",
+     "conflict": true
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Road-Bridge",
+     "confidence": 0.85,
+     "source": "drone_vision",
+     "conflict": true
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3236,
+     "completion_tokens": 74,
+     "seconds": 2.119,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 703,
+     "completion_tokens": 101,
+     "seconds": 2.341,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 3939,
+   "completion_tokens": 175,
+   "llm_seconds": 4.46,
+   "wall_seconds": 4.478,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "pv05",
+   "category": "provenance",
+   "question": "Which source last confirmed Rescue Team 4's status?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team {id: 'Team-Rescue4'})-[n:NEAR]->(x)\nWHERE n.active = true\nRETURN x.id AS id, x.name AS name, x.status AS status, x.status_since AS status_since, x.source AS source, x.confidence AS confidence, x.raw_evidence_ref AS raw_evidence_ref, x.conflict AS conflict\nORDER BY x.status_since DESC\nLIMIT 1",
+   "answer": "The last confirmed status for Rescue Team 4 is active, reported by sensor at 14:01:30Z (sensor, 0.97).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "hazard",
+    "id": "Hazard-gas-Sensor-Gas3",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.335,
+    "lon": -121.8896
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Hazard-gas-Sensor-Gas3",
+     "name": "Gas hazard at Gas Sensor 3",
+     "status": "active",
+     "status_since": "2026-09-25 14:01:30+00:00",
+     "source": "sensor",
+     "confidence": 0.97,
+     "raw_evidence_ref": "mqtt/sensors/gas/3/1790344890",
+     "conflict": null
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Team-Rescue4",
+     "source": "field_report",
+     "last_confirmed_source": "field_report"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3244,
+     "completion_tokens": 108,
+     "seconds": 2.83,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 788,
+     "completion_tokens": 83,
+     "seconds": 2.481,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4032,
+   "completion_tokens": 191,
+   "llm_seconds": 5.311,
+   "wall_seconds": 5.364,
+   "exec_acc": false,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    [
+     "field_report",
+     "field report"
+    ]
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "pv06",
+   "category": "provenance",
+   "question": "List every report about Bridge Street with its source and confidence.",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Event)-[:ABOUT]->(r:Road {id: 'Road-Bridge'})\nRETURN e.id AS id, e.source AS source, e.confidence AS confidence, e.claim AS claim, e.timestamp AS timestamp, e.raw_evidence_ref AS raw_evidence_ref\nORDER BY e.timestamp DESC\nLIMIT 25",
+   "answer": "Bridge Street is reported blocked at 14:02:45Z (drone_vision, 0.85) and open at 14:02:30Z (radio_asr, 0.7).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "evt-0010",
+     "source": "drone_vision",
+     "confidence": 0.85,
+     "claim": "blocked",
+     "timestamp": "2026-09-25 14:02:45+00:00",
+     "raw_evidence_ref": "drone/cam2/frame_000910.jpg"
+    },
+    {
+     "id": "evt-0009",
+     "source": "radio_asr",
+     "confidence": 0.7,
+     "claim": "open",
+     "timestamp": "2026-09-25 14:02:30+00:00",
+     "raw_evidence_ref": "radio/ch3/clip_000150.wav"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "evt-0010",
+     "source": "drone_vision",
+     "confidence": 0.85,
+     "claim": "blocked"
+    },
+    {
+     "id": "evt-0009",
+     "source": "radio_asr",
+     "confidence": 0.7,
+     "claim": "open"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3238,
+     "completion_tokens": 84,
+     "seconds": 2.363,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 829,
+     "completion_tokens": 88,
+     "seconds": 2.083,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4067,
+   "completion_tokens": 172,
+   "llm_seconds": 4.446,
+   "wall_seconds": 4.477,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "pv07",
+   "category": "provenance",
+   "question": "What did the drone see at Building 14?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Event)-[:ABOUT]->(n:Entity {id: 'Building-14'})\nWHERE e.source = 'drone_vision'\nRETURN n.id AS id, n.name AS name, e.source AS source, e.confidence AS confidence, e.timestamp AS timestamp, e.raw_evidence_ref AS raw_evidence_ref\nORDER BY e.timestamp DESC LIMIT 5",
+   "answer": "Building 14 is currently on fire, as reported by drone vision at 14:00:15Z (drone_vision, 0.91).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "building",
+    "id": "Building-14",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.3352,
+    "lon": -121.8893
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Building-14",
+     "name": "Building 14",
+     "source": "drone_vision",
+     "confidence": 0.91,
+     "timestamp": "2026-09-25 14:00:15+00:00",
+     "raw_evidence_ref": "drone/cam1/frame_000450.jpg"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "evt-0002",
+     "claim": "collapsed",
+     "timestamp": "2026-09-25 14:00:15+00:00"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3240,
+     "completion_tokens": 91,
+     "seconds": 2.491,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 749,
+     "completion_tokens": 85,
+     "seconds": 1.998,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 3989,
+   "completion_tokens": 176,
+   "llm_seconds": 4.489,
+   "wall_seconds": 4.536,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    "collapsed"
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "tm01",
+   "category": "temporal",
+   "question": "What changed in the last 2 minutes?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Event)-[:ABOUT]->(n)\nWHERE e.timestamp >= $now - duration({minutes: 2})\nRETURN n.id AS id, n.name AS name, e.timestamp AS timestamp, e.source AS source, e.claim AS claim, e.confidence AS confidence, e.raw_evidence_ref AS raw_evidence_ref\nORDER BY e.timestamp DESC\nLIMIT 25",
+   "answer": "Bridge Street is blocked according to drone_vision at 14:02:45Z (confidence 0.85), but radio_asr reports it open at 14:02:30Z (confidence 0.7), indicating conflicting reports.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [
+     "Team-Rescue4",
+     "Sensor-Gas3",
+     "Team-Ambulance2"
+    ],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "highlighted entity has conflicting reports: Bridge Street blocked (drone_vision) vs open (radio_asr)"
+   ],
+   "rows": [
+    {
+     "id": "Road-Bridge",
+     "name": "Bridge Street",
+     "timestamp": "2026-09-25 14:02:45+00:00",
+     "source": "drone_vision",
+     "claim": "blocked",
+     "confidence": 0.85,
+     "raw_evidence_ref": "drone/cam2/frame_000910.jpg"
+    },
+    {
+     "id": "Road-Bridge",
+     "name": "Bridge Street",
+     "timestamp": "2026-09-25 14:02:30+00:00",
+     "source": "radio_asr",
+     "claim": "open",
+     "confidence": 0.7,
+     "raw_evidence_ref": "radio/ch3/clip_000150.wav"
+    },
+    {
+     "id": "Team-Rescue4",
+     "name": "Rescue Team 4",
+     "timestamp": "2026-09-25 14:02:00+00:00",
+     "source": "field_report",
+     "claim": "on_scene",
+     "confidence": 0.9,
+     "raw_evidence_ref": "fieldreport/msg_000118"
+    },
+    {
+     "id": "Sensor-Gas3",
+     "name": "Gas Sensor 3",
+     "timestamp": "2026-09-25 14:01:30+00:00",
+     "source": "sensor",
+     "claim": "spike",
+     "confidence": 0.97,
+     "raw_evidence_ref": "mqtt/sensors/gas/3/1790344890"
+    },
+    {
+     "id": "Team-Ambulance2",
+     "name": "Ambulance 2",
+     "timestamp": "2026-09-25 14:01:00+00:00",
+     "source": "gps",
+     "claim": "position_update",
+     "confidence": 0.95,
+     "raw_evidence_ref": "mqtt/gps/team-ambulance2/1790344860"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "evt-0006"
+    },
+    {
+     "id": "evt-0007"
+    },
+    {
+     "id": "evt-0008"
+    },
+    {
+     "id": "evt-0009"
+    },
+    {
+     "id": "evt-0010"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3210,
+     "completion_tokens": 94,
+     "seconds": 2.555,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 1142,
+     "completion_tokens": 114,
+     "seconds": 2.66,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4352,
+   "completion_tokens": 208,
+   "llm_seconds": 5.215,
+   "wall_seconds": 5.251,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "tm02",
+   "category": "temporal",
+   "question": "What did radio report in the last 5 minutes?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Event {source: 'radio_asr'})-[:ABOUT]->(n)\nWHERE e.timestamp >= $now - duration({minutes: 5})\nRETURN n.id AS id, n.name AS name, e.claim AS claim, e.timestamp AS timestamp, e.confidence AS confidence, e.raw_evidence_ref AS raw_evidence_ref\nORDER BY e.timestamp DESC LIMIT 25",
+   "answer": "Bridge Street is open (radio_asr, 0.70). Main Street is blocked since 14:00:32Z (radio_asr, 0.78).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [
+     "Road-Main"
+    ],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "highlighted entity has conflicting reports: Bridge Street blocked (drone_vision) vs open (radio_asr)"
+   ],
+   "rows": [
+    {
+     "id": "Road-Bridge",
+     "name": "Bridge Street",
+     "claim": "open",
+     "timestamp": "2026-09-25 14:02:30+00:00",
+     "confidence": 0.7,
+     "raw_evidence_ref": "radio/ch3/clip_000150.wav"
+    },
+    {
+     "id": "Road-Main",
+     "name": "Main Street",
+     "claim": "blocked",
+     "timestamp": "2026-09-25 14:00:32+00:00",
+     "confidence": 0.78,
+     "raw_evidence_ref": "radio/ch3/clip_000032.wav"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "evt-0003"
+    },
+    {
+     "id": "evt-0009"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3212,
+     "completion_tokens": 95,
+     "seconds": 2.563,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 828,
+     "completion_tokens": 102,
+     "seconds": 2.37,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4040,
+   "completion_tokens": 197,
+   "llm_seconds": 4.933,
+   "wall_seconds": 4.982,
+   "exec_acc": true,
+   "grounded": false,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "tm03",
+   "category": "temporal",
+   "question": "When did Rescue Team 4 arrive on scene?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team {id: 'Team-Rescue4'})-[:NEAR]->(x)\nWHERE t.status = 'on_scene' AND x.status = 'active'\nRETURN x.id AS id, x.status_since AS status_since\nORDER BY x.status_since DESC\nLIMIT 1",
+   "answer": "Rescue Team 4 arrived on scene at 14:01:30Z (status_since).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "hazard",
+    "id": "Hazard-gas-Sensor-Gas3",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.335,
+    "lon": -121.8896
+   },
+   "warnings": [
+    "Neo.ClientError.Statement.SyntaxError: Variable `n` not defined (line 1, column 56 (offset: 55))\n\"MATCH (t:Team {id: 'Team-Rescue4'})-[:NEAR]->(x) WHERE n.active = true\"\n                                                        ^"
+   ],
+   "rows": [
+    {
+     "id": "Hazard-gas-Sensor-Gas3",
+     "status_since": "2026-09-25 14:01:30+00:00"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Team-Rescue4",
+     "status_since": "2026-09-25 14:02:00+00:00"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3243,
+     "completion_tokens": 69,
+     "seconds": 2.31,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3394,
+     "completion_tokens": 69,
+     "seconds": 2.31,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3418,
+     "completion_tokens": 76,
+     "seconds": 2.412,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 688,
+     "completion_tokens": 74,
+     "seconds": 2.109,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 720,
+     "completion_tokens": 105,
+     "seconds": 2.425,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 11463,
+   "completion_tokens": 393,
+   "llm_seconds": 11.566,
+   "wall_seconds": 11.64,
+   "exec_acc": false,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    "14:02:00"
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 2
+  },
+  {
+   "id": "tm04",
+   "category": "temporal",
+   "question": "What was the first event of the incident?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Event) RETURN e.timestamp AS timestamp, e.claim AS claim, e.source AS source, e.confidence AS confidence, e.raw_evidence_ref AS raw_evidence_ref, e.entity_id AS id ORDER BY e.timestamp ASC LIMIT 1",
+   "answer": "The first event was a spike reported by Sensor-Seismic1 at 14:00:00Z (sensor, 0.99).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "sensor",
+    "id": "Sensor-Seismic1",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.89
+   },
+   "warnings": [
+    "schema check: RETURN must include the entity id as `id` (e.g. n.id AS id) so the answer can name what it is about"
+   ],
+   "rows": [
+    {
+     "timestamp": "2026-09-25 14:00:00+00:00",
+     "claim": "spike",
+     "source": "sensor",
+     "confidence": 0.99,
+     "raw_evidence_ref": "mqtt/sensors/seismic/1/1790344800",
+     "id": "Sensor-Seismic1"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "evt-0001",
+     "entity_id": "Sensor-Seismic1"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3210,
+     "completion_tokens": 58,
+     "seconds": 1.774,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3317,
+     "completion_tokens": 64,
+     "seconds": 2.161,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 719,
+     "completion_tokens": 98,
+     "seconds": 2.268,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 7246,
+   "completion_tokens": 220,
+   "llm_seconds": 6.203,
+   "wall_seconds": 6.245,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 1
+  },
+  {
+   "id": "tm05",
+   "category": "temporal",
+   "question": "How long has Main Street been blocked?",
+   "answerable": true,
+   "mode_used": "error",
+   "intent": null,
+   "cypher": "MATCH (r:Road {id: 'Road-Main'})\nWHERE r.status = 'blocked' OR r.conflict = true\nRETURN r.id AS id,\n       r.status AS status,\n       r.status_since AS status_since,\n       duration({seconds: round(duration.inSeconds($now, r.status_since))}) AS duration_seconds\nLIMIT 1",
+   "answer": "I could not build a valid graph query for that question. Try rephrasing, or ask one of the standard questions.",
+   "confidence": 0.0,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [
+    "Neo.ClientError.Statement.SyntaxError: Function call does not provide the required number of arguments: expected 2 got 1.\n\nFunction duration.inSeconds has signature: duration.inSeconds(from :: ANY, to :: ANY) :: DURATION\nmeaning that it expects 2 arguments of type ANY, ANY\nDescription: Computes the `DURATION` between the `from` instant (inclusive) and the `to` instant (exclusive) in seconds. (line 6, column 33 (offset: 198))\n\"       duration({seconds: round(duration.inSeconds($now - r.status_since))}) AS duration_seconds\"\n                                 ^",
+    "Neo.ClientError.Statement.SyntaxError: Type mismatch: expected Float but was Duration (line 6, column 33 (offset: 198))\n\"       duration({seconds: round(duration.inSeconds($now, r.status_since))}) AS duration_seconds\"\n                                 ^"
+   ],
+   "rows": [],
+   "gold_rows": [
+    {
+     "id": "Road-Main",
+     "status_since": "2026-09-25 14:00:32+00:00"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3234,
+     "completion_tokens": 100,
+     "seconds": 2.664,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3431,
+     "completion_tokens": 87,
+     "seconds": 2.641,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3476,
+     "completion_tokens": 87,
+     "seconds": 2.409,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 10141,
+   "completion_tokens": 274,
+   "llm_seconds": 7.714,
+   "wall_seconds": 7.778,
+   "exec_acc": false,
+   "grounded": false,
+   "facts": false,
+   "missing": [
+    [
+     "14:00:32",
+     "2 minutes",
+     "2 min",
+     "two minutes"
+    ]
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 2
+  },
+  {
+   "id": "tm06",
+   "category": "temporal",
+   "question": "Which entities have had their status confirmed since 14:02?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Entity)\nWHERE e.status_since >= datetime('2026-09-25T14:02:45+00:00')\nRETURN e.id AS id, e.name AS name, e.status AS status, e.status_since AS status_since, e.source AS source, e.confidence AS confidence, e.raw_evidence_ref AS raw_evidence_ref, e.conflict AS conflict\nORDER BY e.status_since DESC\nLIMIT 25",
+   "answer": "Bridge Street is blocked since 14:02:45Z (drone_vision, 0.85).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "highlighted entity has conflicting reports: Bridge Street blocked (drone_vision) vs open (radio_asr)"
+   ],
+   "rows": [
+    {
+     "id": "Road-Bridge",
+     "name": "Bridge Street",
+     "status": "blocked",
+     "status_since": "2026-09-25 14:02:45+00:00",
+     "source": "drone_vision",
+     "confidence": 0.85,
+     "raw_evidence_ref": "drone/cam2/frame_000910.jpg",
+     "conflict": true
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Team-Rescue4"
+    },
+    {
+     "id": "Road-Bridge"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3216,
+     "completion_tokens": 118,
+     "seconds": 3.282,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 791,
+     "completion_tokens": 85,
+     "seconds": 2.002,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4007,
+   "completion_tokens": 203,
+   "llm_seconds": 5.284,
+   "wall_seconds": 5.335,
+   "exec_acc": false,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    [
+     "Rescue Team 4",
+     "Team-Rescue4",
+     "Rescue 4"
+    ]
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "tm07",
+   "category": "temporal",
+   "question": "What happened between 14:00 and 14:01?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Event)-[:ABOUT]->(n)\nWHERE e.timestamp >= datetime('2026-09-25T14:00:00Z') \n  AND e.timestamp < datetime('2026-09-25T14:01:00Z')\nRETURN n.id AS id, n.name AS name, e.claim AS claim, e.timestamp AS timestamp, e.source AS source, e.confidence AS confidence\nORDER BY e.timestamp ASC LIMIT 25",
+   "answer": "At 14:00:00Z a seismic spike was recorded by Sensor-Seismic1 (sensor, 0.99), and at 14:00:15Z Building 14 collapsed (drone_vision, 0.91). Main Street was reported blocked at 14:00:32Z (radio_asr, 0.78). Rescue Team 4 gave a position update at 14:00:40Z (gps, 0.95) and was later noted near the area at 14:00:45Z (drone_vision, 0.82).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "sensor",
+    "id": "Sensor-Seismic1",
+    "ids": [
+     "Building-14",
+     "Road-Main",
+     "Team-Rescue4"
+    ],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.89
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Sensor-Seismic1",
+     "name": "Seismic Sensor 1",
+     "claim": "spike",
+     "timestamp": "2026-09-25 14:00:00+00:00",
+     "source": "sensor",
+     "confidence": 0.99
+    },
+    {
+     "id": "Building-14",
+     "name": "Building 14",
+     "claim": "collapsed",
+     "timestamp": "2026-09-25 14:00:15+00:00",
+     "source": "drone_vision",
+     "confidence": 0.91
+    },
+    {
+     "id": "Road-Main",
+     "name": "Main Street",
+     "claim": "blocked",
+     "timestamp": "2026-09-25 14:00:32+00:00",
+     "source": "radio_asr",
+     "confidence": 0.78
+    },
+    {
+     "id": "Team-Rescue4",
+     "name": "Rescue Team 4",
+     "claim": "position_update",
+     "timestamp": "2026-09-25 14:00:40+00:00",
+     "source": "gps",
+     "confidence": 0.95
+    },
+    {
+     "id": "Team-Rescue4",
+     "name": "Rescue Team 4",
+     "claim": "near",
+     "timestamp": "2026-09-25 14:00:45+00:00",
+     "source": "drone_vision",
+     "confidence": 0.82
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "evt-0001",
+     "entity_id": "Sensor-Seismic1"
+    },
+    {
+     "id": "evt-0002",
+     "entity_id": "Building-14"
+    },
+    {
+     "id": "evt-0003",
+     "entity_id": "Road-Main"
+    },
+    {
+     "id": "evt-0004",
+     "entity_id": "Team-Rescue4"
+    },
+    {
+     "id": "evt-0005",
+     "entity_id": "Team-Rescue4"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3218,
+     "completion_tokens": 122,
+     "seconds": 3.406,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 1059,
+     "completion_tokens": 208,
+     "seconds": 4.866,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4277,
+   "completion_tokens": 330,
+   "llm_seconds": 8.272,
+   "wall_seconds": 8.31,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "px01",
+   "category": "proximity",
+   "question": "Which units are near Building 14?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team)-[n:NEAR]->(b:Entity {id: 'Building-14'})\nWHERE n.active = true\nRETURN t.id AS id, t.name AS name, t.status AS status, n.distance_m AS distance_m, n.sources AS sources, n.evidence_refs AS evidence_refs\nORDER BY n.distance_m ASC\nLIMIT 25",
+   "answer": "Rescue Team 4 is on scene near Building-14, about 20.9 meters away (gps, drone_vision, 0.78).",
+   "confidence": 0.4,
+   "highlight": {
+    "type": "team",
+    "id": "Team-Rescue4",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.3353,
+    "lon": -121.8891
+   },
+   "warnings": [
+    "answer fact-check: confidence 0.78 is not in the rows"
+   ],
+   "rows": [
+    {
+     "id": "Team-Rescue4",
+     "name": "Rescue Team 4",
+     "status": "on_scene",
+     "distance_m": 20.9,
+     "sources": [
+      "gps",
+      "drone_vision"
+     ],
+     "evidence_refs": [
+      "mqtt/gps/team-rescue4/1790344840",
+      "drone/cam1/frame_000520.jpg"
+     ]
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Team-Rescue4"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3238,
+     "completion_tokens": 93,
+     "seconds": 2.519,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 755,
+     "completion_tokens": 126,
+     "seconds": 2.859,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 788,
+     "completion_tokens": 74,
+     "seconds": 1.775,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4781,
+   "completion_tokens": 293,
+   "llm_seconds": 7.153,
+   "wall_seconds": 7.209,
+   "exec_acc": true,
+   "grounded": false,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "px02",
+   "category": "proximity",
+   "question": "How far is Rescue Team 4 from Building 14?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team {id: 'Team-Rescue4'})-[:NEAR]->(b:Entity {id: 'Building-14'})\nRETURN t.id AS id, t.name AS name, b.id AS target, round(point.distance(t.location, b.location)) AS distance_m, t.status AS status, t.position_since AS position_since, b.status AS target_status, b.status_since AS target_status_since, t.source AS source, t.confidence AS confidence, b.source AS target_source, b.confidence AS target_confidence, b.raw_evidence_ref AS target_raw_evidence_ref, b.conflict AS target_conflict, b.conflict_source AS target_conflict_source, b.conflict_confidence AS target_conflict_confidence, b.conflict_since AS target_conflict_since\nORDER BY distance_m ASC LIMIT 1",
+   "answer": "Rescue Team 4 is 21 meters from Building 14 (on_scene since 14:00:40Z, source field_report, 0.9 confidence). Building 14 is collapsed (since 14:00:15Z, drone_vision, 0.91 confidence).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "team",
+    "id": "Team-Rescue4",
+    "ids": [
+     "Building-14"
+    ],
+    "action": "fly_to",
+    "lat": 37.3353,
+    "lon": -121.8891
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Team-Rescue4",
+     "name": "Rescue Team 4",
+     "target": "Building-14",
+     "distance_m": 21.0,
+     "status": "on_scene",
+     "position_since": "2026-09-25 14:00:40+00:00",
+     "target_status": "collapsed",
+     "target_status_since": "2026-09-25 14:00:15+00:00",
+     "source": "field_report",
+     "confidence": 0.9,
+     "target_source": "drone_vision",
+     "target_confidence": 0.91,
+     "target_raw_evidence_ref": "drone/cam1/frame_000450.jpg",
+     "target_conflict": false,
+     "target_conflict_source": null,
+     "target_conflict_confidence": null,
+     "target_conflict_since": null
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Team-Rescue4",
+     "distance_m": 20.9
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3264,
+     "completion_tokens": 191,
+     "seconds": 4.968,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 974,
+     "completion_tokens": 115,
+     "seconds": 5.244,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4238,
+   "completion_tokens": 306,
+   "llm_seconds": 10.212,
+   "wall_seconds": 10.283,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "px03",
+   "category": "proximity",
+   "question": "Is any unit inside the gas hazard zone?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (h:Hazard {hazard_type: 'gas', status: 'active'})-[:AFFECTS]->(b:Building)\nWHERE point.distance(h.location, b.location) <= h.radius_m\nRETURN b.id AS id, b.name AS name, b.status AS status, h.id AS hazard, h.status AS hazard_status, h.radius_m AS radius_m, h.source AS source, h.confidence AS confidence\nLIMIT 25",
+   "answer": "Building 14 is collapsed and inside the active gas hazard zone (radius 100\u202fm) (sensor, 0.97).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "building",
+    "id": "Building-14",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.3352,
+    "lon": -121.8893
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Building-14",
+     "name": "Building 14",
+     "status": "collapsed",
+     "hazard": "Hazard-gas-Sensor-Gas3",
+     "hazard_status": "active",
+     "radius_m": 100.0,
+     "source": "sensor",
+     "confidence": 0.97
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Team-Rescue4"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3210,
+     "completion_tokens": 105,
+     "seconds": 2.769,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 744,
+     "completion_tokens": 320,
+     "seconds": 7.036,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "length"
+    },
+    {
+     "prompt_tokens": 755,
+     "completion_tokens": 60,
+     "seconds": 3.198,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4709,
+   "completion_tokens": 485,
+   "llm_seconds": 13.003,
+   "wall_seconds": 13.084,
+   "exec_acc": false,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    [
+     "Rescue Team 4",
+     "Team-Rescue4",
+     "Rescue 4"
+    ]
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "px04",
+   "category": "proximity",
+   "question": "Which units are within 200 metres of the hospital?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (f:Facility {facility_type: 'hospital'}), (t:Team) WHERE t.location IS NOT NULL \n      AND point.distance(t.location, f.location) <= 200\nRETURN t.id AS id, t.name AS name, t.status AS status, \n       round(point.distance(t.location, f.location)) AS distance_m, \n       f.id AS facility\nORDER BY distance_m ASC LIMIT 10",
+   "answer": "Ambulance 1 is available and located 14.0 metres from CountyGeneral Hospital (Facility-CountyGeneral).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "team",
+    "id": "Team-Ambulance1",
+    "ids": [
+     "Facility-CountyGeneral"
+    ],
+    "action": "fly_to",
+    "lat": 37.3399,
+    "lon": -121.8851
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Team-Ambulance1",
+     "name": "Ambulance 1",
+     "status": "available",
+     "distance_m": 14.0,
+     "facility": "Facility-CountyGeneral"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Team-Ambulance1"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3241,
+     "completion_tokens": 103,
+     "seconds": 3.265,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 719,
+     "completion_tokens": 66,
+     "seconds": 1.601,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 751,
+     "completion_tokens": 73,
+     "seconds": 1.754,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4711,
+   "completion_tokens": 242,
+   "llm_seconds": 6.62,
+   "wall_seconds": 6.684,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "px05",
+   "category": "proximity",
+   "question": "What is near Ambulance 2 right now?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team {id: 'Team-Ambulance2'})-[:NEAR]->(x)\nWHERE x.active = true\nRETURN x.id AS id, x.name AS name, x.kind AS kind, x.status AS status, x.status_since AS status_since, x.source AS source, x.confidence AS confidence, x.raw_evidence_ref AS raw_evidence_ref, x.conflict AS conflict\nORDER BY x.status_since DESC\nLIMIT 25",
+   "answer": "The graph query found no matching records. That is not proof that none exist - the question may use terms the graph does not track.",
+   "confidence": 0.3,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [
+    "query returned 0 rows; not evidence of absence",
+    "Neo.ClientError.Statement.SyntaxError: Variable `n` not defined (line 1, column 86 (offset: 85))\n\"MATCH (t:Team {id: 'Team-Ambulance2'})-[:NEAR]->(x) WHERE t.status = 'available' AND n.active = true\"\n                                                                                      ^"
+   ],
+   "rows": [],
+   "gold_rows": [
+    {
+     "id": "Facility-LincolnHS"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3242,
+     "completion_tokens": 120,
+     "seconds": 3.092,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3452,
+     "completion_tokens": 120,
+     "seconds": 3.342,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3468,
+     "completion_tokens": 113,
+     "seconds": 3.197,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 10162,
+   "completion_tokens": 353,
+   "llm_seconds": 9.631,
+   "wall_seconds": 9.714,
+   "exec_acc": false,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    [
+     "Lincoln",
+     "LincolnHS",
+     "shelter"
+    ]
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 2
+  },
+  {
+   "id": "px06",
+   "category": "proximity",
+   "question": "Which buildings does the gas hazard affect?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (h:Hazard {hazard_type: 'gas', status: 'active'})-[:AFFECTS]->(b:Building)\nRETURN b.id AS id, b.name AS name, h.id AS hazard_id, h.name AS hazard_name, h.level AS level, h.unit AS unit,\n       h.source AS source, h.confidence AS confidence, h.status_since AS status_since, b.status AS status,\n       b.raw_evidence_ref AS raw_evidence_ref, b.conflict AS conflict\nORDER BY h.level DESC, b.id\nLIMIT 25",
+   "answer": "Building 14 is collapsed due to a gas hazard (level 45.0\u202fppm) that has been active since 14:01:30Z (sensor, 0.97).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "building",
+    "id": "Building-14",
+    "ids": [
+     "Hazard-gas-Sensor-Gas3"
+    ],
+    "action": "fly_to",
+    "lat": 37.3352,
+    "lon": -121.8893
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Building-14",
+     "name": "Building 14",
+     "hazard_id": "Hazard-gas-Sensor-Gas3",
+     "hazard_name": "Gas hazard at Gas Sensor 3",
+     "level": 45.0,
+     "unit": "ppm",
+     "source": "sensor",
+     "confidence": 0.97,
+     "status_since": "2026-09-25 14:01:30+00:00",
+     "status": "collapsed",
+     "raw_evidence_ref": "drone/cam1/frame_000450.jpg",
+     "conflict": false
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Building-14"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3209,
+     "completion_tokens": 134,
+     "seconds": 3.614,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 845,
+     "completion_tokens": 97,
+     "seconds": 2.258,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4054,
+   "completion_tokens": 231,
+   "llm_seconds": 5.872,
+   "wall_seconds": 5.932,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "rt01",
+   "category": "route",
+   "question": "Can Ambulance 2 still reach the hospital?",
+   "answerable": true,
+   "mode_used": "llm+fallback",
+   "intent": "reachability",
+   "cypher": "MATCH (s:Road {id: $start}), (d:Road {id: $dest})\nMATCH p = (s)-[:CONNECTS_TO*0..6]-(d)\nWITH p, [x IN nodes(p)[1..] WHERE x.status = 'blocked' AND coalesce(x.conflict, false) = false | x.id] AS hard_blocked,\n     [x IN nodes(p) WHERE coalesce(x.conflict, false) = true | x.id] AS uncertain\nRETURN [x IN nodes(p) | x.id] AS route, [x IN nodes(p) | x.name] AS names, length(p) AS hops, hard_blocked, uncertain,\n       reduce(m = 0, r IN relationships(p) | m + coalesce(r.length_m, 0)) AS length_m\nORDER BY size(hard_blocked) ASC, size(uncertain) ASC, hops ASC, length_m ASC LIMIT 50",
+   "answer": "No confirmed route to County General Hospital. Ambulance 2 is on Oak Avenue (near Lincoln High School Shelter). Blocked: Main Street blocked (radio_asr 0.78, 14:00:32Z). The only remaining route Oak Avenue -> Bridge Street -> River Road has conflicting reports - Bridge Street: drone_vision reports blocked (0.85, 14:02:45Z) but radio_asr reports open (0.70, 14:02:30Z). Recommend verifying before committing the unit.",
+   "confidence": 0.8,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [
+     "Road-Oak",
+     "Road-River",
+     "Team-Ambulance2",
+     "Facility-CountyGeneral"
+    ],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "route depends on a road with conflicting reports",
+    "LLM query failed; answered from the pre-baked query"
+   ],
+   "rows": [
+    {
+     "route": [
+      "Road-Oak",
+      "Road-Bridge",
+      "Road-River"
+     ],
+     "names": [
+      "Oak Avenue",
+      "Bridge Street",
+      "River Road"
+     ],
+     "hops": 2,
+     "hard_blocked": [],
+     "uncertain": [
+      "Road-Bridge"
+     ],
+     "length_m": 1320
+    },
+    {
+     "route": [
+      "Road-Oak",
+      "Road-Main",
+      "Road-River"
+     ],
+     "names": [
+      "Oak Avenue",
+      "Main Street",
+      "River Road"
+     ],
+     "hops": 2,
+     "hard_blocked": [
+      "Road-Main"
+     ],
+     "uncertain": [],
+     "length_m": 1190
+    },
+    {
+     "route": [
+      "Road-Oak",
+      "Road-Main",
+      "Road-3rd",
+      "Road-River"
+     ],
+     "names": [
+      "Oak Avenue",
+      "Main Street",
+      "3rd Street",
+      "River Road"
+     ],
+     "hops": 3,
+     "hard_blocked": [
+      "Road-Main"
+     ],
+     "uncertain": [],
+     "length_m": 1230
+    },
+    {
+     "route": [
+      "Road-Oak",
+      "Road-Bridge",
+      "Road-River",
+      "Road-Main",
+      "Road-3rd",
+      "Road-River"
+     ],
+     "names": [
+      "Oak Avenue",
+      "Bridge Street",
+      "River Road",
+      "Main Street",
+      "3rd Street",
+      "River Road"
+     ],
+     "hops": 5,
+     "hard_blocked": [
+      "Road-Main"
+     ],
+     "uncertain": [
+      "Road-Bridge"
+     ],
+     "length_m": 2440
+    },
+    {
+     "route": [
+      "Road-Oak",
+      "Road-Bridge",
+      "Road-River",
+      "Road-3rd",
+      "Road-Main",
+      "Road-River"
+     ],
+     "names": [
+      "Oak Avenue",
+      "Bridge Street",
+      "River Road",
+      "3rd Street",
+      "Main Street",
+      "River Road"
+     ],
+     "hops": 5,
+     "hard_blocked": [
+      "Road-Main"
+     ],
+     "uncertain": [
+      "Road-Bridge"
+     ],
+     "length_m": 2440
+    }
+   ],
+   "gold_rows": [],
+   "calls": [
+    {
+     "prompt_tokens": 3259,
+     "completion_tokens": 227,
+     "seconds": 5.634,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3517,
+     "completion_tokens": 227,
+     "seconds": 5.656,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3517,
+     "completion_tokens": 227,
+     "seconds": 5.387,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 10293,
+   "completion_tokens": 681,
+   "llm_seconds": 16.677,
+   "wall_seconds": 16.743,
+   "exec_acc": null,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 2
+  },
+  {
+   "id": "rt02",
+   "category": "route",
+   "question": "Which roads connect to Oak Avenue?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (r:Road)-[:CONNECTS_TO]-(oak:Road {id: 'Road-Oak'})\nRETURN r.id AS id, r.name AS name, r.status AS status, r.source AS source, r.confidence AS confidence, r.raw_evidence_ref AS raw_evidence_ref, r.conflict AS conflict\nORDER BY r.id\nLIMIT 25",
+   "answer": "Road-Bridge (Bridge Street) is blocked, reported by drone_vision with 0.85 confidence (conflicting reports). Road-Main (Main Street) is blocked, reported by radio_asr with 0.78 confidence.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [
+     "Road-Main"
+    ],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "highlighted entity has conflicting reports: Bridge Street blocked (drone_vision) vs open (radio_asr)"
+   ],
+   "rows": [
+    {
+     "id": "Road-Bridge",
+     "name": "Bridge Street",
+     "status": "blocked",
+     "source": "drone_vision",
+     "confidence": 0.85,
+     "raw_evidence_ref": "drone/cam2/frame_000910.jpg",
+     "conflict": true
+    },
+    {
+     "id": "Road-Main",
+     "name": "Main Street",
+     "status": "blocked",
+     "source": "radio_asr",
+     "confidence": 0.78,
+     "raw_evidence_ref": "radio/ch3/clip_000032.wav",
+     "conflict": false
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Road-Bridge"
+    },
+    {
+     "id": "Road-Main"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3234,
+     "completion_tokens": 90,
+     "seconds": 2.774,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 791,
+     "completion_tokens": 97,
+     "seconds": 2.383,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4025,
+   "completion_tokens": 187,
+   "llm_seconds": 5.157,
+   "wall_seconds": 5.213,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "rt03",
+   "category": "route",
+   "question": "Which road is County General Hospital on?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (f:Facility {id: 'Facility-CountyGeneral'})-[:ON_ROAD]->(r:Road)\nRETURN r.id AS id, r.name AS name, r.status AS status, r.status_since AS status_since, r.source AS source, r.confidence AS confidence,\n       r.raw_evidence_ref AS raw_evidence_ref, r.conflict AS conflict\nORDER BY r.status_since DESC\nLIMIT 25",
+   "answer": "River Road is open and has been open since 13:00:00Z (seed_dataset, 1.0).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-River",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.3395,
+    "lon": -121.8858
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Road-River",
+     "name": "River Road",
+     "status": "open",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0,
+     "raw_evidence_ref": "seed/static_world_v1#Road-River",
+     "conflict": null
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Road-River"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3238,
+     "completion_tokens": 106,
+     "seconds": 3.001,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 762,
+     "completion_tokens": 49,
+     "seconds": 1.309,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4000,
+   "completion_tokens": 155,
+   "llm_seconds": 4.31,
+   "wall_seconds": 4.348,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "rt04",
+   "category": "route",
+   "question": "Is there an open route from the shelter to the hospital that avoids blocked roads?",
+   "answerable": true,
+   "mode_used": "llm+fallback",
+   "intent": "reachability",
+   "cypher": "MATCH (s:Road {id: $start}), (d:Road {id: $dest})\nMATCH p = (s)-[:CONNECTS_TO*0..6]-(d)\nWITH p, [x IN nodes(p)[1..] WHERE x.status = 'blocked' AND coalesce(x.conflict, false) = false | x.id] AS hard_blocked,\n     [x IN nodes(p) WHERE coalesce(x.conflict, false) = true | x.id] AS uncertain\nRETURN [x IN nodes(p) | x.id] AS route, [x IN nodes(p) | x.name] AS names, length(p) AS hops, hard_blocked, uncertain,\n       reduce(m = 0, r IN relationships(p) | m + coalesce(r.length_m, 0)) AS length_m\nORDER BY size(hard_blocked) ASC, size(uncertain) ASC, hops ASC, length_m ASC LIMIT 50",
+   "answer": "No confirmed route to County General Hospital. Lincoln High School Shelter is on Oak Avenue. Blocked: Main Street blocked (radio_asr 0.78, 14:00:32Z). The only remaining route Oak Avenue -> Bridge Street -> River Road has conflicting reports - Bridge Street: drone_vision reports blocked (0.85, 14:02:45Z) but radio_asr reports open (0.70, 14:02:30Z). Recommend verifying before committing the unit.",
+   "confidence": 0.8,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [
+     "Road-Oak",
+     "Road-River",
+     "Facility-LincolnHS",
+     "Facility-CountyGeneral"
+    ],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "route depends on a road with conflicting reports",
+    "LLM query failed; answered from the pre-baked query"
+   ],
+   "rows": [
+    {
+     "route": [
+      "Road-Oak",
+      "Road-Bridge",
+      "Road-River"
+     ],
+     "names": [
+      "Oak Avenue",
+      "Bridge Street",
+      "River Road"
+     ],
+     "hops": 2,
+     "hard_blocked": [],
+     "uncertain": [
+      "Road-Bridge"
+     ],
+     "length_m": 1320
+    },
+    {
+     "route": [
+      "Road-Oak",
+      "Road-Main",
+      "Road-River"
+     ],
+     "names": [
+      "Oak Avenue",
+      "Main Street",
+      "River Road"
+     ],
+     "hops": 2,
+     "hard_blocked": [
+      "Road-Main"
+     ],
+     "uncertain": [],
+     "length_m": 1190
+    },
+    {
+     "route": [
+      "Road-Oak",
+      "Road-Main",
+      "Road-3rd",
+      "Road-River"
+     ],
+     "names": [
+      "Oak Avenue",
+      "Main Street",
+      "3rd Street",
+      "River Road"
+     ],
+     "hops": 3,
+     "hard_blocked": [
+      "Road-Main"
+     ],
+     "uncertain": [],
+     "length_m": 1230
+    },
+    {
+     "route": [
+      "Road-Oak",
+      "Road-Bridge",
+      "Road-River",
+      "Road-Main",
+      "Road-3rd",
+      "Road-River"
+     ],
+     "names": [
+      "Oak Avenue",
+      "Bridge Street",
+      "River Road",
+      "Main Street",
+      "3rd Street",
+      "River Road"
+     ],
+     "hops": 5,
+     "hard_blocked": [
+      "Road-Main"
+     ],
+     "uncertain": [
+      "Road-Bridge"
+     ],
+     "length_m": 2440
+    },
+    {
+     "route": [
+      "Road-Oak",
+      "Road-Bridge",
+      "Road-River",
+      "Road-3rd",
+      "Road-Main",
+      "Road-River"
+     ],
+     "names": [
+      "Oak Avenue",
+      "Bridge Street",
+      "River Road",
+      "3rd Street",
+      "Main Street",
+      "River Road"
+     ],
+     "hops": 5,
+     "hard_blocked": [
+      "Road-Main"
+     ],
+     "uncertain": [
+      "Road-Bridge"
+     ],
+     "length_m": 2440
+    }
+   ],
+   "gold_rows": [],
+   "calls": [
+    {
+     "prompt_tokens": 3262,
+     "completion_tokens": 153,
+     "seconds": 4.368,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3497,
+     "completion_tokens": 153,
+     "seconds": 4.313,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3497,
+     "completion_tokens": 157,
+     "seconds": 4.165,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 10256,
+   "completion_tokens": 463,
+   "llm_seconds": 12.846,
+   "wall_seconds": 12.935,
+   "exec_acc": null,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 2
+  },
+  {
+   "id": "rt05",
+   "category": "route",
+   "question": "Which blocked roads have buildings on them?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (b:Building)-[:ON_ROAD]->(r:Road)\nWHERE r.status = 'blocked' OR r.conflict = true\nRETURN r.id AS id, r.name AS name, r.status AS status, r.status_since AS status_since, r.source AS source, r.confidence AS confidence,\n       r.raw_evidence_ref AS raw_evidence_ref, r.conflict AS conflict, r.conflict_claim AS conflict_claim, r.conflict_source AS conflict_source\nORDER BY r.status_since DESC LIMIT 25",
+   "answer": "Main Street is blocked since 14:00:32Z (radio_asr, 0.78).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Main",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.3355,
+    "lon": -121.889
+   },
+   "warnings": [
+    "schema check: ON_ROAD never starts at Road; the pattern is (Building|Facility)-[:ON_ROAD]->(Road); ON_ROAD never ends at Building; the pattern is (Building|Facility)-[:ON_ROAD]->(Road)"
+   ],
+   "rows": [
+    {
+     "id": "Road-Main",
+     "name": "Main Street",
+     "status": "blocked",
+     "status_since": "2026-09-25 14:00:32+00:00",
+     "source": "radio_asr",
+     "confidence": 0.78,
+     "raw_evidence_ref": "radio/ch3/clip_000032.wav",
+     "conflict": false,
+     "conflict_claim": null,
+     "conflict_source": null
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Road-Main"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3209,
+     "completion_tokens": 118,
+     "seconds": 3.211,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3398,
+     "completion_tokens": 126,
+     "seconds": 3.721,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 804,
+     "completion_tokens": 58,
+     "seconds": 1.502,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 7411,
+   "completion_tokens": 302,
+   "llm_seconds": 8.434,
+   "wall_seconds": 8.489,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    [
+     "Building 14",
+     "Building-14"
+    ]
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 1
+  },
+  {
+   "id": "ag01",
+   "category": "aggregation",
+   "question": "How many people are estimated to be in collapsed buildings?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (h:Hazard)-[:AFFECTS]->(b:Building)\nWHERE h.status = 'active' AND h.hazard_type = 'seismic' AND b.status = 'collapsed'\nRETURN sum(coalesce(b.occupancy_est, 0)) AS estimated_people\nORDER BY estimated_people DESC\nLIMIT 1",
+   "answer": "The graph query found no matching records. That is not proof that none exist - the question may use terms the graph does not track.",
+   "confidence": 0.3,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [
+    "query returned only zero counts; not evidence of absence",
+    "schema check: AFFECTS never starts at Building; the pattern is (Hazard)-[:AFFECTS]->(Building|Road); AFFECTS never ends at Hazard; the pattern is (Hazard)-[:AFFECTS]->(Building|Road)"
+   ],
+   "rows": [
+    {
+     "estimated_people": 0
+    }
+   ],
+   "gold_rows": [
+    {
+     "people": 120
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3212,
+     "completion_tokens": 83,
+     "seconds": 2.394,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3370,
+     "completion_tokens": 84,
+     "seconds": 2.344,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 6582,
+   "completion_tokens": 167,
+   "llm_seconds": 4.738,
+   "wall_seconds": 4.765,
+   "exec_acc": false,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    "120"
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 1
+  },
+  {
+   "id": "ag02",
+   "category": "aggregation",
+   "question": "How many events have been ingested in total?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Event) RETURN count(e) AS total_events LIMIT 25",
+   "answer": "A total of 10 events have been ingested.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "total_events": 10
+    }
+   ],
+   "gold_rows": [
+    {
+     "n": 10
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3211,
+     "completion_tokens": 26,
+     "seconds": 1.087,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 599,
+     "completion_tokens": 32,
+     "seconds": 0.857,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 3810,
+   "completion_tokens": 58,
+   "llm_seconds": 1.944,
+   "wall_seconds": 1.955,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "ag03",
+   "category": "aggregation",
+   "question": "How many roads are blocked?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (r:Road)\nWHERE r.status IN ['blocked','restricted'] OR r.conflict = true\nRETURN count(r) AS count, r.id AS id, r.name AS name, r.status AS status, r.status_since AS status_since, r.source AS source, r.confidence AS confidence, r.raw_evidence_ref AS raw_evidence_ref, r.conflict AS conflict\nORDER BY r.status_since DESC\nLIMIT 25",
+   "answer": "Two roads are currently blocked: Main Street has been blocked since 14:00:32Z (radio_asr, 0.78) and Bridge Street has been blocked since 14:02:45Z (drone_vision, 0.85).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [
+     "Road-Main"
+    ],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "highlighted entity has conflicting reports: Bridge Street blocked (drone_vision) vs open (radio_asr)"
+   ],
+   "rows": [
+    {
+     "count": 1,
+     "id": "Road-Bridge",
+     "name": "Bridge Street",
+     "status": "blocked",
+     "status_since": "2026-09-25 14:02:45+00:00",
+     "source": "drone_vision",
+     "confidence": 0.85,
+     "raw_evidence_ref": "drone/cam2/frame_000910.jpg",
+     "conflict": true
+    },
+    {
+     "count": 1,
+     "id": "Road-Main",
+     "name": "Main Street",
+     "status": "blocked",
+     "status_since": "2026-09-25 14:00:32+00:00",
+     "source": "radio_asr",
+     "confidence": 0.78,
+     "raw_evidence_ref": "radio/ch3/clip_000032.wav",
+     "conflict": false
+    }
+   ],
+   "gold_rows": [
+    {
+     "n": 2
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3207,
+     "completion_tokens": 108,
+     "seconds": 2.831,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 884,
+     "completion_tokens": 121,
+     "seconds": 3.236,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4091,
+   "completion_tokens": 229,
+   "llm_seconds": 6.067,
+   "wall_seconds": 6.113,
+   "exec_acc": false,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "ag04",
+   "category": "aggregation",
+   "question": "What is the total shelter capacity?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (f:Facility {id: 'Facility-LincolnHS'})\nRETURN f.id AS id, f.name AS name, f.capacity AS capacity, f.beds_available AS beds_available\nORDER BY f.capacity DESC LIMIT 1",
+   "answer": "Lincoln High School Shelter has a total capacity of 300 people.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "facility",
+    "id": "Facility-LincolnHS",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.332,
+    "lon": -121.895
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Facility-LincolnHS",
+     "name": "Lincoln High School Shelter",
+     "capacity": 300,
+     "beds_available": 300
+    }
+   ],
+   "gold_rows": [
+    {
+     "capacity": 300
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3237,
+     "completion_tokens": 62,
+     "seconds": 2.116,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 665,
+     "completion_tokens": 75,
+     "seconds": 2.125,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 3902,
+   "completion_tokens": 137,
+   "llm_seconds": 4.241,
+   "wall_seconds": 4.282,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "ag05",
+   "category": "aggregation",
+   "question": "Which hazard affects the most people?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (h:Hazard)-[a:AFFECTS]->(b:Building)\nWHERE h.status = 'active' AND a.active = true\nRETURN h.id AS id, h.name AS name, h.hazard_type AS hazard_type, h.level AS level, h.unit AS unit,\n       h.source AS source, h.confidence AS confidence,\n       collect(b.id) AS buildings, sum(coalesce(b.occupancy_est, 0)) AS people\nORDER BY people DESC LIMIT 1",
+   "answer": "Gas hazard at Gas Sensor 3 is affecting Building-14, with an estimated 120 people impacted (sensor, 0.97).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "hazard",
+    "id": "Hazard-gas-Sensor-Gas3",
+    "ids": [
+     "Building-14"
+    ],
+    "action": "fly_to",
+    "lat": 37.335,
+    "lon": -121.8896
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Hazard-gas-Sensor-Gas3",
+     "name": "Gas hazard at Gas Sensor 3",
+     "hazard_type": "gas",
+     "level": 45.0,
+     "unit": "ppm",
+     "source": "sensor",
+     "confidence": 0.97,
+     "buildings": [
+      "Building-14"
+     ],
+     "people": 120
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Hazard-gas-Sensor-Gas3",
+     "people": 120
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3208,
+     "completion_tokens": 115,
+     "seconds": 2.976,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 760,
+     "completion_tokens": 73,
+     "seconds": 1.743,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 3968,
+   "completion_tokens": 188,
+   "llm_seconds": 4.719,
+   "wall_seconds": 4.778,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "ag06",
+   "category": "aggregation",
+   "question": "How many units are available?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team) WHERE t.status = 'available'\nRETURN count(t) AS count, collect(t.id) AS ids LIMIT 25",
+   "answer": "Three units are available: Team-Ambulance2, Team-Ambulance1, and Team-Engine7.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "team",
+    "id": "Team-Ambulance2",
+    "ids": [
+     "Team-Ambulance1",
+     "Team-Engine7"
+    ],
+    "action": "fly_to",
+    "lat": 37.3322,
+    "lon": -121.8947
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "count": 3,
+     "ids": [
+      "Team-Ambulance2",
+      "Team-Ambulance1",
+      "Team-Engine7"
+     ]
+    }
+   ],
+   "gold_rows": [
+    {
+     "n": 3
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3207,
+     "completion_tokens": 40,
+     "seconds": 1.389,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 631,
+     "completion_tokens": 84,
+     "seconds": 2.333,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 3838,
+   "completion_tokens": 124,
+   "llm_seconds": 3.722,
+   "wall_seconds": 3.757,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "cf01",
+   "category": "conflict",
+   "question": "Are there any conflicting reports?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (n:Entity) WHERE n.conflict = true\nRETURN n.id AS id, n.name AS name, n.status AS status, n.source AS source, n.confidence AS confidence, n.status_since AS status_since, n.conflict_claim AS conflict_claim, n.conflict_source AS conflict_source, n.conflict_confidence AS conflict_confidence, n.conflict_since AS conflict_since\nORDER BY n.conflict_since DESC\nLIMIT 25",
+   "answer": "Bridge Street is blocked according to drone_vision (confidence 0.85) since 14:02:45Z, but radio_asr reports it as open with confidence 0.7 since 14:02:30Z, indicating conflicting reports.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "highlighted entity has conflicting reports: Bridge Street blocked (drone_vision) vs open (radio_asr)"
+   ],
+   "rows": [
+    {
+     "id": "Road-Bridge",
+     "name": "Bridge Street",
+     "status": "blocked",
+     "source": "drone_vision",
+     "confidence": 0.85,
+     "status_since": "2026-09-25 14:02:45+00:00",
+     "conflict_claim": "open",
+     "conflict_source": "radio_asr",
+     "conflict_confidence": 0.7,
+     "conflict_since": "2026-09-25 14:02:30+00:00"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Road-Bridge"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3207,
+     "completion_tokens": 111,
+     "seconds": 2.895,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 809,
+     "completion_tokens": 112,
+     "seconds": 3.075,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4016,
+   "completion_tokens": 223,
+   "llm_seconds": 5.97,
+   "wall_seconds": 6.015,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "cf02",
+   "category": "conflict",
+   "question": "Which reports about the bridge disagree?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e1:Event)-[:CONFLICTS_WITH]->(e2:Event)\nWHERE e1.timestamp >= $now - duration({minutes: 5})\n  AND e2.timestamp >= $now - duration({minutes: 5})\nRETURN e1.id AS id, e1.source AS source, e1.claim AS claim, e1.confidence AS confidence,\n       e2.id AS id2, e2.source AS source2, e2.claim AS claim2, e2.confidence AS confidence2\nORDER BY e1.timestamp DESC, e2.timestamp DESC\nLIMIT 25",
+   "answer": "The bridge is reported as blocked by drone_vision (confidence 0.85) and as open by radio_asr (confidence 0.70), creating a conflict.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "evt-0010",
+     "source": "drone_vision",
+     "claim": "blocked",
+     "confidence": 0.85,
+     "id2": "evt-0009",
+     "source2": "radio_asr",
+     "claim2": "open",
+     "confidence2": 0.7
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "evt-0010",
+     "other": "evt-0009"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3233,
+     "completion_tokens": 137,
+     "seconds": 3.712,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 774,
+     "completion_tokens": 103,
+     "seconds": 2.381,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4007,
+   "completion_tokens": 240,
+   "llm_seconds": 6.093,
+   "wall_seconds": 6.129,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "cf03",
+   "category": "conflict",
+   "question": "What does radio say about Bridge Street versus the drone?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Event {source: 'radio_asr'})-[:ABOUT]->(r:Road {id: 'Road-Bridge'})\nWHERE e.timestamp >= $now - duration({minutes: 3})\nRETURN r.id AS id, r.status AS status, e.claim AS claim, e.timestamp AS timestamp, e.confidence AS confidence, e.raw_evidence_ref AS raw_evidence_ref\nUNION ALL\nMATCH (e:Event {source: 'drone_vision'})-[:ABOUT]->(r:Road {id: 'Road-Bridge'})\nWHERE e.timestamp >= $now - duration({minutes: 3})\nRETURN r.id AS id, r.status AS status, e.claim AS claim, e.timestamp AS timestamp, e.confidence AS confidence, e.raw_evidence_ref AS raw_evidence_ref\nORDER BY timestamp DESC LIMIT 25",
+   "answer": "Radio reports Bridge Street is open (confidence 0.70) at 14:02:30Z, while drone vision shows it blocked (confidence 0.85) at 14:02:45Z, creating conflicting reports.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "highlighted entity has conflicting reports: Bridge Street blocked (drone_vision) vs open (radio_asr)"
+   ],
+   "rows": [
+    {
+     "id": "Road-Bridge",
+     "status": "blocked",
+     "claim": "open",
+     "timestamp": "2026-09-25 14:02:30+00:00",
+     "confidence": 0.7,
+     "raw_evidence_ref": "radio/ch3/clip_000150.wav"
+    },
+    {
+     "id": "Road-Bridge",
+     "status": "blocked",
+     "claim": "blocked",
+     "timestamp": "2026-09-25 14:02:45+00:00",
+     "confidence": 0.85,
+     "raw_evidence_ref": "drone/cam2/frame_000910.jpg"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "evt-0010",
+     "source": "drone_vision",
+     "claim": "blocked"
+    },
+    {
+     "id": "evt-0009",
+     "source": "radio_asr",
+     "claim": "open"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3237,
+     "completion_tokens": 195,
+     "seconds": 4.678,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 930,
+     "completion_tokens": 132,
+     "seconds": 3.011,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4167,
+   "completion_tokens": 327,
+   "llm_seconds": 7.689,
+   "wall_seconds": 7.761,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "cf04",
+   "category": "conflict",
+   "question": "Has the Bridge Street conflict been resolved?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (r:Road {name: 'Bridge Street'})\nRETURN r.id AS id, r.status AS status, r.status_since AS status_since, r.source AS source, r.confidence AS confidence,\n       r.raw_evidence_ref AS raw_evidence_ref, r.conflict AS conflict, r.conflict_claim AS conflict_claim,\n       r.conflict_source AS conflict_source, r.conflict_confidence AS conflict_confidence, r.conflict_since AS conflict_since\nLIMIT 1",
+   "answer": "Bridge Street remains blocked, with conflicting reports: drone_vision (0.85) indicates it has been blocked since 14:02:45Z, while radio_asr (0.7) claims it was opened at 14:02:30Z.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "highlighted entity has conflicting reports: Bridge Street blocked (drone_vision) vs open (radio_asr)"
+   ],
+   "rows": [
+    {
+     "id": "Road-Bridge",
+     "status": "blocked",
+     "status_since": "2026-09-25 14:02:45+00:00",
+     "source": "drone_vision",
+     "confidence": 0.85,
+     "raw_evidence_ref": "drone/cam2/frame_000910.jpg",
+     "conflict": true,
+     "conflict_claim": "open",
+     "conflict_source": "radio_asr",
+     "conflict_confidence": 0.7,
+     "conflict_since": "2026-09-25 14:02:30+00:00"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Road-Bridge",
+     "conflict": true
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3234,
+     "completion_tokens": 116,
+     "seconds": 2.999,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 839,
+     "completion_tokens": 123,
+     "seconds": 2.811,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4073,
+   "completion_tokens": 239,
+   "llm_seconds": 5.81,
+   "wall_seconds": 5.849,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "un01",
+   "category": "units",
+   "question": "Which units are assigned to Building 14?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team)-[a:ASSIGNED_TO]->(x:Entity {id: 'Building-14'}) WHERE a.active = true\nRETURN t.id AS id, t.name AS name, t.status AS status, x.id AS target, a.since AS since, a.source AS source, a.confidence AS confidence LIMIT 10",
+   "answer": "Rescue Team 4 is on scene at Building-14 since 14:02:00Z (field_report, 0.9).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "team",
+    "id": "Team-Rescue4",
+    "ids": [
+     "Building-14"
+    ],
+    "action": "fly_to",
+    "lat": 37.3353,
+    "lon": -121.8891
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Team-Rescue4",
+     "name": "Rescue Team 4",
+     "status": "on_scene",
+     "target": "Building-14",
+     "since": "2026-09-25 14:02:00+00:00",
+     "source": "field_report",
+     "confidence": 0.9
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Team-Rescue4"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3239,
+     "completion_tokens": 84,
+     "seconds": 2.321,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 732,
+     "completion_tokens": 73,
+     "seconds": 1.737,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 3971,
+   "completion_tokens": 157,
+   "llm_seconds": 4.058,
+   "wall_seconds": 4.099,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "un02",
+   "category": "units",
+   "question": "Where is Ambulance 1 staged?",
+   "answerable": true,
+   "mode_used": "llm+fallback",
+   "intent": "unit_location",
+   "cypher": "MATCH (t:Team {id: $id})\nOPTIONAL MATCH (t)-[n:NEAR]->(x) WHERE n.active = true\nOPTIONAL MATCH (t)-[a:ASSIGNED_TO]->(y) WHERE a.active = true\nOPTIONAL MATCH (t)-[:STAGED_AT]->(f:Facility)\nRETURN t.id AS id, t.name AS name, t.status AS status, t.status_since AS status_since, t.source AS source, t.confidence AS confidence,\n       t.raw_evidence_ref AS raw_evidence_ref, t.lat AS lat, t.lon AS lon, t.position_since AS position_since, t.position_source AS position_source,\n       t.position_evidence_ref AS position_evidence_ref, head(collect(DISTINCT f.name)) AS staged_at, head(collect(DISTINCT f.id)) AS staged_at_id,\n       collect(DISTINCT {id: x.id, name: x.name, kind: x.kind, status: x.status, distance_m: n.distance_m, sources: n.sources, since: n.since}) AS near,\n       collect(DISTINCT y.name) AS assigned LIMIT 1",
+   "answer": "Ambulance 1: available since 13:00:00Z (seed_dataset 1.00). Position 37.33990, -121.88510 at 13:00:00Z via seed_dataset; no tracked entity within range.",
+   "confidence": 0.9,
+   "highlight": {
+    "type": "team",
+    "id": "Team-Ambulance1",
+    "ids": [
+     "Facility-CountyGeneral"
+    ],
+    "action": "fly_to",
+    "lat": 37.3399,
+    "lon": -121.8851
+   },
+   "warnings": [
+    "LLM query failed; answered from the pre-baked query"
+   ],
+   "rows": [
+    {
+     "id": "Team-Ambulance1",
+     "name": "Ambulance 1",
+     "status": "available",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0,
+     "raw_evidence_ref": "seed/static_world_v1#Team-Ambulance1",
+     "lat": 37.3399,
+     "lon": -121.8851,
+     "position_since": "2026-09-25 13:00:00+00:00",
+     "position_source": "seed_dataset",
+     "position_evidence_ref": "seed/static_world_v1#staging",
+     "staged_at": "County General Hospital",
+     "staged_at_id": "Facility-CountyGeneral",
+     "near": [
+      {
+       "id": null,
+       "status": null,
+       "name": null,
+       "distance_m": null,
+       "since": null,
+       "sources": null,
+       "kind": null
+      }
+     ],
+     "assigned": []
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Facility-CountyGeneral"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3240,
+     "completion_tokens": 84,
+     "seconds": 2.329,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3407,
+     "completion_tokens": 84,
+     "seconds": 3.343,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3477,
+     "completion_tokens": 92,
+     "seconds": 4.844,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 10124,
+   "completion_tokens": 260,
+   "llm_seconds": 10.516,
+   "wall_seconds": 10.555,
+   "exec_acc": false,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    [
+     "County General",
+     "Facility-CountyGeneral",
+     "hospital"
+    ]
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 2
+  },
+  {
+   "id": "un03",
+   "category": "units",
+   "question": "Which ambulances are available?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team {kind: 'ambulance'}) WHERE t.status = 'available'\nRETURN t.id AS id, t.name AS name, t.status AS status, t.status_since AS status_since, t.source AS source, t.confidence AS confidence, t.raw_evidence_ref AS raw_evidence_ref\nORDER BY t.status_since DESC\nLIMIT 25",
+   "answer": "The graph query found no matching records. That is not proof that none exist - the question may use terms the graph does not track.",
+   "confidence": 0.3,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [
+    "query returned 0 rows; not evidence of absence"
+   ],
+   "rows": [],
+   "gold_rows": [
+    {
+     "id": "Team-Ambulance2"
+    },
+    {
+     "id": "Team-Ambulance1"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3207,
+     "completion_tokens": 93,
+     "seconds": 2.781,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3406,
+     "completion_tokens": 93,
+     "seconds": 2.958,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 6613,
+   "completion_tokens": 186,
+   "llm_seconds": 5.739,
+   "wall_seconds": 5.78,
+   "exec_acc": false,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    [
+     "Ambulance 1",
+     "Team-Ambulance1",
+     "Medic 1"
+    ],
+    [
+     "Ambulance 2",
+     "Team-Ambulance2",
+     "Medic 2"
+    ]
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 1
+  },
+  {
+   "id": "un04",
+   "category": "units",
+   "question": "What is Rescue Team 4 doing right now?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team {id: 'Team-Rescue4'})-[:NEAR]->(x) WHERE t.status = 'on_scene'\nRETURN t.id AS id, t.name AS name, t.status AS status, t.position_since AS position_since, collect({near: x.id, distance_m: t.position_since}) AS near LIMIT 5",
+   "answer": "Rescue Team 4 is on scene at Building-14, having arrived at 14:00:40Z.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "team",
+    "id": "Team-Rescue4",
+    "ids": [
+     "Hazard-gas-Sensor-Gas3",
+     "Building-14",
+     "Hazard-seismic-Sensor-Seismic1"
+    ],
+    "action": "fly_to",
+    "lat": 37.3353,
+    "lon": -121.8891
+   },
+   "warnings": [
+    "Neo.ClientError.Statement.SyntaxError: Variable `n` not defined (line 1, column 56 (offset: 55))\n\"MATCH (t:Team {id: 'Team-Rescue4'})-[:NEAR]->(x) WHERE n.active = true\"\n                                                        ^",
+    "schema check: property t.active does not exist on Team; Team has id, name, status, status_since, last_confirmed, source, confidence, raw_evidence_ref, conflict, callsign, personnel, position_event_id, position_evidence_ref, position_since, position_source, speed_mps, unit_type; property t.distance_m does not exist on Team; Team has id, name, status, status_since, last_confirmed, source, confidence, raw_evidence_ref, conflict, callsign, personnel, position_event_id, position_evidence_ref, position_since, position_source, speed_mps, unit_type"
+   ],
+   "rows": [
+    {
+     "id": "Team-Rescue4",
+     "name": "Rescue Team 4",
+     "status": "on_scene",
+     "position_since": "2026-09-25 14:00:40+00:00",
+     "near": [
+      {
+       "near": "Hazard-gas-Sensor-Gas3",
+       "distance_m": "2026-09-25 14:00:40+00:00"
+      },
+      {
+       "near": "Building-14",
+       "distance_m": "2026-09-25 14:00:40+00:00"
+      },
+      {
+       "near": "Hazard-seismic-Sensor-Seismic1",
+       "distance_m": "2026-09-25 14:00:40+00:00"
+      }
+     ]
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Team-Rescue4",
+     "status": "on_scene"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3243,
+     "completion_tokens": 83,
+     "seconds": 2.453,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3408,
+     "completion_tokens": 83,
+     "seconds": 2.472,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3479,
+     "completion_tokens": 87,
+     "seconds": 2.465,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 848,
+     "completion_tokens": 93,
+     "seconds": 2.254,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 880,
+     "completion_tokens": 85,
+     "seconds": 2.091,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 11858,
+   "completion_tokens": 431,
+   "llm_seconds": 11.735,
+   "wall_seconds": 11.795,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 2
+  },
+  {
+   "id": "un05",
+   "category": "units",
+   "question": "Which units have no assignment?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team) WHERE t.status = 'available' AND NOT (t)-[:ASSIGNED_TO]->()\nRETURN t.id AS id, t.name AS name, t.status AS status, t.status_since AS status_since, t.source AS source, t.confidence AS confidence\nORDER BY t.status_since ASC\nLIMIT 25",
+   "answer": "Ambulance 2, Ambulance 1, and Engine 7 are available and have no assignment (status_since 13:00:00Z, seed_dataset, 1.0).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "team",
+    "id": "Team-Ambulance2",
+    "ids": [
+     "Team-Ambulance1",
+     "Team-Engine7"
+    ],
+    "action": "fly_to",
+    "lat": 37.3322,
+    "lon": -121.8947
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Team-Ambulance2",
+     "name": "Ambulance 2",
+     "status": "available",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0
+    },
+    {
+     "id": "Team-Ambulance1",
+     "name": "Ambulance 1",
+     "status": "available",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0
+    },
+    {
+     "id": "Team-Engine7",
+     "name": "Engine 7",
+     "status": "available",
+     "status_since": "2026-09-25 13:00:00+00:00",
+     "source": "seed_dataset",
+     "confidence": 1.0
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Team-Ambulance2"
+    },
+    {
+     "id": "Team-Ambulance1"
+    },
+    {
+     "id": "Team-Engine7"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3207,
+     "completion_tokens": 84,
+     "seconds": 2.346,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 864,
+     "completion_tokens": 96,
+     "seconds": 2.248,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4071,
+   "completion_tokens": 180,
+   "llm_seconds": 4.594,
+   "wall_seconds": 4.64,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "na01",
+   "category": "unanswerable",
+   "question": "How many helicopters are airborne?",
+   "answerable": false,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team {unit_type: 'helicopter', status: 'en_route'}) \nRETURN count(t) AS count\nLIMIT 25",
+   "answer": "The graph query found no matching records. That is not proof that none exist - the question may use terms the graph does not track.",
+   "confidence": 0.3,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [
+    "query returned only zero counts; not evidence of absence"
+   ],
+   "rows": [
+    {
+     "count": 0
+    }
+   ],
+   "gold_rows": [],
+   "calls": [
+    {
+     "prompt_tokens": 3207,
+     "completion_tokens": 39,
+     "seconds": 1.407,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 3207,
+   "completion_tokens": 39,
+   "llm_seconds": 1.407,
+   "wall_seconds": 1.416,
+   "abstain": true,
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "na02",
+   "category": "unanswerable",
+   "question": "What is the weather forecast for tonight?",
+   "answerable": false,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Event)-[:ABOUT]->(n)\nWHERE e.source = 'radio_asr' AND e.claim CONTAINS 'forecast'\nRETURN n.id AS id, n.name AS name, e.claim AS claim, e.timestamp AS timestamp, e.confidence AS confidence, e.raw_evidence_ref AS raw_evidence_ref\nORDER BY e.timestamp DESC\nLIMIT 25",
+   "answer": "The graph query found no matching records. That is not proof that none exist - the question may use terms the graph does not track.",
+   "confidence": 0.3,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [
+    "query returned 0 rows; not evidence of absence"
+   ],
+   "rows": [],
+   "gold_rows": [],
+   "calls": [
+    {
+     "prompt_tokens": 3209,
+     "completion_tokens": 110,
+     "seconds": 2.99,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3425,
+     "completion_tokens": 94,
+     "seconds": 2.841,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 6634,
+   "completion_tokens": 204,
+   "llm_seconds": 5.831,
+   "wall_seconds": 5.89,
+   "abstain": true,
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 1
+  },
+  {
+   "id": "na03",
+   "category": "unanswerable",
+   "question": "What is the status of Building 99?",
+   "answerable": false,
+   "mode_used": "llm+fallback",
+   "intent": "entity_status",
+   "cypher": null,
+   "answer": "I have no entity called 'Building 99' in the graph.",
+   "confidence": 0.3,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [
+    "LLM query failed; answered from the pre-baked query"
+   ],
+   "rows": [],
+   "gold_rows": [],
+   "calls": [
+    {
+     "prompt_tokens": 3211,
+     "completion_tokens": 119,
+     "seconds": 3.079,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3364,
+     "completion_tokens": 136,
+     "seconds": 3.855,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3453,
+     "completion_tokens": 119,
+     "seconds": 3.418,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 10028,
+   "completion_tokens": 374,
+   "llm_seconds": 10.352,
+   "wall_seconds": 10.399,
+   "abstain": true,
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 2
+  },
+  {
+   "id": "na04",
+   "category": "unanswerable",
+   "question": "Set Main Street to open.",
+   "answerable": false,
+   "mode_used": "fallback",
+   "intent": "read_only_refusal",
+   "cypher": null,
+   "answer": "RescueGrid is read-only: I answer questions about the live graph but never change it. No changes were made.",
+   "confidence": 1.0,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [],
+   "rows": [],
+   "gold_rows": [],
+   "calls": [],
+   "prompt_tokens": 0,
+   "completion_tokens": 0,
+   "llm_seconds": 0,
+   "wall_seconds": 0.001,
+   "abstain": true,
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "na05",
+   "category": "unanswerable",
+   "question": "Which units are near Building 500?",
+   "answerable": false,
+   "mode_used": "error",
+   "intent": null,
+   "cypher": "MATCH (t:Team)-[n:NEAR]->(b:Entity {id: 'Building-500'}) WHERE n.active = true\nRETURN t.id AS id, t.name AS name, t.status AS status, b.id AS target, n.distance_m AS distance_m, n.sources AS sources, n.evidence_refs AS evidence_refs\nORDER BY distance_m ASC LIMIT 25",
+   "answer": "I could not build a valid graph query for that question. Try rephrasing, or ask one of the standard questions.",
+   "confidence": 0.0,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [
+    "schema check: id 'Building-500' does not exist in the graph",
+    "schema check: id 'Building-500' does not exist in the graph"
+   ],
+   "rows": [],
+   "gold_rows": [],
+   "calls": [
+    {
+     "prompt_tokens": 3211,
+     "completion_tokens": 97,
+     "seconds": 2.607,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3343,
+     "completion_tokens": 97,
+     "seconds": 2.867,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3343,
+     "completion_tokens": 97,
+     "seconds": 2.663,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 9897,
+   "completion_tokens": 291,
+   "llm_seconds": 8.137,
+   "wall_seconds": 8.139,
+   "abstain": true,
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 2
+  },
+  {
+   "id": "na06",
+   "category": "unanswerable",
+   "question": "Who is the incident commander?",
+   "answerable": false,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team)-[a:ASSIGNED_TO]->(e:Entity {id: 'Building-14'})\nWHERE a.active = true\nRETURN t.id AS id, t.name AS name, t.status AS status, a.since AS since, a.source AS source, a.confidence AS confidence\nORDER BY a.since ASC LIMIT 1",
+   "answer": "Rescue Team 4 is the incident commander, assigned to Building-14 since 14:02:00Z (field_report, 0.9).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "team",
+    "id": "Team-Rescue4",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.3353,
+    "lon": -121.8891
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Team-Rescue4",
+     "name": "Rescue Team 4",
+     "status": "on_scene",
+     "since": "2026-09-25 14:02:00+00:00",
+     "source": "field_report",
+     "confidence": 0.9
+    }
+   ],
+   "gold_rows": [],
+   "calls": [
+    {
+     "prompt_tokens": 3207,
+     "completion_tokens": 84,
+     "seconds": 2.33,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 719,
+     "completion_tokens": 57,
+     "seconds": 1.403,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 3926,
+   "completion_tokens": 141,
+   "llm_seconds": 3.733,
+   "wall_seconds": 3.781,
+   "abstain": false,
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "pp01",
+   "category": "paraphrase",
+   "question": "Which roads are impassable at the moment?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (r:Road)\nWHERE r.status IN ['blocked','restricted'] OR r.conflict = true\nRETURN r.id AS id, r.name AS name, r.status AS status, r.status_since AS status_since, r.source AS source, r.confidence AS confidence,\n       r.raw_evidence_ref AS raw_evidence_ref, r.conflict AS conflict, r.conflict_claim AS conflict_claim, r.conflict_source AS conflict_source\nORDER BY r.status_since DESC\nLIMIT 25",
+   "answer": "Bridge Street and Main Street are currently blocked. Bridge Street has been blocked since 14:02:45Z (drone_vision, 0.85) with conflicting reports (radio_asr claims it is open). Main Street has been blocked since 14:00:32Z (radio_asr, 0.78) and shows no conflict.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [
+     "Road-Main"
+    ],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "highlighted entity has conflicting reports: Bridge Street blocked (drone_vision) vs open (radio_asr)"
+   ],
+   "rows": [
+    {
+     "id": "Road-Bridge",
+     "name": "Bridge Street",
+     "status": "blocked",
+     "status_since": "2026-09-25 14:02:45+00:00",
+     "source": "drone_vision",
+     "confidence": 0.85,
+     "raw_evidence_ref": "drone/cam2/frame_000910.jpg",
+     "conflict": true,
+     "conflict_claim": "open",
+     "conflict_source": "radio_asr"
+    },
+    {
+     "id": "Road-Main",
+     "name": "Main Street",
+     "status": "blocked",
+     "status_since": "2026-09-25 14:00:32+00:00",
+     "source": "radio_asr",
+     "confidence": 0.78,
+     "raw_evidence_ref": "radio/ch3/clip_000032.wav",
+     "conflict": false,
+     "conflict_claim": null,
+     "conflict_source": null
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Road-Main"
+    },
+    {
+     "id": "Road-Bridge"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3211,
+     "completion_tokens": 121,
+     "seconds": 3.113,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 923,
+     "completion_tokens": 138,
+     "seconds": 3.144,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4134,
+   "completion_tokens": 259,
+   "llm_seconds": 6.257,
+   "wall_seconds": 6.286,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "pp02",
+   "category": "paraphrase",
+   "question": "Where's Rescue 4?",
+   "answerable": true,
+   "mode_used": "llm+fallback",
+   "intent": "unit_location",
+   "cypher": "MATCH (t:Team {id: $id})\nOPTIONAL MATCH (t)-[n:NEAR]->(x) WHERE n.active = true\nOPTIONAL MATCH (t)-[a:ASSIGNED_TO]->(y) WHERE a.active = true\nOPTIONAL MATCH (t)-[:STAGED_AT]->(f:Facility)\nRETURN t.id AS id, t.name AS name, t.status AS status, t.status_since AS status_since, t.source AS source, t.confidence AS confidence,\n       t.raw_evidence_ref AS raw_evidence_ref, t.lat AS lat, t.lon AS lon, t.position_since AS position_since, t.position_source AS position_source,\n       t.position_evidence_ref AS position_evidence_ref, head(collect(DISTINCT f.name)) AS staged_at, head(collect(DISTINCT f.id)) AS staged_at_id,\n       collect(DISTINCT {id: x.id, name: x.name, kind: x.kind, status: x.status, distance_m: n.distance_m, sources: n.sources, since: n.since}) AS near,\n       collect(DISTINCT y.name) AS assigned LIMIT 1",
+   "answer": "Rescue Team 4: on scene since 14:02:00Z (field_report 0.90), assigned to Building 14. Position 37.33530, -121.88910 at 14:00:40Z via gps; 55 m from Gas hazard at Gas Sensor 3 (active; sensor, gps), 21 m from Building 14 (collapsed; gps, drone_vision), 111 m from Seismic hazard at Seismic Sensor 1 (active; gps).",
+   "confidence": 0.9,
+   "highlight": {
+    "type": "team",
+    "id": "Team-Rescue4",
+    "ids": [
+     "Hazard-gas-Sensor-Gas3",
+     "Building-14",
+     "Hazard-seismic-Sensor-Seismic1",
+     "Facility-LincolnHS"
+    ],
+    "action": "fly_to",
+    "lat": 37.3353,
+    "lon": -121.8891
+   },
+   "warnings": [
+    "LLM query failed; answered from the pre-baked query"
+   ],
+   "rows": [
+    {
+     "id": "Team-Rescue4",
+     "name": "Rescue Team 4",
+     "status": "on_scene",
+     "status_since": "2026-09-25 14:02:00+00:00",
+     "source": "field_report",
+     "confidence": 0.9,
+     "raw_evidence_ref": "fieldreport/msg_000118",
+     "lat": 37.3353,
+     "lon": -121.8891,
+     "position_since": "2026-09-25 14:00:40+00:00",
+     "position_source": "gps",
+     "position_evidence_ref": "mqtt/gps/team-rescue4/1790344840",
+     "staged_at": "Lincoln High School Shelter",
+     "staged_at_id": "Facility-LincolnHS",
+     "near": [
+      {
+       "id": "Hazard-gas-Sensor-Gas3",
+       "status": "active",
+       "name": "Gas hazard at Gas Sensor 3",
+       "distance_m": 55.4,
+       "since": "2026-09-25 14:01:30+00:00",
+       "sources": [
+        "sensor",
+        "gps"
+       ],
+       "kind": "hazard"
+      },
+      {
+       "id": "Building-14",
+       "status": "collapsed",
+       "name": "Building 14",
+       "distance_m": 20.9,
+       "since": "2026-09-25 14:00:40+00:00",
+       "sources": [
+        "gps",
+        "drone_vision"
+       ],
+       "kind": "building"
+      },
+      {
+       "id": "Hazard-seismic-Sensor-Seismic1",
+       "status": "active",
+       "name": "Seismic hazard at Seismic Sensor 1",
+       "distance_m": 111.4,
+       "since": "2026-09-25 14:00:40+00:00",
+       "sources": [
+        "gps"
+       ],
+       "kind": "hazard"
+      }
+     ],
+     "assigned": [
+      "Building 14"
+     ]
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Team-Rescue4",
+     "lat": 37.3353,
+     "lon": -121.8891
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3238,
+     "completion_tokens": 101,
+     "seconds": 2.684,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3421,
+     "completion_tokens": 101,
+     "seconds": 2.94,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 3425,
+     "completion_tokens": 101,
+     "seconds": 2.71,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 10084,
+   "completion_tokens": 303,
+   "llm_seconds": 8.334,
+   "wall_seconds": 8.366,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 2
+  },
+  {
+   "id": "pp03",
+   "category": "paraphrase",
+   "question": "Who's most at risk right now?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (t:Team)-[n:NEAR]->(x)\nWHERE n.active = true\nWITH t, collect({\n    id: x.id,\n    kind: x.kind,\n    status: x.status,\n    distance_m: n.distance_m,\n    sources: n.sources\n}) AS near\nWITH t, near, \n     reduce(s = 0, r IN near |\n           s + CASE \n                WHEN r.kind = 'hazard' AND r.status = 'active' THEN 50 \n                WHEN r.kind = 'building' AND r.status = 'collapsed' THEN 30 \n                WHEN r.kind = 'building' AND r.status = 'damaged' THEN 20 \n                WHEN r.kind = 'road' AND r.status = 'blocked' THEN 10 \n                ELSE 0 END) AS risk\nWHERE risk > 0\nRETURN t.id AS id, t.name AS name, t.status AS status, risk, near\nORDER BY risk DESC\nLIMIT 5",
+   "answer": "Rescue Team 4 is on scene and faces the highest risk, with 130 points from an active gas hazard 55.4 meters away (sensor, gps) and a collapsed building 20.9 meters away (gps, drone_vision).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "team",
+    "id": "Team-Rescue4",
+    "ids": [
+     "Hazard-gas-Sensor-Gas3",
+     "Building-14",
+     "Hazard-seismic-Sensor-Seismic1"
+    ],
+    "action": "fly_to",
+    "lat": 37.3353,
+    "lon": -121.8891
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Team-Rescue4",
+     "name": "Rescue Team 4",
+     "status": "on_scene",
+     "risk": 130,
+     "near": [
+      {
+       "id": "Hazard-gas-Sensor-Gas3",
+       "status": "active",
+       "distance_m": 55.4,
+       "sources": [
+        "sensor",
+        "gps"
+       ],
+       "kind": "hazard"
+      },
+      {
+       "id": "Building-14",
+       "status": "collapsed",
+       "distance_m": 20.9,
+       "sources": [
+        "gps",
+        "drone_vision"
+       ],
+       "kind": "building"
+      },
+      {
+       "id": "Hazard-seismic-Sensor-Seismic1",
+       "status": "active",
+       "distance_m": 111.4,
+       "sources": [
+        "gps"
+       ],
+       "kind": "hazard"
+      }
+     ]
+    }
+   ],
+   "gold_rows": [],
+   "calls": [
+    {
+     "prompt_tokens": 3209,
+     "completion_tokens": 236,
+     "seconds": 5.647,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 981,
+     "completion_tokens": 132,
+     "seconds": 3.014,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 1025,
+     "completion_tokens": 130,
+     "seconds": 3.237,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 5215,
+   "completion_tokens": 498,
+   "llm_seconds": 11.898,
+   "wall_seconds": 11.967,
+   "exec_acc": null,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "pp04",
+   "category": "paraphrase",
+   "question": "Give me the latest on Building 14.",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (n:Entity {id: 'Building-14'})\nRETURN n.id AS id, n.name AS name, n.status AS status, n.status_since AS status_since, n.source AS source, n.confidence AS confidence, n.raw_evidence_ref AS raw_evidence_ref, n.conflict AS conflict, n.conflict_claim AS conflict_claim, n.conflict_source AS conflict_source, n.conflict_confidence AS conflict_confidence, n.conflict_since AS conflict_since\nORDER BY n.status_since DESC LIMIT 1",
+   "answer": "Building 14 is collapsed, reported at 14:00:15Z by drone_vision (confidence 0.91).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "building",
+    "id": "Building-14",
+    "ids": [],
+    "action": "fly_to",
+    "lat": 37.3352,
+    "lon": -121.8893
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "Building-14",
+     "name": "Building 14",
+     "status": "collapsed",
+     "status_since": "2026-09-25 14:00:15+00:00",
+     "source": "drone_vision",
+     "confidence": 0.91,
+     "raw_evidence_ref": "drone/cam1/frame_000450.jpg",
+     "conflict": false,
+     "conflict_claim": null,
+     "conflict_source": null,
+     "conflict_confidence": null,
+     "conflict_since": null
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Building-14",
+     "status": "collapsed"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3239,
+     "completion_tokens": 127,
+     "seconds": 3.234,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 829,
+     "completion_tokens": 93,
+     "seconds": 2.174,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4068,
+   "completion_tokens": 220,
+   "llm_seconds": 5.408,
+   "wall_seconds": 5.454,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "pp05",
+   "category": "paraphrase",
+   "question": "What's new in the last minute?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e:Event)-[:ABOUT]->(n)\nWHERE e.timestamp >= $now - duration({minutes: 1})\nRETURN n.id AS id, n.name AS name, e.timestamp AS timestamp, e.source AS source, e.claim AS claim, e.confidence AS confidence, e.raw_evidence_ref AS raw_evidence_ref\nORDER BY e.timestamp DESC\nLIMIT 25",
+   "answer": "Bridge Street is currently reported as blocked by drone_vision at 14:02:45Z (confidence 0.85) but was previously reported as open by radio_asr at 14:02:30Z (confidence 0.70), indicating conflicting reports. Rescue Team 4 is on scene at 14:02:00Z (confidence 0.90).",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "road",
+    "id": "Road-Bridge",
+    "ids": [
+     "Team-Rescue4"
+    ],
+    "action": "fly_to",
+    "lat": 37.336,
+    "lon": -121.8935
+   },
+   "warnings": [
+    "highlighted entity has conflicting reports: Bridge Street blocked (drone_vision) vs open (radio_asr)"
+   ],
+   "rows": [
+    {
+     "id": "Road-Bridge",
+     "name": "Bridge Street",
+     "timestamp": "2026-09-25 14:02:45+00:00",
+     "source": "drone_vision",
+     "claim": "blocked",
+     "confidence": 0.85,
+     "raw_evidence_ref": "drone/cam2/frame_000910.jpg"
+    },
+    {
+     "id": "Road-Bridge",
+     "name": "Bridge Street",
+     "timestamp": "2026-09-25 14:02:30+00:00",
+     "source": "radio_asr",
+     "claim": "open",
+     "confidence": 0.7,
+     "raw_evidence_ref": "radio/ch3/clip_000150.wav"
+    },
+    {
+     "id": "Team-Rescue4",
+     "name": "Rescue Team 4",
+     "timestamp": "2026-09-25 14:02:00+00:00",
+     "source": "field_report",
+     "claim": "on_scene",
+     "confidence": 0.9,
+     "raw_evidence_ref": "fieldreport/msg_000118"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "evt-0008"
+    },
+    {
+     "id": "evt-0009"
+    },
+    {
+     "id": "evt-0010"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3209,
+     "completion_tokens": 94,
+     "seconds": 2.537,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 937,
+     "completion_tokens": 139,
+     "seconds": 3.634,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4146,
+   "completion_tokens": 233,
+   "llm_seconds": 6.171,
+   "wall_seconds": 6.209,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": true,
+   "missing": [],
+   "forbidden_hit": [],
+   "correct": true,
+   "guard_rejections": 0,
+   "repairs": 0
+  },
+  {
+   "id": "pp06",
+   "category": "paraphrase",
+   "question": "Any disagreements between sources?",
+   "answerable": true,
+   "mode_used": "llm",
+   "intent": null,
+   "cypher": "MATCH (e1:Event)-[:CONFLICTS_WITH]->(e2:Event)\nWHERE e1.timestamp >= $now - duration({minutes: 5}) AND e2.timestamp >= $now - duration({minutes: 5})\nRETURN e1.id AS id, e1.source AS source, e1.claim AS claim, e1.confidence AS confidence, e1.raw_evidence_ref AS raw_evidence_ref,\n       e2.id AS conflict_id, e2.source AS conflict_source, e2.claim AS conflict_claim, e2.confidence AS conflict_confidence, e2.raw_evidence_ref AS conflict_raw_evidence_ref\nORDER BY e1.timestamp DESC, e2.timestamp DESC\nLIMIT 25",
+   "answer": "There is a conflict between sources: drone_vision reports the road is blocked with 0.85 confidence, while radio_asr reports it is open with 0.7 confidence.",
+   "confidence": 0.6,
+   "highlight": {
+    "type": "none",
+    "id": null,
+    "ids": [],
+    "action": "none",
+    "lat": null,
+    "lon": null
+   },
+   "warnings": [],
+   "rows": [
+    {
+     "id": "evt-0010",
+     "source": "drone_vision",
+     "claim": "blocked",
+     "confidence": 0.85,
+     "raw_evidence_ref": "drone/cam2/frame_000910.jpg",
+     "conflict_id": "evt-0009",
+     "conflict_source": "radio_asr",
+     "conflict_claim": "open",
+     "conflict_confidence": 0.7,
+     "conflict_raw_evidence_ref": "radio/ch3/clip_000150.wav"
+    }
+   ],
+   "gold_rows": [
+    {
+     "id": "Road-Bridge"
+    }
+   ],
+   "calls": [
+    {
+     "prompt_tokens": 3206,
+     "completion_tokens": 167,
+     "seconds": 4.091,
+     "max_tokens": 320,
+     "json": false,
+     "finish": "stop"
+    },
+    {
+     "prompt_tokens": 856,
+     "completion_tokens": 64,
+     "seconds": 1.558,
+     "max_tokens": 320,
+     "json": true,
+     "finish": "stop"
+    }
+   ],
+   "prompt_tokens": 4062,
+   "completion_tokens": 231,
+   "llm_seconds": 5.649,
+   "wall_seconds": 5.671,
+   "exec_acc": true,
+   "grounded": true,
+   "facts": false,
+   "missing": [
+    [
+     "Bridge Street",
+     "Road-Bridge",
+     "bridge"
+    ]
+   ],
+   "forbidden_hit": [],
+   "correct": false,
+   "guard_rejections": 0,
+   "repairs": 0
+  }
+ ]
+}
