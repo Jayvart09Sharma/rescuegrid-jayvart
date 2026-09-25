@@ -14,6 +14,7 @@
 import { ENV } from '../config'
 import { nodePos, useStore } from '../store'
 import { HALF } from './seed'
+import { snapToStreet, streetRoute } from './streets'
 import { paintAll } from '../scene/coverage'
 import type {
   CameraFrame, CameraInfo, FlyToSignal, GraphEdge, GraphNode, GraphPatch, LoggedEvent, NetworkState, NetworkStatus, Provenance, RadioMsg, RadioQueueItem, StreamInfo, Suggestion,
@@ -48,7 +49,8 @@ const flight = new Map<string, { x: number; z: number; clip: string | null; idx:
 const patrol = new Map<string, number>()   // camera -> patrol phase
 const patrolAt = new Map<string, number>() // camera -> last tick (ms)
 
-/** Polyline for a suggested route from graph ids: unit -> road segments -> destination (twin geometry, no script). */
+/** Polyline for a suggested route from graph ids: unit -> road segments -> destination, routed along the twin's
+ *  streets (never through blocks), avoiding blocked segments. */
 function pathFromIds(sg: Suggestion): [number, number][] {
   const { nodes } = useStore.getState()
   const ids = [sg.unit, ...(sg.routeIds ?? []), ...(sg.destination ? [sg.destination] : [])]
@@ -61,17 +63,25 @@ function pathFromIds(sg: Suggestion): [number, number][] {
     const u = nodePos(nodes[sg.unit]) ?? [0, 0]
     return [u, [u[0] + 0.01, u[1]]]
   }
-  return pts
+  return streetRoute(pts, nodes)
 }
 
-/** Nodes the gateway cannot place itself (a hazard seen by a camera at a building) carry props.at = the entity's id;
- *  give them that entity's position from the twin's own geometry. */
-function placeAt(patches: GraphPatch[]): GraphPatch[] {
+/** GPS fixes for ground units are map-matched onto the nearest street (drones fly, they are left alone). */
+function mapMatch(patches: GraphPatch[]): GraphPatch[] {
   const { nodes } = useStore.getState()
   return patches.map((p) => {
-    if (p.op !== 'upsertNode' || typeof p.node.props?.at !== 'string' || typeof p.node.props.x === 'number') return p
-    const pos = nodePos(nodes[p.node.props.at as string])
-    return pos ? { ...p, node: { ...p.node, props: { ...p.node.props, x: pos[0], z: pos[1], r: p.node.props.r ?? 8 } } } : p
+    if (p.op === 'setProps' && typeof p.props.x === 'number' && typeof p.props.z === 'number') {
+      const n = nodes[p.id]
+      if (n?.label === 'Unit' && n.props.kind !== 'drone') {
+        const [x, z] = snapToStreet(p.props.x as number, p.props.z as number)
+        return { ...p, props: { ...p.props, x, z } }
+      }
+    }
+    if (p.op === 'upsertNode' && p.node.label === 'Unit' && p.node.props?.kind !== 'drone' && typeof p.node.props?.x === 'number') {
+      const [x, z] = snapToStreet(p.node.props.x as number, p.node.props.z as number)
+      return { ...p, node: { ...p.node, props: { ...p.node.props, x, z } } }
+    }
+    return p
   })
 }
 
@@ -83,6 +93,10 @@ function handle(msg: Msg) {
       const nodes = { ...s.nodes }
       for (const n of msg.nodes) {
         const prev = nodes[n.id]
+        if (n.label === 'Unit' && n.props?.kind !== 'drone' && typeof n.props?.x === 'number') {
+          const [x, z] = snapToStreet(n.props.x as number, n.props.z as number)
+          n.props = { ...n.props, x, z }
+        }
         if (typeof n.props?.at === 'string' && typeof n.props.x !== 'number') {
           const pos = nodePos(nodes[n.props.at as string])
           if (pos) n.props = { ...n.props, x: pos[0], z: pos[1], r: n.props.r ?? 8 }
@@ -103,11 +117,11 @@ function handle(msg: Msg) {
         raw_evidence_ref: e.raw_evidence_ref, claim: e.claim,
       }
       s.logEvent(e, msg.silent)
-      if (msg.patches?.length) s.applyPatches(placeAt(msg.patches), prov)
+      if (msg.patches?.length) s.applyPatches(mapMatch(placeAt(msg.patches)), prov)
       break
     }
     case 'patch':
-      s.applyPatches(placeAt(msg.patches))
+      s.applyPatches(mapMatch(placeAt(msg.patches)))
       break
     case 'suggestion': {
       const sg = { ...msg.suggestion }
