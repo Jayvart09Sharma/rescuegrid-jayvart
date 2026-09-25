@@ -17,13 +17,23 @@ M = TypeVar("M", bound=BaseModel)
 class OpenAICompatLLM:
     def __init__(self, base_url: str, model: str, api_key: str = "not-needed", thinking: bool = False, timeout: float = 120.0):
         self.name = f"openai_compatible:{model}@{base_url}"
+        self.extra_body_override = None  # set from LLM_EXTRA_BODY (JSON) for providers that need other switches
         self.model, self.thinking = model, thinking
-        self.client = OpenAI(base_url=base_url, api_key=api_key or "not-needed", timeout=timeout, max_retries=0)  # no hidden retries: every second must show in the ledger
+        from .netlink import http_client_for, profile_from_env
+        self.net_profile = profile_from_env()
+        http_client, self.link = http_client_for(self.net_profile, timeout)
+        self.client = OpenAI(base_url=base_url, api_key=api_key or "not-needed", timeout=timeout, max_retries=0,  # no hidden retries: every second must show in the ledger
+                             **({"http_client": http_client} if http_client else {}))
         self.last_finish: str | None = None
 
     def _extra_body(self, thinking: bool | None = None) -> dict:
         # Nemotron-specific: reasoning mode is a chat-template switch. Harmless on other servers.
-        return {"chat_template_kwargs": {"enable_thinking": self.thinking if thinking is None else thinking}}
+        body = {"chat_template_kwargs": {"enable_thinking": self.thinking if thinking is None else thinking}}
+        import json as _json, os as _os
+        extra = _os.environ.get("LLM_EXTRA_BODY")
+        if extra:
+            body.update(_json.loads(extra))
+        return body
 
     def complete(self, system: str, user: str, *, max_tokens: int = 1024, temperature: float = 0.0, thinking: bool | None = None) -> str:
         try:

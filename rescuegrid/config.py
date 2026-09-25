@@ -16,6 +16,14 @@ def _env(name: str, default: str) -> str:
     return os.environ.get(name, default)
 
 
+def _api_key() -> str:
+    """LLM_API_KEY, except that a Nebius base URL uses NEBIUS_API_KEY from .env (never logged)."""
+    base = _env("LLM_BASE_URL", "")
+    if "nebius" in base and os.environ.get("NEBIUS_API_KEY"):
+        return os.environ["NEBIUS_API_KEY"]
+    return _env("LLM_API_KEY", "not-needed")
+
+
 @dataclass(frozen=True)
 class Settings:
     neo4j_uri: str = field(default_factory=lambda: _env("NEO4J_URI", "bolt://127.0.0.1:7687"))
@@ -26,7 +34,7 @@ class Settings:
     llm_provider: str = field(default_factory=lambda: _env("LLM_PROVIDER", "openai_compatible"))
     llm_base_url: str = field(default_factory=lambda: _env("LLM_BASE_URL", "http://127.0.0.1:8080/v1"))
     llm_model: str = field(default_factory=lambda: _env("LLM_MODEL", "llm"))
-    llm_api_key: str = field(default_factory=lambda: _env("LLM_API_KEY", "not-needed"))
+    llm_api_key: str = field(default_factory=lambda: _api_key())
     llm_thinking: bool = field(default_factory=lambda: _env("LLM_THINKING", "false").lower() == "true")
     llm_timeout_s: float = field(default_factory=lambda: float(_env("LLM_TIMEOUT_S", "60")))
     qa_max_repairs: int = field(default_factory=lambda: int(_env("QA_MAX_REPAIRS", "2")))

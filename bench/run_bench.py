@@ -51,8 +51,13 @@ def instrument():
                 role = f"repair_{sum(1 for c in CALLS if c['role'].startswith('repair')) + 1}"
             else:
                 role = "cypher"
+            link = getattr(self, "link", None)
+            emu = 0.0
+            if link is not None:
+                emu = link.emulated_seconds - getattr(self, "_emu_seen", 0.0)
+                self._emu_seen = link.emulated_seconds
             CALLS.append({"role": role, "prompt_tokens": r.usage.prompt_tokens, "completion_tokens": r.usage.completion_tokens, "seconds": round(time.time() - t, 3),
-                          "max_tokens": kw.get("max_tokens"), "json": is_json, "finish": r.choices[0].finish_reason})
+                          "emulated_link_seconds": round(emu, 3), "max_tokens": kw.get("max_tokens"), "json": is_json, "finish": r.choices[0].finish_reason})
             return r
         self.client.chat.completions.create = create
     compat.OpenAICompatLLM.__init__ = init
@@ -132,10 +137,17 @@ def fingerprint(sha):
     llm_models = None
     try:
         import urllib.request
-        llm_models = [m["id"] for m in json.load(urllib.request.urlopen(Settings().llm_base_url.rstrip("/") + "/models", timeout=3))["data"]]
+        req = urllib.request.Request(Settings().llm_base_url.rstrip("/") + "/models", headers={"Authorization": f"Bearer {Settings().llm_api_key}"})
+        ids = [m["id"] for m in json.load(urllib.request.urlopen(req, timeout=5))["data"]]
+        llm_models = [i for i in ids if i == Settings().llm_model] or ids[:5]
     except Exception:
         pass
-    return {"git": sha, "dirty": dirty, "qa_features": sorted(Settings().qa_features), "qa_max_repairs": Settings().qa_max_repairs, "llm_thinking": Settings().llm_thinking,
+    from urllib.parse import urlparse
+    from rescuegrid.qa.netlink import profile_from_env
+    cfg = Settings()
+    endpoint = urlparse(cfg.llm_base_url).netloc
+    site = "local" if endpoint.split(":")[0] in ("127.0.0.1", "localhost") else "cloud"
+    return {"git": sha, "dirty": dirty, "site": site, "llm_endpoint": endpoint, "net": profile_from_env(), "qa_features": sorted(Settings().qa_features), "qa_max_repairs": Settings().qa_max_repairs, "llm_thinking": Settings().llm_thinking,
             "llm_model": Settings().llm_model, "llm_models_served": llm_models, "mem_free_mb": mem.get("MemFree"), "mem_available_mb": mem.get("MemAvailable"), "python": sys.version.split()[0]}
 
 
@@ -157,7 +169,13 @@ def seen_flags(questions):
     return out, h
 
 
+RESULTS = ROOT / "bench" / "results"
+
+
 def run(args):
+    global RESULTS
+    RESULTS = ROOT / "bench" / "results" / args.out if args.out else ROOT / "bench" / "results"
+    RESULTS.mkdir(parents=True, exist_ok=True)
     questions = json.load(open(ROOT / "bench" / args.questions))
     if args.only:
         questions = [q for q in questions if q["id"] in args.only or q.get("category") in args.only]
@@ -170,8 +188,9 @@ def run(args):
         print("!! git tree is dirty: results will be marked dirty=true")
     all_runs = []
     for rep in range(1, args.repeats + 1):
-        if rep > 1:
+        if rep > 1 and not args.no_reset:
             subprocess.run([sys.executable, str(ROOT / "scripts" / "ingest.py"), "--reset", "--quiet"], cwd=ROOT, capture_output=True)
+        if rep > 1:
             engine = QAEngine(g)
         all_runs.append(_run_once(args, questions, g, engine, sha, fp, seen, bank_hash, rep))
     if args.repeats > 1:
@@ -183,7 +202,7 @@ def run(args):
         print(f"\n=== K={args.repeats}: correct mean {mean} +/- {se} (SE), pass^{args.repeats} = {pass_k}, per-run {rates} ===")
         agg = {"label": args.label, "git": sha, "repeats": args.repeats, "correct_mean": mean, "correct_se": se, "pass_k": pass_k, "runs": [run["path"] for run in all_runs],
                "flaky_ids": sorted(i for i, v in per.items() if len(set(v)) > 1)}
-        path = ROOT / "bench" / "results" / f"{args.label}-{sha}-k{args.repeats}.json"
+        path = RESULTS / f"{args.label}-{sha}-k{args.repeats}.json"
         json.dump(agg, open(path, "w"), indent=1); print(f"saved {path}")
 
 
@@ -234,9 +253,9 @@ def _run_once(args, questions, g, engine, sha, fp, seen, bank_hash, rep):
     out = {"label": args.label, "git": sha, "mode": args.mode, "questions_file": args.questions, "graph": os.environ["NEO4J_URI"], "repeat": rep,
            "fingerprint": fp, "bank_hash": bank_hash, "timestamp": datetime.now(timezone.utc).isoformat(), "summary": summary, "results": results}
     suffix = f"-r{rep}" if args.repeats > 1 else ""
-    path = ROOT / "bench" / "results" / f"{args.label}-{sha}{suffix}.json"
+    path = RESULTS / f"{args.label}-{sha}{suffix}.json"
     if path.exists():
-        path = ROOT / "bench" / "results" / f"{args.label}-{sha}{suffix}-{int(time.time())}.json"
+        path = RESULTS / f"{args.label}-{sha}{suffix}-{int(time.time())}.json"
     json.dump(out, open(path, "w"), indent=1, default=str)
     out["path"] = str(path)
     print("\n" + table([out]))
@@ -270,6 +289,7 @@ def summarize(results):
          "calls_per_llm_q": round(statistics.mean([len(r["calls"]) for r in llm]), 2) if llm else 0,
          "latency_p50_s": round(pct([r["wall_seconds"] for r in results], 0.5), 2), "latency_p95_s": round(pct([r["wall_seconds"] for r in results], 0.95), 2),
          "latency_llm_p50_s": round(pct([r["wall_seconds"] for r in llm], 0.5), 2) if llm else 0,
+         "emulated_link_s_per_q": round(statistics.mean([sum(c.get("emulated_link_seconds", 0) for c in r["calls"]) for r in results]), 2),
          "guard_rejections": sum(r["guard_rejections"] for r in results), "schema_rejections": sum(r.get("schema_rejections", 0) for r in results),
          "repairs": sum(r["repairs"] for r in results), "truncations": sum(1 for r in results for c in r["calls"] if c.get("finish") == "length"),
          "tokens_by_role": {}, "by_category": {}, "by_tier": {}}
@@ -307,6 +327,8 @@ if __name__ == "__main__":
     ap.add_argument("--only", nargs="*", help="question ids or categories")
     ap.add_argument("--compare", nargs="*", help="result files to tabulate instead of running")
     ap.add_argument("--repeats", type=int, default=1, help="K repeats (graph reset between); reports mean, SE and pass^K")
+    ap.add_argument("--no-reset", action="store_true", help="do not reset the graph between repeats (needed when runs share the graph concurrently; Q&A is read-only)")
+    ap.add_argument("--out", default="", help="subdirectory of bench/results for this run's files")
     a = ap.parse_args()
     if a.compare:
         runs = [json.load(open(p)) for p in a.compare]
