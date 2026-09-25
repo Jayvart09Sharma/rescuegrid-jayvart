@@ -9,8 +9,8 @@ K="${1:-3}"
 BEST="${BEST:-entity_link,schema_check,fewshot_v2,dyn_fewshot,compact_schema,det_render}"
 RUNS=(
   "ho-baseline-llm|llm||2"
-  "ho-best-llm|llm|$BEST|2"
-  "ho-best-auto|auto|$BEST,router_v2|2"
+  "ho-best-llm|llm|$BEST|1"
+  "ho-best-auto|auto|$BEST,router_v2|1"
 )
 for spec in "${RUNS[@]}"; do
   IFS='|' read -r label mode feats reps <<< "$spec"
