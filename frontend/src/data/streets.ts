@@ -90,22 +90,35 @@ function astar(a: [number, number], b: [number, number], blocked: Set<string>): 
   return null
 }
 
-/** Street route through a list of waypoints (any positions): snapped onto streets, joined intersection by intersection. */
+/** Street route through a list of waypoints (any positions): the first and last are snapped onto their street, the
+ *  ones in between are passed at the nearest intersection, everything joined intersection by intersection. Backtracks
+ *  (A -> B -> A) that snapping can create are removed. */
 export function streetRoute(waypoints: [number, number][], nodes: Record<string, GraphNode>): [number, number][] {
   if (waypoints.length < 2) return waypoints
   const blocked = blockedSegments(nodes)
-  const out: [number, number][] = []
-  const push = (p: [number, number]) => { const l = out[out.length - 1]; if (!l || l[0] !== p[0] || l[1] !== p[1]) out.push(p) }
   const toIntersection = (p: [number, number]): [number, number] => [Math.round(p[0] / GRID) * GRID, Math.round(p[1] / GRID) * GRID]
-  for (let i = 0; i < waypoints.length - 1; i++) {
-    const a = snapToStreet(waypoints[i][0], waypoints[i][1])
-    const b = snapToStreet(waypoints[i + 1][0], waypoints[i + 1][1])
-    push(a)
-    const ia = toIntersection(a)
-    const ib = toIntersection(b)
-    const mid = astar(ia, ib, blocked) ?? [ia, ib]
-    for (const p of mid) push(p)
-    push(b)
+  const first = snapToStreet(waypoints[0][0], waypoints[0][1])
+  const last = snapToStreet(waypoints[waypoints.length - 1][0], waypoints[waypoints.length - 1][1])
+  const stops: [number, number][] = [toIntersection(first), ...waypoints.slice(1, -1).map((w) => toIntersection(snapToStreet(w[0], w[1]))), toIntersection(last)]
+  let out: [number, number][] = [first]
+  for (let i = 0; i < stops.length - 1; i++) {
+    const seg = astar(stops[i], stops[i + 1], blocked) ?? [stops[i], stops[i + 1]]
+    for (const p of seg) out.push(p)
+  }
+  out.push(last)
+  // drop exact duplicates and backtracks
+  let changed = true
+  while (changed) {
+    changed = false
+    const next: [number, number][] = []
+    for (const p of out) {
+      const l = next[next.length - 1]
+      if (l && l[0] === p[0] && l[1] === p[1]) { changed = true; continue }
+      const ll = next[next.length - 2]
+      if (ll && ll[0] === p[0] && ll[1] === p[1]) { next.pop(); changed = true; continue }
+      next.push(p)
+    }
+    out = next
   }
   return out
 }
