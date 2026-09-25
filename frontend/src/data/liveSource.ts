@@ -45,6 +45,8 @@ const cameras = new Map<string, CameraInfo>()
 const MOTION_K = 17 / 320
 const MOTION_MIN_RESPONSE = 0.12
 const flight = new Map<string, { x: number; z: number; clip: string | null; idx: number }>()
+const patrol = new Map<string, number>()   // camera -> patrol phase
+const patrolAt = new Map<string, number>() // camera -> last tick (ms)
 
 /** Polyline for a suggested route from graph ids: unit -> road segments -> destination (twin geometry, no script). */
 function pathFromIds(sg: Suggestion): [number, number][] {
@@ -226,8 +228,13 @@ function placeCameras() {
     if (!running && (!frame || frame.replayed || now - frame.receivedAt > 10000)) { retireDrone(c.camera); continue }
     const f = flight.get(c.camera)
     const anchor = c.watching.map((id) => nodePos(s.nodes[id])).find(Boolean)
-    const pos = f ? [f.x, f.z] : anchor
-    if (!pos) continue
+    const base = f ? [f.x, f.z] : anchor
+    if (!base) continue
+    // a real drone never hangs dead still: slow patrol loop around what it watches while streaming, hover wobble otherwise
+    const ph = (patrol.get(c.camera) ?? 0) + (streaming ? 0.22 : 0.05) * (now - (patrolAt.get(c.camera) ?? now)) / 1000
+    patrol.set(c.camera, ph); patrolAt.set(c.camera, now)
+    const r = streaming ? 5.5 : 1.2
+    const pos = [base[0] + Math.cos(ph) * r, base[1] + Math.sin(ph * 0.8) * r * 0.7]
     patches.push({ op: 'setProps', id: c.unit, props: { x: pos[0], z: pos[1], streaming } })
   }
   if (patches.length) s.applyPatches(patches)

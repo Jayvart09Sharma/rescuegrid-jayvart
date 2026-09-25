@@ -1,12 +1,13 @@
 // The earthquake, made visible. Everything here is driven by the graph mirror (store), never the other way round:
-//  - Incident / seismic spike       -> ground cracks radiating from the epicentre, dust haze, aftershock tremors
-//  - Building collapsed             -> dust column + embers; with a fire hazard on it: flames, black smoke, flicker light
+//  - Incident / seismic spike       -> a heavy first jolt, fissures with real width radiating from the epicentre with
+//                                      rubble along their lips, a dust burst, dust haze, aftershock tremors
+//  - Building collapsed             -> fire and smoke in the rubble (a bigger blaze when a fire hazard sits on it)
+//  - Building damaged (warning)     -> thin smoke wisps
 //  - Hazard kind 'fire'             -> flames + smoke on the entity it affects
 //  - Road blocked (danger)          -> rubble chunks scattered across the segment
 //  - Units (ambulance / engine)     -> emergency beacons (Markers.tsx)
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Line } from '@react-three/drei'
 import * as THREE from 'three'
 import { nodePos, useStore } from '../store'
 import { TWIN } from '../config'
@@ -21,19 +22,24 @@ uniform float uH;      // plume height
 uniform float uW;      // base width
 uniform float uGrow;
 uniform vec3 uWind;
-uniform float uFlame;  // 1 = flames (short, bright, additive); 0 = smoke (tall, grey, alpha)
+uniform float uFlame;  // 1 = flames (short, bright, additive); 0 = smoke (tall, grey, alpha); 2 = dust burst (wide, brown, fading)
 attribute vec4 aRand;
 varying float vA;
 varying vec3 vC;
 void main() {
   float life = fract(uTime * (0.08 + aRand.y * 0.06) + aRand.x);
+  if (uFlame > 1.5) life = min(1.0, uGrow * (0.35 + aRand.x * 0.65));
   float h = life * uH * uGrow;
   float spread = (0.4 + life * 1.6) * uW;
   float th = aRand.z * 6.2832 + uTime * 0.2 * (aRand.w - 0.5);
   vec3 p = vec3(cos(th) * spread * aRand.w, h, sin(th) * spread * aRand.w);
+  if (uFlame > 1.5) p = vec3(cos(th) * uW * life * (0.6 + aRand.w), uH * life * (0.3 + aRand.y * 0.7) * (1.0 - life * 0.5), sin(th) * uW * life * (0.6 + aRand.w));
   p += uWind * life * life * uH * 0.6;
   p.x += sin(uTime * 0.7 + aRand.x * 30.0) * 0.6 * life;
-  if (uFlame > 0.5) {
+  if (uFlame > 1.5) {
+    vC = vec3(0.55, 0.47, 0.38);
+    vA = (1.0 - life) * 0.55 * (1.0 - smoothstep(0.85, 1.0, uGrow));
+  } else if (uFlame > 0.5) {
     vC = mix(vec3(1.0, 0.85, 0.3), vec3(1.0, 0.25, 0.05), life);
     vA = (1.0 - life) * (1.0 - life) * 0.9;
   } else {
@@ -42,7 +48,7 @@ void main() {
     vA = smoothstep(0.0, 0.1, life) * (1.0 - smoothstep(0.55, 1.0, life)) * 0.55;
   }
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
-  float size = uFlame > 0.5 ? (1.5 + aRand.y * 3.0) : (3.0 + aRand.y * 6.0 + life * 10.0);
+  float size = uFlame > 1.5 ? (4.0 + aRand.y * 9.0 + life * 12.0) : uFlame > 0.5 ? (1.5 + aRand.y * 3.0) : (3.0 + aRand.y * 6.0 + life * 10.0);
   gl_PointSize = size * (70.0 / -mv.z);
   gl_Position = projectionMatrix * mv;
 }
@@ -57,7 +63,7 @@ void main() {
 }
 `
 
-function Plume({ x, z, y = 0, flame, h, w, n = 2500 }: { x: number; z: number; y?: number; flame: boolean; h: number; w: number; n?: number }) {
+function Plume({ x, z, y = 0, mode, h, w, n = 2500, rate = 0.35 }: { x: number; z: number; y?: number; mode: 'flame' | 'smoke' | 'burst'; h: number; w: number; n?: number; rate?: number }) {
   const { geo, mat } = useMemo(() => {
     const rnd = new Float32Array(n * 4).map(() => Math.random())
     const geo = new THREE.BufferGeometry()
@@ -65,95 +71,151 @@ function Plume({ x, z, y = 0, flame, h, w, n = 2500 }: { x: number; z: number; y
     geo.setAttribute('aRand', new THREE.Float32BufferAttribute(rnd, 4))
     const mat = new THREE.ShaderMaterial({
       vertexShader: plumeVert, fragmentShader: plumeFrag, transparent: true, depthWrite: false,
-      blending: flame ? THREE.AdditiveBlending : THREE.NormalBlending,
-      uniforms: { uTime: { value: Math.random() * 100 }, uH: { value: h }, uW: { value: w }, uGrow: { value: 0 }, uWind: { value: new THREE.Vector3(0.35, 0, 0.15) }, uFlame: { value: flame ? 1 : 0 } },
+      blending: mode === 'flame' ? THREE.AdditiveBlending : THREE.NormalBlending,
+      uniforms: { uTime: { value: Math.random() * 100 }, uH: { value: h }, uW: { value: w }, uGrow: { value: 0 }, uWind: { value: new THREE.Vector3(0.35, 0, 0.15) }, uFlame: { value: mode === 'flame' ? 1 : mode === 'burst' ? 2 : 0 } },
     })
     return { geo, mat }
-  }, [flame, h, w, n])
+  }, [mode, h, w, n])
   useFrame((_, dt) => {
     mat.uniforms.uTime.value += dt
-    mat.uniforms.uGrow.value = Math.min(1, (mat.uniforms.uGrow.value as number) + dt * 0.35)
+    mat.uniforms.uGrow.value = Math.min(1, (mat.uniforms.uGrow.value as number) + dt * rate)
   })
   return <points position={[x, y, z]} geometry={geo} material={mat} frustumCulled={false} />
 }
 
 /** Flickering fire light for the lit (mesh) twin. */
-function FireLight({ x, z, y }: { x: number; z: number; y: number }) {
+function FireLight({ x, z, y, k = 1 }: { x: number; z: number; y: number; k?: number }) {
   const l = useRef<THREE.PointLight>(null)
   useFrame((s) => {
     if (!l.current) return
     const t = s.clock.elapsedTime
-    l.current.intensity = 60 + Math.sin(t * 17) * 18 + Math.sin(t * 5.3) * 14
+    l.current.intensity = (60 + Math.sin(t * 17) * 18 + Math.sin(t * 5.3) * 14) * k
   })
-  return <pointLight ref={l} position={[x, y, z]} color="#ff7a2a" distance={38} decay={2} castShadow={false} />
+  return <pointLight ref={l} position={[x, y, z]} color="#ff7a2a" distance={38 * k} decay={2} castShadow={false} />
 }
 
 function Fire({ x, z, w, big }: { x: number; z: number; w: number; big: boolean }) {
   return (
     <>
-      <Plume x={x} z={z} y={0.4} flame h={big ? 7 : 4} w={w * 0.5} n={big ? 3000 : 1600} />
-      <Plume x={x} z={z} y={1.5} flame={false} h={big ? 40 : 26} w={w * 0.7} n={big ? 4000 : 2500} />
-      {MESH && <FireLight x={x} z={z} y={3} />}
+      <Plume x={x} z={z} y={0.4} mode="flame" h={big ? 8 : 4.5} w={w * (big ? 0.55 : 0.35)} n={big ? 3200 : 1600} />
+      <Plume x={x} z={z} y={1.5} mode="smoke" h={big ? 44 : 28} w={w * (big ? 0.75 : 0.5)} n={big ? 4200 : 2400} />
+      {MESH && <FireLight x={x} z={z} y={3} k={big ? 1.2 : 0.6} />}
     </>
   )
 }
 
-/** A collapsed building without fire: a settling dust column and drifting grit. */
-function Dust({ x, z, w }: { x: number; z: number; w: number }) {
-  return <Plume x={x} z={z} y={0.3} flame={false} h={16} w={w * 0.9} n={1800} />
+/** Thin smoke wisps from a damaged building. */
+function Wisps({ x, z, w, h }: { x: number; z: number; w: number; h: number }) {
+  return <Plume x={x} z={z} y={h * 0.6} mode="smoke" h={14} w={w * 0.35} n={700} />
 }
 
-// ─── ground cracks from the epicentre ────────────────────────────────────────
-function crackPath(cx: number, cz: number, angle: number, len: number, seed: number): [number, number, number][] {
+// ─── fissures from the epicentre: ribbons with width, rubble along the lips ────
+function crackPath(cx: number, cz: number, angle: number, len: number, seed: number): [number, number][] {
   let s = seed >>> 0
   const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
-  const pts: [number, number, number][] = [[cx, 0.06, cz]]
+  const pts: [number, number][] = [[cx, cz]]
   let a = angle
   let x = cx
   let z = cz
-  const steps = 10 + Math.floor(rnd() * 8)
+  const steps = 12 + Math.floor(rnd() * 8)
   for (let i = 0; i < steps; i++) {
-    a += (rnd() - 0.5) * 0.9
+    a += (rnd() - 0.5) * 1.1
     const d = (len / steps) * (0.5 + rnd())
     x += Math.cos(a) * d
     z += Math.sin(a) * d
-    pts.push([x, 0.06, z])
+    pts.push([x, z])
   }
   return pts
 }
 
-function Cracks({ x, z }: { x: number; z: number }) {
-  const paths = useMemo(() => {
-    const out: [number, number, number][][] = []
-    const N = 9
+/** A crack as a flat ribbon: wide near the epicentre, tapering, jagged edges. */
+function ribbonGeometry(path: [number, number][], w0: number, seed: number): THREE.BufferGeometry {
+  let s = seed >>> 0
+  const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
+  const pos: number[] = []
+  const idx: number[] = []
+  for (let i = 0; i < path.length; i++) {
+    const [x, z] = path[i]
+    const [px, pz] = path[Math.max(0, i - 1)]
+    const [nx, nz] = path[Math.min(path.length - 1, i + 1)]
+    const dx = nx - px
+    const dz = nz - pz
+    const L = Math.hypot(dx, dz) || 1
+    const ox = -dz / L
+    const oz = dx / L
+    const w = w0 * (1 - i / path.length) * (0.6 + rnd() * 0.8) + 0.08
+    pos.push(x + ox * w, 0.07, z + oz * w, x - ox * w, 0.07, z - oz * w)
+    if (i > 0) { const b = i * 2; idx.push(b - 2, b - 1, b, b - 1, b + 1, b) }
+  }
+  const g = new THREE.BufferGeometry()
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+  g.setIndex(idx)
+  g.computeVertexNormals()
+  return g
+}
+
+function Fissures({ x, z }: { x: number; z: number }) {
+  const { geos, chunks } = useMemo(() => {
+    const paths: [number, number][][] = []
+    const N = 11
     for (let i = 0; i < N; i++) {
       const a = (i / N) * Math.PI * 2 + 0.3
-      out.push(crackPath(x, z, a, 34 + (i % 3) * 14, 1000 + i))
-      if (i % 2 === 0) out.push(crackPath(x + Math.cos(a) * 12, z + Math.sin(a) * 12, a + 0.9, 14, 2000 + i))
+      paths.push(crackPath(x, z, a, 36 + (i % 3) * 16, 1000 + i))
+      if (i % 2 === 0) paths.push(crackPath(x + Math.cos(a) * 14, z + Math.sin(a) * 14, a + 1.1, 16, 2000 + i))
     }
-    return out
+    const geos = paths.map((p, i) => ribbonGeometry(p, 1.1, 3000 + i))
+    // rubble along the crack lips, denser near the epicentre
+    const chunks: { x: number; z: number; s: number; r: number }[] = []
+    let sd = 777
+    const rnd = () => { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296 }
+    for (const p of paths) for (let i = 0; i < p.length; i += 2) {
+      if (rnd() < 0.55) chunks.push({ x: p[i][0] + (rnd() - 0.5) * 2.2, z: p[i][1] + (rnd() - 0.5) * 2.2, s: 0.25 + rnd() * 0.7 * (1 - i / p.length), r: rnd() * 6 })
+    }
+    return { geos, chunks }
   }, [x, z])
+  const mesh = useRef<THREE.InstancedMesh>(null)
+  useEffect(() => {
+    const m = mesh.current
+    if (!m) return
+    const d = new THREE.Object3D()
+    chunks.forEach((c, i) => { d.position.set(c.x, c.s * 0.35, c.z); d.rotation.set(c.r, c.r * 1.7, c.r * 0.6); d.scale.set(c.s, c.s * 0.7, c.s * 0.9); d.updateMatrix(); m.setMatrixAt(i, d.matrix) })
+    m.instanceMatrix.needsUpdate = true
+  }, [chunks])
   const grow = useRef(0)
   const g = useRef<THREE.Group>(null)
   useFrame((_, dt) => {
-    grow.current = Math.min(1, grow.current + dt * 0.25)
-    if (g.current) g.current.visible = grow.current > 0.02
+    grow.current = Math.min(1, grow.current + dt * 0.5)
+    if (g.current) g.current.scale.setScalar(0.2 + 0.8 * grow.current)
   })
-  const col = MESH ? '#1a120e' : '#3a1611'
-  const glow = MESH ? '#5a2a1a' : '#ff3a2a'
+  const dark = MESH ? '#120c09' : '#2a100c'
+  const glow = MESH ? '#3a1a10' : '#ff3a2a'
   return (
-    <group ref={g}>
-      {paths.map((p, i) => (
-        <group key={i}>
-          <Line points={p} color={col} lineWidth={MESH ? 2.6 : 1.6} transparent opacity={0.95} />
-          <Line points={p} color={glow} lineWidth={MESH ? 0.8 : 0.6} transparent opacity={MESH ? 0.5 : 0.35} />
-        </group>
-      ))}
-      {/* epicentre: a dark sunken ring */}
-      <mesh position={[x, 0.05, z]} rotation-x={-Math.PI / 2}>
-        <ringGeometry args={[2.5, 6, 48]} />
-        <meshBasicMaterial color={col} transparent opacity={0.7} depthWrite={false} />
-      </mesh>
+    <group ref={g} position={[x, 0, z]}>
+      <group position={[-x, 0, -z]}>
+        {geos.map((geo, i) => (
+          <mesh key={i} geometry={geo} renderOrder={2}>
+            <meshBasicMaterial color={dark} depthWrite={false} side={THREE.DoubleSide} polygonOffset polygonOffsetFactor={-2} />
+          </mesh>
+        ))}
+        {geos.map((geo, i) => (
+          <mesh key={`g${i}`} geometry={geo} scale={[1, 1, 1]} position-y={0.02} renderOrder={3}>
+            <meshBasicMaterial color={glow} transparent opacity={MESH ? 0.25 : 0.3} depthWrite={false} side={THREE.DoubleSide} blending={MESH ? THREE.NormalBlending : THREE.AdditiveBlending} />
+          </mesh>
+        ))}
+        <instancedMesh ref={mesh} args={[undefined, undefined, chunks.length]} castShadow={MESH} receiveShadow={MESH}>
+          <dodecahedronGeometry args={[0.6, 0]} />
+          {MESH ? <meshStandardMaterial color="#5f564d" roughness={1} /> : <meshBasicMaterial color="#4a2a24" />}
+        </instancedMesh>
+        {/* epicentre: sunken dark disc with a raised rim */}
+        <mesh position={[x, 0.05, z]} rotation-x={-Math.PI / 2}>
+          <circleGeometry args={[5.5, 48]} />
+          <meshBasicMaterial color={dark} transparent opacity={0.85} depthWrite={false} />
+        </mesh>
+        <mesh position={[x, 0.08, z]} rotation-x={-Math.PI / 2}>
+          <ringGeometry args={[5.5, 7.5, 48]} />
+          <meshBasicMaterial color={MESH ? '#4a3d33' : '#3a1611'} transparent opacity={0.7} depthWrite={false} />
+        </mesh>
+      </group>
     </group>
   )
 }
@@ -192,18 +254,20 @@ function RoadRubble({ n }: { n: GraphNode }) {
   )
 }
 
-// ─── aftershocks ─────────────────────────────────────────────────────────────
-/** After the quake, smaller tremors every 30-70 s: the Shaker in Scene.tsx reacts to store.shock. */
-function Aftershocks({ active }: { active: boolean }) {
+// ─── the main shock and the aftershocks ──────────────────────────────────────
+/** When the incident first appears: one heavy jolt and a dust burst at the epicentre. Then smaller tremors every 30-70 s. */
+function Shocks({ active }: { active: boolean }) {
   useEffect(() => {
     if (!active) return
+    const s = useStore.getState()
+    useStore.setState({ shock: { nonce: s.shock.nonce + 1, severity: 'danger', amp: 3.2 } })
     let stop = false
     let timer = 0
     const next = () => {
       timer = window.setTimeout(() => {
         if (stop) return
-        const s = useStore.getState()
-        useStore.setState({ shock: { nonce: s.shock.nonce + 1, severity: 'warning' } })
+        const st = useStore.getState()
+        useStore.setState({ shock: { nonce: st.shock.nonce + 1, severity: 'warning', amp: 0.6 + Math.random() * 0.8 } })
         next()
       }, 30000 + Math.random() * 40000)
     }
@@ -233,17 +297,20 @@ export function Disaster() {
   const fires = list.filter((n) => n.label === 'Hazard' && n.props.kind === 'fire' && n.status === 'danger')
   const fireAt = new Set(fires.map((f) => f.props.at as string | undefined).filter(Boolean))
   const collapsed = list.filter((n) => n.label === 'Building' && n.props.collapsed)
+  const damaged = list.filter((n) => n.label === 'Building' && !n.props.collapsed && n.status === 'warning' && typeof n.props.x === 'number')
   const blocked = list.filter((n) => (n.label === 'Road' || n.label === 'Bridge') && n.status === 'danger' && Array.isArray(n.props.a))
   const epi = incident ? nodePos(incident) : null
   return (
     <group>
       <Haze active={quake} />
-      <Aftershocks active={quake} />
-      {epi && <Cracks x={epi[0]} z={epi[1]} />}
+      <Shocks active={quake} />
+      {epi && <Fissures x={epi[0]} z={epi[1]} />}
+      {epi && <Plume x={epi[0]} z={epi[1]} y={0.2} mode="burst" h={16} w={22} n={3000} rate={0.12} />}
       {collapsed.map((b) => {
         const w = (b.props.w as number) ?? 6
-        return fireAt.has(b.id) ? <Fire key={b.id} x={b.props.x as number} z={b.props.z as number} w={w} big /> : <Dust key={b.id} x={b.props.x as number} z={b.props.z as number} w={w} />
+        return <Fire key={b.id} x={b.props.x as number} z={b.props.z as number} w={w} big={fireAt.has(b.id)} />
       })}
+      {damaged.map((b) => <Wisps key={b.id} x={b.props.x as number} z={b.props.z as number} w={(b.props.w as number) ?? 6} h={(b.props.h as number) ?? 6} />)}
       {fires.filter((f) => !collapsed.some((b) => b.id === f.props.at)).map((f) => {
         const p = nodePos(f)
         return p ? <Fire key={f.id} x={p[0]} z={p[1]} w={5} big={false} /> : null

@@ -675,7 +675,7 @@ def now_iso_wall() -> str: return datetime.now(timezone.utc).isoformat(timespec=
 # raw_evidence_ref sim/... ; vision, ASR, fusion and the graph stay real. Timings are the delays a real incident would have.
 REACTIVE = {"enabled": True, "fired": set(), "log": []}
 RADIO_PY = os.path.join(ROOT, "radio", ".venv", "bin", "python"); RADIO_SAY = os.path.join(ROOT, "radio", "say.py")
-UNIT_SPEED_MPS = {"rescue": 9.0, "ambulance": 12.0, "fire": 9.0}
+UNIT_SPEED_MPS = {"rescue": 16.0, "ambulance": 22.0, "fire": 16.0, "police": 24.0}   # m/s with lights and sirens (58-86 km/h)
 VOICE_FOR = {"Team-Rescue4": "lessac", "Team-Engine7": "ryan", "Team-Ambulance2": "ryan", "Team-Ambulance1": "lessac", "Dispatch": "lessac"}
 
 
@@ -711,7 +711,7 @@ def haversine_m(lat1, lon1, lat2, lon2):
     return 2 * R * math.asin(math.sqrt(a))
 
 
-def sim_drive(team: dict, waypoints: list, arrive_claim: str | None, arrive_target: str | None, arrive_text: str | None, voice: str, fix_s: float = 3.0):
+def sim_drive(team: dict, waypoints: list, arrive_claim: str | None, arrive_target: str | None, arrive_text: str | None, voice: str, fix_s: float = 1.5):
     """Simulated GPS: fixes every fix_s seconds along the waypoints (graph lat/lon of the roads), at the unit's speed.
     Each fix is a normal gps event; the fusion agent derives NEAR edges from it like from a real tracker."""
     speed = UNIT_SPEED_MPS.get(team.get("unit_type") or "", 10.0)

@@ -49,7 +49,7 @@ interface State {
   qa: QAState
   alerts: Alert[]
   /** bumps whenever something dramatic happens; HUD shakes/flashes off it */
-  shock: { nonce: number; severity: Status }
+  shock: { nonce: number; severity: Status; amp?: number }
   /** events per source in the last few seconds, for feed sparklines */
   feedPulse: Record<string, number>
   /** live mode: the newest tier-1 result per camera (Aditya's vision service via the gateway) */

@@ -79,19 +79,22 @@ function CameraRig() {
 function Shaker({ children }: { children: React.ReactNode }) {
   const g = useRef<THREE.Group>(null)
   const amp = useRef(0)
+  const decay = useRef(3)
   useEffect(
     () =>
       useStore.subscribe((s, p) => {
-        if (s.shock.nonce !== p.shock.nonce) amp.current = s.shock.severity === 'danger' ? 0.9 : 0.4
+        if (s.shock.nonce !== p.shock.nonce) { amp.current = s.shock.amp ?? (s.shock.severity === 'danger' ? 0.9 : 0.4); decay.current = s.shock.amp && s.shock.amp > 1.5 ? 1.1 : 3 }
       }),
     [],
   )
   useFrame((st, dt) => {
-    amp.current *= Math.exp(-dt * 3)
+    amp.current *= Math.exp(-dt * decay.current)
     const a = amp.current
     if (g.current) {
       const t = st.clock.elapsedTime
-      g.current.position.set(Math.sin(t * 57) * a, Math.sin(t * 43) * a * 0.4, Math.cos(t * 51) * a)
+      // low rolling motion plus high-frequency rattle, like a real quake rather than a camera jitter
+      g.current.position.set(Math.sin(t * 57) * a * 0.5 + Math.sin(t * 6.5) * a * 0.9, Math.sin(t * 43) * a * 0.35, Math.cos(t * 51) * a * 0.5 + Math.cos(t * 5.2) * a * 0.9)
+      g.current.rotation.z = Math.sin(t * 4.1) * a * 0.004
     }
   })
   return <group ref={g}>{children}</group>
