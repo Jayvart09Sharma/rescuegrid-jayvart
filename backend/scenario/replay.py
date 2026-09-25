@@ -26,6 +26,15 @@ VISION_ADAPTER = os.environ.get("RESCUEGRID_VISION_ADAPTER", os.path.join(ROOT, 
 VIDEO_EXT = (".mp4", ".mov", ".mkv", ".avi", ".webm")
 
 
+def media_path(rel: str) -> str:
+    """details.media is relative to backend/ (e.g. vision/samples/x.jpg) or to the repo root (videos/x.mp4); absolute works too."""
+    if os.path.isabs(rel): return rel
+    for base in (ROOT, os.path.dirname(ROOT)):
+        p = os.path.join(base, rel)
+        if os.path.exists(p): return p
+    return os.path.join(ROOT, rel)
+
+
 def vision_up() -> bool:
     try:
         with urllib.request.urlopen(f"{VISION_URL}/health", timeout=3) as r:
@@ -52,7 +61,7 @@ def vision_claims() -> list:
 
 def live_still(ev: dict) -> tuple[dict | None, int]:
     """Push one still through the vision service (forced Qwen look, no claim from v2) so the tier-1 result is live."""
-    media = os.path.join(ROOT, ev["details"]["media"])
+    media = media_path(ev["details"]["media"])
     data = open(media, "rb").read()
     boundary = "----rgboundary"
     parts = [(f'Content-Disposition: form-data; name="file"; filename="{os.path.basename(media)}"\r\nContent-Type: image/jpeg\r\n\r\n').encode() + data]
@@ -75,7 +84,7 @@ def cam_type(ev: dict) -> str:
 def start_clip(ev: dict, speed: float) -> subprocess.Popen:
     """Play the event's clip into the vision service with Aditya's adapter: one frame per request at 2 fps
     (scaled by the replay speed), frame timestamps on the scenario clock. Returns immediately; v2 posts the claim."""
-    media = os.path.join(ROOT, ev["details"]["media"])
+    media = media_path(ev["details"]["media"])
     cmd = [VISION_PY, VISION_ADAPTER, media, "--url", VISION_URL, "--source-id", ev["details"].get("camera", "drone-1"),
            "--source-type", cam_type(ev), "--ts-start", ev["timestamp"], "--speed", str(speed), "--quiet",
            "--fps", str(ev["details"].get("fps", 2))]
