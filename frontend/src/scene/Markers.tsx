@@ -94,6 +94,7 @@ function Unit({ id }: { id: string }) {
           <octahedronGeometry args={[0.8, 0]} />
           <meshBasicMaterial color={BLUE} toneMapped={false} wireframe />
         </mesh>
+        {/^(ambulance|engine|police|rescue|fire)$/.test(String(node.props.kind)) && <EmergencyLights kind={String(node.props.kind)} />}
         <mesh position={[0, 1.2, 0]}>
           <cylinderGeometry args={[0.04, 0.04, 2.4, 6]} />
           <meshBasicMaterial color={BLUE} toneMapped={false} transparent opacity={0.6} />
@@ -117,6 +118,38 @@ function Unit({ id }: { id: string }) {
         </Html>
       </group>
     </>
+  )
+}
+
+/** Flashing red / blue emergency beacons on responder units (lit twin gets point lights too). */
+function EmergencyLights({ kind }: { kind: string }) {
+  const r = useRef<THREE.Mesh>(null)
+  const b = useRef<THREE.Mesh>(null)
+  const lr = useRef<THREE.PointLight>(null)
+  const lb = useRef<THREE.PointLight>(null)
+  const blue = kind === 'police' || kind === 'ambulance'
+  useFrame((s) => {
+    const t = s.clock.elapsedTime * 6
+    const on1 = Math.floor(t) % 2 === 0
+    const on2 = !on1
+    if (r.current) (r.current.material as THREE.MeshBasicMaterial).opacity = on1 ? 1 : 0.15
+    if (b.current) (b.current.material as THREE.MeshBasicMaterial).opacity = on2 ? 1 : 0.15
+    if (lr.current) lr.current.intensity = on1 ? 25 : 0
+    if (lb.current) lb.current.intensity = on2 ? 25 : 0
+  })
+  return (
+    <group position={[0, 1.6, 0]}>
+      <mesh ref={r} position={[-0.45, 0, 0]}>
+        <sphereGeometry args={[0.22, 10, 10]} />
+        <meshBasicMaterial color={[4, 0.3, 0.3]} toneMapped={false} transparent />
+      </mesh>
+      <mesh ref={b} position={[0.45, 0, 0]}>
+        <sphereGeometry args={[0.22, 10, 10]} />
+        <meshBasicMaterial color={blue ? [0.4, 0.8, 4] : [4, 3, 1]} toneMapped={false} transparent />
+      </mesh>
+      <pointLight ref={lr} position={[-0.6, 0.3, 0]} color="#ff2a2a" distance={12} decay={2} />
+      <pointLight ref={lb} position={[0.6, 0.3, 0]} color={blue ? '#3a7cff' : '#ffb347'} distance={12} decay={2} />
+    </group>
   )
 }
 

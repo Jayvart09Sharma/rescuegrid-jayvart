@@ -11,6 +11,7 @@ import { MeshCity } from './MeshCity'
 import { Drones } from './Drones'
 import { Markers } from './Markers'
 import { Overlays } from './Overlays'
+import { Disaster } from './Disaster'
 
 type Controls = { target: THREE.Vector3; update: () => void; autoRotate: boolean; addEventListener: (e: string, f: () => void) => void; removeEventListener: (e: string, f: () => void) => void }
 
@@ -149,6 +150,7 @@ export function Scene() {
       <Shaker>
         {TWIN === 'mesh' ? <MeshCity /> : <ParticleCity />}
         <Overlays ground={TWIN === 'particles'} />
+        <Disaster />
         <Markers />
         <Drones />
       </Shaker>

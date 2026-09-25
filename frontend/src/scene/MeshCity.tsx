@@ -777,6 +777,8 @@ function Rubble({ box, index, statusTex, uniforms }: { box: Box; index: number; 
 // ─── lighting: golden hour, matches the drone footage ────────────────────────
 function Lighting() {
   const sun = useRef<THREE.DirectionalLight>(null)
+  // after the quake the air is full of concrete dust and smoke: hazy sky, dimmer amber sun
+  const quake = useStore((st) => Object.values(st.nodes).some((n) => n.label === 'Incident' || (n.label === 'Building' && n.props.collapsed)))
   useEffect(() => {
     const l = sun.current
     if (!l) return
@@ -786,14 +788,14 @@ function Lighting() {
   }, [])
   return (
     <>
-      <Sky distance={450} sunPosition={SUN.toArray()} turbidity={3.5} rayleigh={0.9} mieCoefficient={0.004} mieDirectionalG={0.8} />
-      <hemisphereLight args={['#d6e6ff', '#6b5a45', 1.7]} />
-      <ambientLight intensity={0.35} />
+      <Sky distance={450} sunPosition={SUN.toArray()} turbidity={quake ? 14 : 3.5} rayleigh={quake ? 0.35 : 0.9} mieCoefficient={quake ? 0.03 : 0.004} mieDirectionalG={quake ? 0.92 : 0.8} />
+      <hemisphereLight args={quake ? ['#c9b39a', '#4a3a2e', 1.3] : ['#d6e6ff', '#6b5a45', 1.7]} />
+      <ambientLight intensity={quake ? 0.3 : 0.35} color={quake ? '#d9c4a6' : '#ffffff'} />
       <directionalLight
         ref={sun}
         position={SUN.clone().multiplyScalar(2.2).toArray()}
-        color="#fff1dc"
-        intensity={3.8}
+        color={quake ? '#ffb070' : '#fff1dc'}
+        intensity={quake ? 2.4 : 3.8}
         castShadow
         shadow-mapSize={[4096, 4096]}
         shadow-bias={-0.0004}

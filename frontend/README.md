@@ -187,3 +187,17 @@ src/
 ```
 
 Dev handle for scripted checks: `window.__rg.engine.seek(90)`, `window.__rg.engine.ask("…")`.
+
+## The disaster layer (`src/scene/Disaster.tsx`, 2026-09-25)
+
+The story is an **urban earthquake**, and the twin now shows it, always from the graph mirror, never from the feeds:
+
+| Graph fact | What you see |
+|---|---|
+| Incident / seismic spike | ground cracks radiating from the epicentre, dust-tinted haze (fog), hazy amber sky and dimmer sun in the mesh twin, aftershock tremors every 30-70 s |
+| Building `collapsed` | rubble heap (mesh twin) plus a settling dust column |
+| Hazard kind `fire` on a building | flames, black smoke column drifting with the wind, flickering fire light |
+| Road `blocked` | rubble chunks scattered across the segment, on top of the barriers |
+| Units of kind ambulance / engine / police / rescue | flashing red / blue emergency beacons with point lights |
+
+`?twin=particles` keeps the dark point-cloud twin; the same layer draws there with darker materials.
