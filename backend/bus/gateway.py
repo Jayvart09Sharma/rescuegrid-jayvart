@@ -440,6 +440,7 @@ async def start():
             if latest: STATE["clock"].update(t=(latest - T0).total_seconds(), wall=time.time(), first=(0.0, time.time()))
     except Exception as e: print("gateway: bus not reachable at start:", e, file=sys.stderr)
     load_cameras()
+    kill_orphan_adapters("gateway restarted; adapters from the previous gateway would keep feeding the incident")
     asyncio.create_task(fanout())
     threading.Thread(target=poller, daemon=True).start()
     threading.Thread(target=camera_poller, daemon=True).start()
@@ -559,6 +560,28 @@ def scen_now_iso() -> str:
 
 # ---------------------------------------------------------------- streams: an uploaded video played through the vision service
 STREAMS: dict[str, dict] = {}
+
+
+ADAPTER_NAMES = ("flight_stream.py", "replay.py")
+
+
+def kill_orphan_adapters(reason: str) -> int:
+    """Camera / scenario adapters are child processes of this gateway. If the gateway restarted, or a reset must stop
+    everything, find any adapter still running (by its command line under /proc) and stop it, so nothing keeps
+    feeding frames or events into a fresh incident."""
+    n = 0
+    for pid in os.listdir("/proc"):
+        if not pid.isdigit() or int(pid) == os.getpid(): continue
+        try:
+            with open(f"/proc/{pid}/cmdline", "rb") as f: argv = f.read().split(b"\0")
+        except Exception: continue
+        if len(argv) > 1 and argv[0].decode(errors="ignore").endswith("python") and any(argv[1].decode(errors="ignore").endswith(a) for a in ADAPTER_NAMES):
+            try: os.kill(int(pid), 15); n += 1; print(f"gateway: stopped adapter pid {pid} ({reason}): {argv[1].decode(errors='ignore')}", flush=True)
+            except Exception: pass
+        elif len(argv) > 1 and argv[0].decode(errors="ignore").endswith("python3") and argv[1].decode(errors="ignore").endswith("scenario/replay.py"):
+            try: os.kill(int(pid), 15); n += 1; print(f"gateway: stopped scenario replay pid {pid} ({reason})", flush=True)
+            except Exception: pass
+    return n
 
 
 def stream_status(st: dict) -> dict:
@@ -724,6 +747,7 @@ async def reset_incident():
     STATE["epoch"] += 1; REACTIVE["armed"] = False
     for st in STREAMS.values():
         if st["proc"].poll() is None: st["proc"].terminate()
+    kill_orphan_adapters("reset")
     for it in RADIO_QUEUE: it["cancelled"] = True
     try: httpx.post(f"{VISION}/v1/vision/reset", timeout=5)
     except Exception: pass
