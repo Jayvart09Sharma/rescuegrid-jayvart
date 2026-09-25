@@ -1,0 +1,20 @@
+:root {
+  --bg: #010409;
+  --ink: #d6ecf5;
+  --ink-dim: #6f8d9a;
+  --chrome: #7fd4ec;
+  --chrome-dim: rgba(127, 212, 236, 0.18);
+  --panel: rgba(4, 16, 24, 0.8);
+  --normal: #22e67a;
+  --warning: #ffcf3a;
+  --danger: #ff2d4b;
+  --safe: #2f8cff;
+  --f-display: 'Orbitron', system-ui, sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; overflow: hidden; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-mono); font-size: 12px; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; cursor: pointer; }
+input { font: inherit; color: inherit; }
