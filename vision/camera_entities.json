@@ -1,0 +1,6 @@
+{
+  "_comment": "Camera -> graph entity it is watching, per entity type. Names must match the seeded graph's id/name/aliases (Shresth/rescuegrid/neo4j/schema/seed_static.cypher) or Kenil's fusion agent creates a stray node. A frame's `entities` form field overrides this per request. report_open: a road camera reports `open` from tier 1 when it sees normal traffic.",
+  "drone-1":   {"building": "Building-14", "road": "Main Street"},
+  "drone-2":   {"road": "Road-Bridge"},
+  "roadcam-3": {"road": "Road-River", "report_open": true}
+}
