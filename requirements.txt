@@ -1,0 +1,6 @@
+neo4j>=5.28,<6
+pydantic>=2.7,<3
+python-dotenv>=1.0
+openai>=1.50
+anthropic>=0.40
+pytest>=8

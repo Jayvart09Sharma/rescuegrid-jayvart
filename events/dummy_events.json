@@ -1,0 +1,102 @@
+[
+  {
+    "event_id": "evt-0001",
+    "source": "sensor",
+    "timestamp": "2026-09-25T14:00:00Z",
+    "confidence": 0.99,
+    "entity": "Sensor-Seismic1",
+    "claim": "spike",
+    "raw_evidence_ref": "mqtt/sensors/seismic/1/1790344800",
+    "details": {"reading": 5.8, "unit": "magnitude", "note": "t=0 seismic event that starts the scenario"}
+  },
+  {
+    "event_id": "evt-0002",
+    "source": "drone_vision",
+    "timestamp": "2026-09-25T14:00:15Z",
+    "confidence": 0.91,
+    "entity": "Building-14",
+    "claim": "collapsed",
+    "raw_evidence_ref": "drone/cam1/frame_000450.jpg",
+    "details": {"detector": "yolo-collapse-v2", "bbox": [412, 188, 790, 602]}
+  },
+  {
+    "event_id": "evt-0003",
+    "source": "radio_asr",
+    "timestamp": "2026-09-25T14:00:32Z",
+    "confidence": 0.78,
+    "entity": "Main Street",
+    "claim": "blocked",
+    "raw_evidence_ref": "radio/ch3/clip_000032.wav",
+    "details": {"transcript": "Dispatch, Engine 7, Main Street is blocked between Oak and Third, debris across all lanes.", "speaker": "Engine 7"}
+  },
+  {
+    "event_id": "evt-0004",
+    "source": "gps",
+    "timestamp": "2026-09-25T14:00:40Z",
+    "confidence": 0.95,
+    "entity": "Rescue Team 4",
+    "claim": "position_update",
+    "raw_evidence_ref": "mqtt/gps/team-rescue4/1790344840",
+    "details": {"lat": 37.3353, "lon": -121.8891, "speed_mps": 0.4, "note": "about 20 m from Building 14 -> should create NEAR"}
+  },
+  {
+    "event_id": "evt-0005",
+    "source": "drone_vision",
+    "timestamp": "2026-09-25T14:00:45Z",
+    "confidence": 0.82,
+    "entity": "Rescue Team 4",
+    "claim": "near",
+    "raw_evidence_ref": "drone/cam1/frame_000520.jpg",
+    "details": {"target": "Building 14", "note": "vision confirms the GPS-derived NEAR: same relationship, second source, higher fused confidence"}
+  },
+  {
+    "event_id": "evt-0006",
+    "source": "gps",
+    "timestamp": "2026-09-25T14:01:00Z",
+    "confidence": 0.95,
+    "entity": "Ambulance 2",
+    "claim": "position_update",
+    "raw_evidence_ref": "mqtt/gps/team-ambulance2/1790344860",
+    "details": {"lat": 37.3322, "lon": -121.8947, "speed_mps": 0.0, "note": "still at the Lincoln HS staging area"}
+  },
+  {
+    "event_id": "evt-0007",
+    "source": "sensor",
+    "timestamp": "2026-09-25T14:01:30Z",
+    "confidence": 0.97,
+    "entity": "Gas Sensor 3",
+    "claim": "spike",
+    "raw_evidence_ref": "mqtt/sensors/gas/3/1790344890",
+    "details": {"reading": 45.0, "unit": "ppm", "note": "sensor monitors Building 14 -> Hazard AFFECTS Building 14; Rescue Team 4 is NEAR it -> at risk"}
+  },
+  {
+    "event_id": "evt-0008",
+    "source": "field_report",
+    "timestamp": "2026-09-25T14:02:00Z",
+    "confidence": 0.90,
+    "entity": "Rescue Team 4",
+    "claim": "on_scene",
+    "raw_evidence_ref": "fieldreport/msg_000118",
+    "details": {"target": "Building-14", "text": "Rescue 4 on scene at Building 14, beginning search of the north stairwell.", "reported_by": "Rescue 4 lead"}
+  },
+  {
+    "event_id": "evt-0009",
+    "source": "radio_asr",
+    "timestamp": "2026-09-25T14:02:30Z",
+    "confidence": 0.70,
+    "entity": "Bridge Street",
+    "claim": "open",
+    "raw_evidence_ref": "radio/ch3/clip_000150.wav",
+    "details": {"transcript": "Bridge Street looks open, units can use the bridge.", "speaker": "unknown", "note": "conflict pair 1/2"}
+  },
+  {
+    "event_id": "evt-0010",
+    "source": "drone_vision",
+    "timestamp": "2026-09-25T14:02:45Z",
+    "confidence": 0.85,
+    "entity": "Road-Bridge",
+    "claim": "blocked",
+    "raw_evidence_ref": "drone/cam2/frame_000910.jpg",
+    "details": {"detector": "debris-seg-v1", "note": "conflict pair 2/2: radio said open 15 s ago, drone sees debris -> surface as CONFLICTING REPORTS, do not silently pick"}
+  }
+]
