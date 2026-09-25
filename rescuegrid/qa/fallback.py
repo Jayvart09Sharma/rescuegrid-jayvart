@@ -8,8 +8,10 @@ import re
 from datetime import datetime, timedelta
 from typing import Any, Callable, Optional
 
+from ..config import Settings, settings as default_settings
 from ..contracts import Highlight, Provenance, QAResponse
-from ..fusion.resolve import AmbiguousEntity, EntityResolver, clean_mention, normalize
+from .features import enabled
+from ..fusion.resolve import AmbiguousEntity, EntityResolver, clean_mention, find_mentions, normalize
 from ..graph import GraphStore, to_native
 
 KIND_TO_TYPE = {"building": "building", "road": "road", "team": "team", "hazard": "hazard", "sensor": "sensor", "facility": "facility"}
@@ -88,9 +90,14 @@ class Intent:
         return None
 
 
+_RANGE = re.compile(r"\b(?:between|from)\s+(?P<a>\d{1,2}:\d{2}(?::\d{2})?)\s*(?:and|to|-|until)\s+(?P<b>\d{1,2}:\d{2}(?::\d{2})?)", re.I)
+_OTHER_ENTITY_WORDS = re.compile(r"\b(buildings?|units?|teams?|sensors?|hospitals?|shelters?|facilit(?:y|ies)|hazards?|ambulances?|engines?|people)\b", re.I)
+
+
 class Fallback:
-    def __init__(self, graph: GraphStore):
+    def __init__(self, graph: GraphStore, cfg: Settings | None = None):
         self.g = graph
+        self.cfg = cfg or default_settings
         self.resolver = EntityResolver(graph)
         U = r"(?P<unit>.+?)"
         D = r"(?P<dest>.+?)"
@@ -130,6 +137,8 @@ class Fallback:
         m = it.search(question.strip())
         try:
             resp = it.handler(m, now)
+            if resp is None:  # router_v2: the intent declined (question has constraints it cannot honour)
+                return None
         except AmbiguousEntity as e:
             names = [self.g.get_entity(c)["name"] for c in e.candidates if self.g.get_entity(c)]
             resp = QAResponse(answer=f"'{e.text}' could mean {', '.join(names)}. Which one?", confidence=NOT_FOUND_CONF,
@@ -157,18 +166,7 @@ class Fallback:
         return QAResponse(answer=f"I have no entity called '{clean_mention(text) or text}' in the graph.", confidence=NOT_FOUND_CONF)
 
     def _mentioned(self, question: str, labels: set[str]) -> list[dict[str, Any]]:
-        """Entities whose name or alias appears verbatim (word-bounded) in the question, longest match first."""
-        q = question.lower()
-        hits = []
-        for c in self.g.read_dicts("MATCH (n:Entity) WHERE any(l IN labels(n) WHERE l IN $labels) RETURN n.id AS id, n.name AS name, n.aliases AS aliases", labels=list(labels)):
-            for a in [c["name"], c["id"]] + list(c.get("aliases") or []):
-                if a and len(a) > 2 and re.search(rf"(?<!\w){re.escape(a.lower())}(?!\w)", q):
-                    hits.append((len(a), c["id"])); break
-        seen, out = set(), []
-        for _, i in sorted(hits, reverse=True):
-            if i not in seen:
-                seen.add(i); out.append(self.g.get_entity(i))
-        return out
+        return [e for e in find_mentions(self.g, question) if labels & set(e.get("labels") or [])]
 
     # ------------------------------------------------------------------ most danger
     MOST_DANGER = """
@@ -347,7 +345,9 @@ ORDER BY r.status_since DESC LIMIT 25"""
     # ------------------------------------------------------------------ roads
     OPEN_ROADS = "MATCH (r:Road) WHERE r.status = 'open' AND coalesce(r.conflict, false) = false RETURN r.id AS id, r.name AS name ORDER BY r.name"
 
-    def blocked_roads(self, m: re.Match, now: datetime) -> QAResponse:
+    def blocked_roads(self, m: re.Match, now: datetime) -> Optional[QAResponse]:
+        if enabled(self.cfg, "router_v2") and _OTHER_ENTITY_WORDS.search(m.string):
+            return None  # "which blocked roads have buildings on them" needs a join this intent cannot do -> let the LLM handle it
         rows = [to_native(r) for r in self.g.read_dicts(self.BLOCKERS)]
         open_rows = self.g.read_dicts(self.OPEN_ROADS)
         wants_open = bool(re.search(r"\b(open|passable|clear)\b", m.string, re.I))
@@ -371,9 +371,28 @@ MATCH (e:Event)-[:ABOUT]->(n) WHERE e.timestamp >= $since AND ($sources IS NULL 
 RETURN n.id AS id, n.name AS name, n.kind AS kind, e.timestamp AS timestamp, e.source AS source, e.claim AS claim, e.confidence AS confidence,
        e.applied AS applied, e.action AS action, e.note AS note, e.raw_evidence_ref AS raw_evidence_ref ORDER BY e.timestamp DESC LIMIT 25"""
 
+    RANGE_QUERY = """
+MATCH (e:Event)-[:ABOUT]->(n) WHERE e.timestamp >= $since AND e.timestamp < $until AND ($sources IS NULL OR e.source IN $sources)
+RETURN n.id AS id, n.name AS name, n.kind AS kind, e.timestamp AS timestamp, e.source AS source, e.claim AS claim, e.confidence AS confidence,
+       e.applied AS applied, e.action AS action, e.note AS note, e.raw_evidence_ref AS raw_evidence_ref ORDER BY e.timestamp ASC LIMIT 25"""
+
     def recent_changes(self, m: re.Match, now: datetime) -> QAResponse:
-        window, label, explicit = parse_window(m.string)
         sources = source_filters(m.string) or None
+        rng = _RANGE.search(m.string) if enabled(self.cfg, "router_v2") else None
+        if rng:  # explicit clock range on the scenario date: "between 14:00 and 14:01"
+            def at(hm: str) -> datetime:
+                parts = [int(x) for x in hm.split(":")] + [0, 0]
+                return now.replace(hour=parts[0], minute=parts[1], second=parts[2], microsecond=0)
+            since, until = at(rng.group("a")), at(rng.group("b"))
+            rows = [to_native(r) for r in self.g.read_dicts(self.RANGE_QUERY, since=since, until=until, sources=sources)]
+            what = f"{' or '.join(sources)} events" if sources else "events"
+            if not rows:
+                return QAResponse(answer=f"No {what} between {hhmm(since)} and {hhmm(until)}.", confidence=0.9, cypher=self.RANGE_QUERY.strip())
+            bits = [f"{hhmm(r['timestamp'])} {r['name']} {r['claim'].replace('_', ' ')} ({r['source']} {conf(r['confidence'])})" for r in rows]
+            return QAResponse(answer=f"{len(rows)} {what} between {hhmm(since)} and {hhmm(until)}: " + "; ".join(bits) + ".",
+                              highlight=_hl(rows[-1]["kind"], rows[-1]["id"], [r["id"] for r in rows]), confidence=0.9, cypher=self.RANGE_QUERY.strip(), evidence=rows,
+                              provenance=[Provenance(source=r["source"], timestamp=r["timestamp"], confidence=r["confidence"], raw_evidence_ref=r["raw_evidence_ref"]) for r in rows])
+        window, label, explicit = parse_window(m.string)
         rows = [to_native(r) for r in self.g.read_dicts(self.RECENT, since=now - window, sources=sources)]
         prefix = "" if explicit else "No time window given - showing the last 5 minutes. "
         what = f"{' or '.join(sources)} events" if sources else "events"
@@ -406,9 +425,10 @@ RETURN n.id AS id, n.name AS name, n.kind AS kind, n.status AS status, n.status_
 MATCH (t:Team {id: $id})
 OPTIONAL MATCH (t)-[n:NEAR]->(x) WHERE n.active = true
 OPTIONAL MATCH (t)-[a:ASSIGNED_TO]->(y) WHERE a.active = true
+OPTIONAL MATCH (t)-[:STAGED_AT]->(f:Facility)
 RETURN t.id AS id, t.name AS name, t.status AS status, t.status_since AS status_since, t.source AS source, t.confidence AS confidence,
        t.raw_evidence_ref AS raw_evidence_ref, t.lat AS lat, t.lon AS lon, t.position_since AS position_since, t.position_source AS position_source,
-       t.position_evidence_ref AS position_evidence_ref,
+       t.position_evidence_ref AS position_evidence_ref, head(collect(DISTINCT f.name)) AS staged_at, head(collect(DISTINCT f.id)) AS staged_at_id,
        collect(DISTINCT {id: x.id, name: x.name, kind: x.kind, status: x.status, distance_m: n.distance_m, sources: n.sources, since: n.since}) AS near,
        collect(DISTINCT y.name) AS assigned LIMIT 1"""
 
@@ -424,9 +444,10 @@ RETURN t.id AS id, t.name AS name, t.status AS status, t.status_since AS status_
         near_txt = ", ".join(f"{dist(x)} {x['name']} ({x['status']}; {', '.join(x.get('sources') or [])})" for x in near) or "no tracked entity within range"
         assigned = ", ".join(a for a in r["assigned"] if a)
         pos = f"Position {r['lat']:.5f}, {r['lon']:.5f} at {hhmm(r['position_since'])} via {r['position_source']}" if r.get("lat") is not None else "No position reported"
+        staged = f", staged at {r['staged_at']}" if enabled(self.cfg, "router_v2") and r.get("staged_at") else ""
         ans = (f"{r['name']}: {r['status'].replace('_', ' ')} since {hhmm(r['status_since'])} ({r['source']} {conf(r['confidence'])})"
-               + (f", assigned to {assigned}" if assigned else "") + f". {pos}; {near_txt}.")
-        return QAResponse(answer=ans, highlight=_hl("team", r["id"], [x["id"] for x in near]), confidence=0.9, cypher=self.UNIT.strip(), evidence=[r],
+               + (f", assigned to {assigned}" if assigned else "") + staged + f". {pos}; {near_txt}.")
+        return QAResponse(answer=ans, highlight=_hl("team", r["id"], [x["id"] for x in near] + ([r["staged_at_id"]] if r.get("staged_at_id") else [])), confidence=0.9, cypher=self.UNIT.strip(), evidence=[r],
                           provenance=[prov(r), Provenance(source=r["position_source"] or "?", timestamp=r["position_since"], raw_evidence_ref=r["position_evidence_ref"])])
 
     # ------------------------------------------------------------------ what happened to X

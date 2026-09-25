@@ -124,9 +124,9 @@ class QAEngine:
         self.g = graph
         self.cfg = cfg or default_settings
         self.llm = llm if llm is not None else (make_llm(self.cfg) if auto_llm else None)
-        self.fallback = Fallback(graph)
+        self.fallback = Fallback(graph, self.cfg)
         self.resolver = EntityResolver(graph)
-        self.t2c = Text2Cypher(self.llm, graph) if self.llm else None
+        self.t2c = Text2Cypher(self.llm, graph, cfg=self.cfg) if self.llm else None
 
     def now(self) -> datetime:
         if self.cfg.clock == "wall":

@@ -34,6 +34,8 @@ class Settings:
     conflict_window_s: float = field(default_factory=lambda: float(_env("CONFLICT_WINDOW_S", "300")))
     conflict_confidence_margin: float = field(default_factory=lambda: float(_env("CONFLICT_CONFIDENCE_MARGIN", "0.25")))
     clock: str = field(default_factory=lambda: _env("RESCUEGRID_CLOCK", "replay"))  # replay | wall
+    # Q&A pipeline experiments (comma-separated, see rescuegrid/qa/features.py). Empty = baseline.
+    qa_features: frozenset = field(default_factory=lambda: frozenset(f.strip() for f in _env("QA_FEATURES", "").split(",") if f.strip()))
 
     schema_file: Path = ROOT / "schema" / "schema.cypher"
     seed_file: Path = ROOT / "schema" / "seed_static.cypher"

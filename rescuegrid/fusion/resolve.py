@@ -113,3 +113,32 @@ class EntityResolver:
             ref=ev.raw_evidence_ref, lat=ev.details.get("lat"), lon=ev.details.get("lon"),
         )
         return created, True
+
+
+_TYPE_WORDS = [("hospital", {"facility_type": "hospital"}), ("shelter", {"facility_type": "shelter"}), ("staging area", {"facility_type": "shelter"})]
+
+
+def find_mentions(graph, text: str, labels: set[str] | None = None) -> list[dict[str, Any]]:
+    """Entities whose name, id or alias appears (word-bounded) in the text, longest match first, plus
+    generic type words ('the hospital'). Used for entity linking before Cypher generation and by the router."""
+    q = text.lower()
+    hits: list[tuple[int, str, str]] = []
+    rows = graph.read_dicts("MATCH (n:Entity) RETURN n.id AS id, n.name AS name, n.aliases AS aliases, n.kind AS kind, n.facility_type AS ft, labels(n) AS labels")
+    for c in rows:
+        if labels and not (labels & set(c.get("labels") or [])):
+            continue
+        for a in [c["name"], c["id"]] + list(c.get("aliases") or []):
+            if a and len(a) > 2 and re.search(rf"(?<!\w){re.escape(a.lower())}(?!\w)", q):
+                hits.append((len(a), c["id"], a)); break
+        else:
+            for word, cond in _TYPE_WORDS:
+                if c.get("ft") == cond.get("facility_type") and re.search(rf"\b{word}\b", q):
+                    hits.append((len(word), c["id"], word)); break
+    seen, out = set(), []
+    for _, i, mention in sorted(hits, key=lambda h: -h[0]):
+        if i not in seen:
+            seen.add(i)
+            ent = graph.get_entity(i)
+            if ent:
+                ent["mention"] = mention; out.append(ent)
+    return out
