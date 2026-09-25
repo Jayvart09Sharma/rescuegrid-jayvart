@@ -1,30 +1,17 @@
-import json
-import time
-from pathlib import Path
-
-
-scenario_path = Path(__file__).parent.parent / "config" / "scenario.json"
-
-with open(scenario_path, "r") as file:
-    scenario = json.load(file)
+"""Sensor replay adapter (Jayvant). Reads the ONE team scenario (Shresth/rescuegrid/scenario/scenario.json)
+and posts the sensor events to the event bus on the shared clock. A live adapter would replace
+`scenario_events(...)` with an MQTT subscription and call post_event() the same way.
+    python3 sensors/sensor_replay.py            # real time
+    RESCUEGRID_SPEED=10 python3 sensors/sensor_replay.py
+"""
+import sys
+sys.path.insert(0, "/home/hp2/Shresth/rescuegrid/scenario")
+from rescuegrid_events import ScenarioClock, log_line, post_event, scenario_events
 
 print("RescueGrid Sensor Replay Started")
-
-start_time = time.time()
-
-for event in scenario["events"]:
-
-    if event["type"] != "sensor":
-        continue
-
-    while time.time() - start_time < event["time"]:
-        time.sleep(0.1)
-
-    print(
-        f"[{event['time']}s] "
-        f"{event['sensor_type']} sensor "
-        f"{event['sensor_id']} -> "
-        f"{event['value']} {event['unit']}"
-    )
-
+clock = ScenarioClock()
+for ev in scenario_events(sources=["sensor"]):
+    clock.wait_until(ev["_t"])
+    reply = post_event(ev, raw_bytes=64)          # one MQTT sensor reading ~64 bytes on the wire
+    print(log_line(ev, reply), flush=True)
 print("Sensor replay finished.")

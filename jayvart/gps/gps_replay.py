@@ -1,35 +1,17 @@
-import json
-import time
-from pathlib import Path
-
-# Path to the shared scenario file
-scenario_path = Path(__file__).parent.parent / "config" / "scenario.json"
-
-# Load scenario data
-with open(scenario_path, "r") as file:
-    scenario = json.load(file)
+"""GPS replay adapter (Jayvant). Plays the responder position updates from the ONE team scenario
+into the event bus on the shared clock. Entity names are spoken names ("Rescue Team 4"); the fusion
+agent resolves them to graph ids (Team-Rescue4) and creates NEAR edges within 75 m.
+    python3 gps/gps_replay.py            # real time
+    RESCUEGRID_SPEED=10 python3 gps/gps_replay.py
+"""
+import sys
+sys.path.insert(0, "/home/hp2/Shresth/rescuegrid/scenario")
+from rescuegrid_events import ScenarioClock, log_line, post_event, scenario_events
 
 print("RescueGrid GPS Replay Started")
-
-start_time = time.time()
-
-# Go through all events in the scenario
-for event in scenario["events"]:
-
-    # Only use GPS events
-    if event["type"] != "gps":
-        continue
-
-    # Wait until the event's scheduled time
-    while time.time() - start_time < event["time"]:
-        time.sleep(0.1)
-
-    # Print the GPS update
-    print(
-        f"[{event['time']}s] "
-        f"{event['entity']} -> "
-        f"Latitude: {event['latitude']}, "
-        f"Longitude: {event['longitude']}"
-    )
-
+clock = ScenarioClock()
+for ev in scenario_events(sources=["gps"]):
+    clock.wait_until(ev["_t"])
+    reply = post_event(ev, raw_bytes=96)          # one GPS fix ~96 bytes on the wire
+    print(log_line(ev, reply), flush=True)
 print("GPS replay finished.")
