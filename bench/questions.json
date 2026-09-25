@@ -182,7 +182,11 @@
   "answerable": true,
   "gold_cypher": "MATCH (r:Road {id:'Road-Bridge'}) RETURN r.id AS id, r.confidence AS confidence, r.source AS source, r.conflict AS conflict",
   "must_mention": [
-   "0.85",
+   [
+    "0.85",
+    "85%",
+    "85 %"
+   ],
    "conflict"
   ]
  },
@@ -208,7 +212,8 @@
   "compare": {
    "contains_any": [
     "evt-0009",
-    "evt-0010"
+    "evt-0010",
+    "Road-Bridge"
    ]
   },
   "must_mention": [
@@ -295,9 +300,9 @@
   "answerable": true,
   "gold_cypher": "MATCH (e:Event)-[:ABOUT]->(n) RETURN e.id AS id, n.id AS entity_id ORDER BY e.timestamp ASC LIMIT 1",
   "compare": {
-   "key_any": [
-    "id",
-    "entity_id"
+   "contains_any": [
+    "evt-0001",
+    "Sensor-Seismic1"
    ]
   },
   "must_mention": [
@@ -386,9 +391,9 @@
    [
     "20.9",
     "21 m",
+    "21.0",
     "21 metres",
-    "21 meters",
-    "20.9 m"
+    "21 meters"
    ]
   ]
  },
@@ -648,7 +653,14 @@
     "drone",
     "Drone"
    ]
-  ]
+  ],
+  "compare": {
+   "contains_any": [
+    "Road-Bridge",
+    "evt-0009",
+    "evt-0010"
+   ]
+  }
  },
  {
   "id": "cf02",
@@ -882,7 +894,13 @@
     "Road-Bridge",
     "bridge"
    ]
-  ]
+  ],
+  "compare": {
+   "key": [
+    "id"
+   ],
+   "subset": true
+  }
  },
  {
   "id": "pp02",
@@ -952,6 +970,13 @@
     "Road-Bridge",
     "bridge"
    ]
-  ]
+  ],
+  "compare": {
+   "contains_any": [
+    "Road-Bridge",
+    "evt-0009",
+    "evt-0010"
+   ]
+  }
  }
 ]

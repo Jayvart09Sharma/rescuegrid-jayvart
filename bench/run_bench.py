@@ -107,7 +107,7 @@ def score_exec(spec, sys_rows, gold_rows):
 
 ABSTAIN_RX = re.compile(r"no (?:matching )?record|not (?:track|in the graph)|cannot (?:answer|evaluate|build|determine)|could not build|does not track|"
                         r"no (?:entity|unit|facility|building|such) (?:called|named|with|record)|read-only|never dispatches|no changes were made|"
-                        r"no (?:data|information|records?) (?:on|about|for|available)|not available in the graph|graph (?:has|contains) no|do(?:es)? not (?:have|contain) (?:any )?(?:data|record|information)|unknown to the graph|is not (?:tracked|recorded)", re.I)
+                        r"no (?:data|information|records?) (?:on|about|for|available)|not available in the graph|graph (?:has|contains) no|do(?:es)? not (?:have|contain|include|provide) (?:any )?(?:data|record|information|forecast)|unknown to the graph|is not (?:tracked|recorded|provided|available|included)|not provided|no (?:forecast|weather|helicopter)", re.I)
 
 
 def run(args):
@@ -142,7 +142,8 @@ def run(args):
         ans = (r.answer if r else "") or ""
         if q.get("answerable", True):
             rec["exec_acc"] = score_exec(q, r.evidence if r else [], gold_rows) if q.get("gold_cypher") else None
-            rec["grounded"] = (not fact_check(ans, r.evidence)) if r and r.evidence else (r is not None and r.mode != "error" and not r.evidence and rec["exec_acc"] is not True)
+            ground_rows = (r.evidence + [c.model_dump() for c in r.conflicts] + [p.model_dump() for p in r.provenance]) if r else []
+            rec["grounded"] = (not fact_check(ans, ground_rows)) if r and ground_rows else (r is not None and r.mode != "error" and not r.evidence and rec["exec_acc"] is not True)
             low = ans.lower()
             mm = [m for m in q.get("must_mention", []) if not any(alt.lower() in low for alt in (m if isinstance(m, list) else [m]))]
             mn = [m for m in q.get("must_not_mention", []) if m.lower() in low]

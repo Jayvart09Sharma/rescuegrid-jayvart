@@ -54,9 +54,9 @@ def _json_default(v):
 
 
 def _walk_records(v: Any, out: list[dict]) -> list[dict]:
-    """Every dict (row or nested) that carries a source; used for provenance and fact-checking."""
+    """Every dict (row or nested) in the rows; used for provenance and fact-checking."""
     if isinstance(v, dict):
-        if any(k in v for k in ("source", "sources", "e_source", "x_source")):
+        if v:
             out.append(v)
         for x in v.values():
             _walk_records(x, out)
@@ -73,7 +73,7 @@ def _times(rec: dict) -> set[str]:
         if hasattr(val, "strftime"):
             out.add(val.strftime("%H:%M:%S"))
         elif isinstance(val, str):
-            out.update(re.findall(r"T(\d{2}:\d{2}:\d{2})", val))
+            out.update(re.findall(r"\d{4}-\d{2}-\d{2}[T ](\d{2}:\d{2}:\d{2})", val))
     return out
 
 
@@ -83,12 +83,13 @@ def _confs(rec: dict) -> set[float]:
 
 def _srcs(rec: dict) -> set[str]:
     out = set()
-    for k in ("source", "e_source", "x_source", "conflict_source", "competing_source", "last_confirmed_source", "position_source"):
-        if isinstance(rec.get(k), str):
-            out.add(rec[k])
-    for k in ("sources",):
-        if isinstance(rec.get(k), list):
-            out.update(x for x in rec[k] if isinstance(x, str))
+    for k, v in rec.items():
+        if "source" not in k:
+            continue
+        if isinstance(v, str):
+            out.add(v)
+        elif isinstance(v, list):
+            out.update(x for x in v if isinstance(x, str))
     return out
 
 
@@ -97,6 +98,7 @@ def fact_check(answer: str, rows: list[dict]) -> list[str]:
     recs = _walk_records(rows, [])
     all_times = set().union(*(_times(r) for r in recs)) if recs else set()
     all_confs = set().union(*(_confs(r) for r in recs)) if recs else set()
+    any_source = any(_srcs(r) for r in recs)
     problems = []
     for seg in re.split(r"(?<=[.;])\s+|\n|\s+and\s+|,\s+while\s+|\s+but\s+", answer):
         srcs = [s for s in SOURCES if s in seg]
@@ -108,7 +110,7 @@ def fact_check(answer: str, rows: list[dict]) -> list[str]:
         for c in confs:
             if c not in all_confs:
                 problems.append(f"confidence {c:.2f} is not in the rows")
-        if len(srcs) == 1 and (times or confs) and recs:
+        if len(srcs) == 1 and (times or confs) and any_source:
             s = srcs[0]
             if not any(s in _srcs(r) and all(t in _times(r) for t in times) and all(c in _confs(r) for c in confs) for r in recs):
                 problems.append(f"no row has {s} with {', '.join(times + [f'{c:.2f}' for c in confs])}")

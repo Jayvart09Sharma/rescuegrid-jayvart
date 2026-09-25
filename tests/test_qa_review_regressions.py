@@ -150,3 +150,11 @@ def test_fact_check_catches_misattributed_confidence():
     assert fact_check(two, rows) == []
     swapped = "Radio reported 'open' at 14:02:30Z (radio_asr, 0.78) and 'blocked' at 14:00:32Z (radio_asr, 0.7)."
     assert fact_check(swapped, rows)
+
+
+def test_fact_check_accepts_rows_without_a_source_column():
+    assert fact_check("Building 14 is collapsed (drone_vision, 0.91).", [{"id": "Building-14", "claim": "collapsed", "confidence": 0.91, "timestamp": "2026-09-25 14:00:15+00:00"}]) == []
+    assert fact_check("Main Street has been blocked since 14:00:32Z.", [{"id": "Road-Main", "status_since": "2026-09-25 14:00:32+00:00"}]) == []
+    two = [{"event1_id": "evt-0010", "source1": "drone_vision", "confidence1": 0.85, "source2": "radio_asr", "confidence2": 0.7}]
+    assert fact_check("drone_vision says blocked (0.85) and radio_asr says open (0.70).", two) == []
+    assert fact_check("drone_vision says blocked (0.99).", two)
