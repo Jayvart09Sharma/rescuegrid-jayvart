@@ -1,0 +1,12 @@
+[
+  {
+    "time": 60,
+    "report_id": "report-001",
+    "text": "Heavy debris reported near Building 14 north entrance."
+  },
+  {
+    "time": 100,
+    "report_id": "report-002",
+    "text": "Strong gas odor reported near Building 14."
+  }
+]

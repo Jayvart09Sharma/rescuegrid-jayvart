@@ -1,0 +1,92 @@
+[
+ {
+  "id": "ch3-engine7-main-blocked",
+  "speaker": "Engine 7",
+  "channel": "ch3",
+  "text": "Dispatch, Engine 7. We are at Main and Third. Main Street is blocked, debris across all lanes, no through traffic. Request heavy rescue to Building 14.",
+  "file": "ch3-engine7-main-blocked.wav",
+  "seconds": 9.6,
+  "voice": "en_US-ryan-medium"
+ },
+ {
+  "id": "ch3-rescue4-enroute",
+  "speaker": "Rescue 4",
+  "channel": "ch3",
+  "text": "Dispatch, Rescue 4, en route to Building 14, E T A two minutes.",
+  "file": "ch3-rescue4-enroute.wav",
+  "seconds": 5.3,
+  "voice": "en_US-lessac-medium"
+ },
+ {
+  "id": "ch3-rescue4-onscene-gas",
+  "speaker": "Rescue 4",
+  "channel": "ch3",
+  "text": "Rescue 4 on scene, Building 14. Partial collapse, north side. We have a strong gas odor at the north entrance, requesting utility shutoff.",
+  "file": "ch3-rescue4-onscene-gas.wav",
+  "seconds": 9.5,
+  "voice": "en_US-lessac-medium"
+ },
+ {
+  "id": "ch3-ambulance1-bridge-open",
+  "speaker": "Ambulance 1",
+  "channel": "ch3",
+  "text": "Ambulance 2, Ambulance 1. Bridge Street looked clear when we passed it ten minutes ago, you should be good to go.",
+  "file": "ch3-ambulance1-bridge-open.wav",
+  "seconds": 7.3,
+  "voice": "en_US-lessac-medium"
+ },
+ {
+  "id": "ch3-ambulance2-holding",
+  "speaker": "Ambulance 2",
+  "channel": "ch3",
+  "text": "Dispatch, Ambulance 2, holding at Lincoln High School staging, awaiting a route to County General.",
+  "file": "ch3-ambulance2-holding.wav",
+  "seconds": 6.0,
+  "voice": "en_US-ryan-medium"
+ },
+ {
+  "id": "ch3-dispatch-building22",
+  "speaker": "Dispatch",
+  "channel": "ch3",
+  "text": "All units, dispatch. Caller reports large cracks in the facade at Building 22 on Oak Avenue, residents self evacuating. Treat Building 22 as damaged until checked.",
+  "file": "ch3-dispatch-building22.wav",
+  "seconds": 11.2,
+  "voice": "en_US-lessac-medium"
+ },
+ {
+  "id": "ch3-engine7-fire",
+  "speaker": "Engine 7",
+  "channel": "ch3",
+  "text": "Dispatch, Engine 7. We have visible smoke and flame from the rubble at Building 14, working fire. Requesting a second engine.",
+  "file": "ch3-engine7-fire.wav",
+  "seconds": 7.6,
+  "voice": "en_US-ryan-medium"
+ },
+ {
+  "id": "ch3-countygeneral-beds",
+  "speaker": "County General",
+  "channel": "ch3",
+  "text": "EOC, County General charge nurse. We are open, twelve beds available, E R accepting walk ins and transports.",
+  "file": "ch3-countygeneral-beds.wav",
+  "seconds": 8.1,
+  "voice": "en_US-lessac-medium"
+ },
+ {
+  "id": "ch3-rescue4-people-trapped",
+  "speaker": "Rescue 4",
+  "channel": "ch3",
+  "text": "Dispatch, Rescue 4. We can hear voices under the debris at Building 14, at least two people trapped, starting extrication.",
+  "file": "ch3-rescue4-people-trapped.wav",
+  "seconds": 8.5,
+  "voice": "en_US-lessac-medium"
+ },
+ {
+  "id": "ch3-dispatch-river-open",
+  "speaker": "Dispatch",
+  "channel": "ch3",
+  "text": "Ambulance 2, dispatch. Traffic camera shows River Road moving, congested but open. Use River Road for County General.",
+  "file": "ch3-dispatch-river-open.wav",
+  "seconds": 8.1,
+  "voice": "en_US-lessac-medium"
+ }
+]

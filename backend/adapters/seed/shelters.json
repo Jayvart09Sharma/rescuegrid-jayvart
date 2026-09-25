@@ -1,0 +1,16 @@
+[
+  {
+    "id": "shelter-001",
+    "name": "Central Emergency Shelter",
+    "capacity": 300,
+    "available_spaces": 180,
+    "status": "open"
+  },
+  {
+    "id": "shelter-002",
+    "name": "North Community Shelter",
+    "capacity": 200,
+    "available_spaces": 95,
+    "status": "open"
+  }
+]

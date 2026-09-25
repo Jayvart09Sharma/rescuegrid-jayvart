@@ -1,0 +1,45 @@
+{
+  "scenario_name": "pine_county_earthquake",
+  "description": "RescueGrid demo timeline (13 events). ONE clock for every replay adapter. t = seconds after scenario_start. Entity ids match the seeded graph (Shresth/rescuegrid/neo4j/schema/seed_static.cypher). Every event is the six-field contract + optional details; the adapter for its source posts it to the event bus at t. Owner: Shresth. Add events, keep the story coherent.",
+  "scenario_start": "2026-09-25T14:00:00Z",
+  "contract": ["source", "timestamp", "confidence", "entity", "claim", "raw_evidence_ref"],
+  "sources": {
+    "sensor":       {"adapter": "Jayvant  Jaya/jayvart/sensors/sensor_replay.py"},
+    "gps":          {"adapter": "Jayvant  Jaya/jayvart/gps/gps_replay.py"},
+    "field_report": {"adapter": "Jayvant  Jaya/jayvart/field_reports/field_report_replay.py"},
+    "drone_vision": {"adapter": "Aditya/Shresth  scenario/replay.py --sources drone_vision: events with a video in details.media are played through Aditya's vision v2 (:8091) with his replay adapter; v2 posts the claim itself. Scripted claim = expected result, posted only with --scripted-vision or if vision is down"},
+    "radio_asr":    {"adapter": "Pranay  radio TTS -> ASR :8090 -> claim; until then scenario/replay.py --sources radio_asr posts the scripted claim with the transcript"}
+  },
+  "events": [
+    {"t": 0,   "event_id": "evt-0001", "source": "sensor",       "entity": "Sensor-Seismic1", "claim": "spike",           "confidence": 0.99, "raw_evidence_ref": "mqtt/sensors/seismic/1/t0",
+     "details": {"reading": 5.8, "unit": "magnitude", "note": "t=0: the earthquake. Starts the scenario."}},
+    {"t": 15,  "event_id": "evt-0002", "source": "drone_vision", "entity": "Building-14",     "claim": "collapsed",       "confidence": 0.91, "raw_evidence_ref": "vision/samples/collapsed_building.jpg",
+     "details": {"media": "videos/pixverse_c1 (3).mp4", "camera": "drone-1", "note": "Drone 1 over downtown sees Building 14 down. Clip -> vision v2 -> `Building-14 collapsed` ~0.93 at t+3 s."}},
+    {"t": 32,  "event_id": "evt-0003", "source": "radio_asr",    "entity": "Main Street",     "claim": "blocked",         "confidence": 0.78, "raw_evidence_ref": "radio/ch3/clip_000032.wav",
+     "details": {"transcript": "Dispatch, Engine 7, Main Street is blocked between Oak and Third, debris across all lanes.", "speaker": "Engine 7", "channel": "ch3"}},
+    {"t": 32,  "event_id": "evt-0013", "source": "drone_vision", "entity": "Main Street",     "claim": "blocked",         "confidence": 0.90, "raw_evidence_ref": "vision/samples/collapsed_building.jpg",
+     "details": {"media": "videos/pixverse_c1 (4).mp4", "camera": "drone-1", "note": "Drone 1 pans to Main Street: debris across the lanes, second source after radio -> CONFIRM. Clip -> vision v2 -> `Main Street blocked` ~0.98 at t+1 s."}},
+    {"t": 40,  "event_id": "evt-0004", "source": "gps",          "entity": "Rescue Team 4",   "claim": "position_update", "confidence": 0.95, "raw_evidence_ref": "mqtt/gps/team-rescue4/t40",
+     "details": {"lat": 37.3353, "lon": -121.8891, "speed_mps": 0.4, "note": "~20 m from Building 14 -> NEAR"}},
+    {"t": 45,  "event_id": "evt-0005", "source": "drone_vision", "entity": "Rescue Team 4",   "claim": "near",            "confidence": 0.82, "raw_evidence_ref": "vision/samples/collapsed_building.jpg",
+     "details": {"target": "Building 14", "camera": "drone-1", "note": "Vision confirms the GPS-derived NEAR: same edge, second source. Scripted (v2 cannot identify which team it sees)."}},
+    {"t": 60,  "event_id": "evt-0006", "source": "gps",          "entity": "Ambulance 2",     "claim": "position_update", "confidence": 0.95, "raw_evidence_ref": "mqtt/gps/team-ambulance2/t60",
+     "details": {"lat": 37.3322, "lon": -121.8947, "speed_mps": 0.0, "note": "Holding at Lincoln HS staging area."}},
+    {"t": 75,  "event_id": "evt-0011", "source": "drone_vision", "entity": "Road-River",      "claim": "open",            "confidence": 0.88, "raw_evidence_ref": "vision/samples/traffic_cam.jpg",
+     "details": {"media": "videos/High-angle-multi-lane-traffic.mp4", "camera": "roadcam-3", "note": "Road camera 3: River Road moving, congested but open. Clip -> vision v2 tier 1 only -> `Road-River open` at the 3rd frame."}},
+    {"t": 90,  "event_id": "evt-0007", "source": "sensor",       "entity": "Sensor-Gas3",     "claim": "spike",           "confidence": 0.97, "raw_evidence_ref": "mqtt/sensors/gas/3/t90",
+     "details": {"reading": 45.0, "unit": "ppm", "note": "Gas sensor 3 next to Building 14 spikes 75 s after the collapse -> Hazard AFFECTS Building-14, Rescue 4 inside the radius."}},
+    {"t": 120, "event_id": "evt-0008", "source": "field_report", "entity": "Rescue Team 4",   "claim": "on_scene",        "confidence": 0.90, "raw_evidence_ref": "fieldreport/msg_000118",
+     "details": {"target": "Building 14", "text": "Rescue 4 on scene Building 14, beginning primary search. Gas odor reported at north entrance.", "reporter": "Rescue 4 team lead"}},
+    {"t": 150, "event_id": "evt-0009", "source": "radio_asr",    "entity": "Bridge Street",   "claim": "open",            "confidence": 0.75, "raw_evidence_ref": "radio/ch3/clip_000150.wav",
+     "details": {"transcript": "Ambulance 2, Bridge Street looked clear when we passed ten minutes ago.", "speaker": "Ambulance 1", "channel": "ch3", "note": "Stale-ish radio claim. Sets up the conflict."}},
+    {"t": 165, "event_id": "evt-0010", "source": "drone_vision", "entity": "Road-Bridge",     "claim": "blocked",         "confidence": 0.85, "raw_evidence_ref": "vision/samples/flooded_road.jpg",
+     "details": {"media": "videos/Flooded-Suburban-Area-With-Submerged-Roads.mp4", "camera": "drone-2", "note": "Drone 2 shows Bridge Street under water 15 s after radio said open -> CONFLICT kept on Road-Bridge, both sides visible. Clip -> vision v2 -> `Road-Bridge blocked` ~0.96 (flooded_road) at t+1 s."}},
+    {"t": 180, "event_id": "evt-0012", "source": "field_report", "entity": "Facility-CountyGeneral", "claim": "open",      "confidence": 0.95, "raw_evidence_ref": "fieldreport/msg_000131",
+     "details": {"text": "County General reports 12 beds available, ER accepting.", "beds_available": 12, "reporter": "County General charge nurse"}}
+  ],
+  "demo_questions_after": {
+    "t=100": ["What changed in the last 5 minutes?", "Who is in the most danger?"],
+    "t=170": ["Can Ambulance 2 still reach the hospital?", "Is there any road with conflicting reports?"]
+  }
+}

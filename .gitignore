@@ -1,0 +1,26 @@
+# environments and caches
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+# downloaded at setup time (setup.sh)
+backend/neo4j/neo4j/
+backend/neo4j/jdk/
+backend/neo4j/backups/
+backend/vision/weights/
+backend/radio/voices/
+# runtime output
+backend/vision/frames/
+backend/radio/uploads/
+videos/uploads/
+backend/bus/bus.log*.jsonl
+*.log
+*.out
+backend/reasoning/.env
+backend/reasoning/out/
+backend/reasoning/bench/results/
+frontend/dist/
+# large stock clips (see videos/README.md for the download links)
+videos/High-angle-multi-lane-traffic.mp4
+videos/Flooded-Suburban-Area-With-Submerged-Roads.mp4

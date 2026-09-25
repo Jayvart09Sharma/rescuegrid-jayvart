@@ -1,0 +1,25 @@
+# RescueGrid reasoning layer - LOCAL Neo4j (Kenil's private instance, not the shared one).
+# Start:  docker compose up -d      (needs docker group membership or sudo on this box)
+# Browser: http://localhost:7474    Bolt: bolt://localhost:7687   user/pass: neo4j / rescuegrid
+services:
+  neo4j:
+    image: neo4j:5.26-community
+    container_name: rescuegrid-neo4j-kenil
+    ports:
+      - "127.0.0.1:7474:7474"   # HTTP / Neo4j Browser
+      - "127.0.0.1:7687:7687"   # Bolt
+    environment:
+      NEO4J_AUTH: neo4j/rescuegrid
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1g
+      NEO4J_server_memory_pagecache_size: 256m
+      NEO4J_dbms_security_procedures_unrestricted: ""
+    volumes:
+      - ./.neo4j/data:/data
+      - ./.neo4j/logs:/logs
+      - ./.neo4j/import:/var/lib/neo4j/import
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12

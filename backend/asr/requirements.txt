@@ -1,0 +1,7 @@
+fastapi>=0.115
+uvicorn>=0.30
+python-multipart>=0.0.9
+faster-whisper>=1.1
+ctranslate2>=4.4
+av>=12
+numpy>=1.26

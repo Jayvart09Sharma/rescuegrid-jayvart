@@ -1,0 +1,12 @@
+[
+  {
+    "event_id": "evt-0011",
+    "source": "gps",
+    "timestamp": "2026-09-25T14:05:00Z",
+    "confidence": 0.95,
+    "entity": "Rescue Team 4",
+    "claim": "position_update",
+    "raw_evidence_ref": "mqtt/gps/team-rescue4/1790345100",
+    "details": {"lat": 37.3374, "lon": -121.8870, "speed_mps": 3.1, "note": "moved to Building 7 -> NEAR Building-14 must end (active=false, ended_at), NEAR Building-7 begins"}
+  }
+]

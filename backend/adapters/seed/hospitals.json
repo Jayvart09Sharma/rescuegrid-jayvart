@@ -1,0 +1,16 @@
+[
+  {
+    "id": "hospital-001",
+    "name": "Valley Medical Center",
+    "capacity": 500,
+    "available_beds": 42,
+    "status": "open"
+  },
+  {
+    "id": "hospital-002",
+    "name": "Regional Emergency Hospital",
+    "capacity": 300,
+    "available_beds": 18,
+    "status": "open"
+  }
+]

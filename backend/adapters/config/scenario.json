@@ -1,0 +1,41 @@
+{
+  "scenario_name": "rescuegrid_earthquake_demo",
+  "events": [
+    {
+      "time": 0,
+      "type": "sensor",
+      "sensor_type": "seismic",
+      "sensor_id": "seismic-01",
+      "value": 7.2,
+      "unit": "magnitude"
+    },
+    {
+      "time": 15,
+      "type": "gps",
+      "entity": "Rescue-Team-4",
+      "latitude": 37.3350,
+      "longitude": -121.8810
+    },
+    {
+      "time": 30,
+      "type": "gps",
+      "entity": "Rescue-Team-4",
+      "latitude": 37.3354,
+      "longitude": -121.8807
+    },
+    {
+      "time": 60,
+      "type": "field_report",
+      "report_id": "report-001",
+      "text": "Heavy debris reported near Building 14 north entrance."
+    },
+    {
+      "time": 90,
+      "type": "sensor",
+      "sensor_type": "gas",
+      "sensor_id": "gas-03",
+      "value": 85,
+      "unit": "ppm"
+    }
+  ]
+}
