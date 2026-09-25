@@ -69,8 +69,8 @@ function Feeds() {
   )
 }
 
-const PIP_W = 320
-const PIP_H = 190
+const PIP_W = 440
+const PIP_H = 250
 
 /** Live mode: the real frame the vision service just analysed for this camera, with its tier-1 boxes. */
 function LiveFrame({ cam }: { cam: CameraFrame }) {
@@ -163,7 +163,7 @@ function LiveVideo({ src, cam }: { src: string; cam?: CameraFrame }) {
   }, [])
   return (
     <>
-      <video ref={vid} src={src} autoPlay muted playsInline width={PIP_W} height={PIP_H} style={{ objectFit: 'contain', background: '#04121a', display: 'block' }} />
+      <video ref={vid} src={src} autoPlay muted loop playsInline width={PIP_W} height={PIP_H} style={{ objectFit: 'contain', background: '#04121a', display: 'block' }} />
       <canvas ref={ovl} width={PIP_W} height={PIP_H} style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }} />
     </>
   )
@@ -177,7 +177,7 @@ function DroneFeed() {
   const drone = list.includes(pick) ? pick : list[0] ?? pick
   const camId = useStore((s) => s.nodes[drone]?.props.camera as string | undefined)
   const cam = useStore((s) => (camId ? s.cameras[camId] : undefined))
-  const video = useStore((s) => s.streams.find((st) => st.camera === camId && st.state === 'running' && st.video)?.video)
+  const video = useStore((s) => [...s.streams].reverse().find((st) => st.camera === camId && st.video && (st.state === 'running' || st.state === 'finished'))?.video)
   const liveFrame = isLive && cam && cam.frame ? cam : undefined
   const stale = liveFrame ? liveFrame.replayed || performance.now() - liveFrame.receivedAt > 5000 : false
   const ref = useRef<HTMLCanvasElement>(null)
@@ -264,7 +264,7 @@ function DroneFeed() {
           <LiveVideo src={`${ENV.restUrl}${video}`} cam={cam} />
         ) : liveFrame ? <LiveFrame cam={liveFrame} /> : <canvas ref={ref} width={PIP_W} height={PIP_H} />}
         <div className="pip-scan" />
-        <span className="pip-badge">{video ? `LIVE VIDEO · ${camId?.toUpperCase()} · BOXES FROM YOLO-WORLD` : liveFrame ? (stale ? `LAST ANALYSED FRAME ${fmtClock(liveFrame.ts)} · ${liveFrame.camera.toUpperCase()}` : `LIVE FRAME · ${liveFrame.camera.toUpperCase()} · YOLO-WORLD + CLIP`) : isLive ? 'NO STREAM' : 'PLACEHOLDER FRAME · REPLAY'}</span>
+        <span className="pip-badge">{video ? (cam && !cam.replayed && performance.now() - cam.receivedAt < 5000 ? `ANALYSING · ${camId?.toUpperCase()} · YOLO-WORLD + CLIP` : `REPLAY · ${camId?.toUpperCase()} · ANALYSED ONCE`) : liveFrame ? (stale ? `LAST ANALYSED FRAME ${fmtClock(liveFrame.ts)} · ${liveFrame.camera.toUpperCase()}` : `LIVE FRAME · ${liveFrame.camera.toUpperCase()} · YOLO-WORLD + CLIP`) : isLive ? 'NO STREAM' : 'PLACEHOLDER FRAME · REPLAY'}</span>
       </div>
     </Panel>
   )

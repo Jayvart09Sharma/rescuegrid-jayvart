@@ -263,8 +263,15 @@ function placeCameras() {
     const streaming = Boolean(frame && !frame.replayed && now - frame.receivedAt < 3000)
     // a drone stays where its flight ended (it is still in the air); only a reset or a stopped stream removes it
     const tel = telemetry.get(c.camera)
-    if (tel && now - tel.at < 15000) {
-      patches.push({ op: 'setProps', id: c.unit, props: { x: tel.x, z: tel.z, streaming, over: tel.over } })
+    if (tel) {
+      if (now - tel.at < 4000) {
+        patches.push({ op: 'setProps', id: c.unit, props: { x: tel.x, z: tel.z, streaming, over: tel.over } })
+        continue
+      }
+      // flight finished: the drone stays airborne and circles slowly where it ended
+      const ph = (patrol.get(c.camera) ?? 0) + 0.12 * (now - (patrolAt.get(c.camera) ?? now)) / 1000
+      patrol.set(c.camera, ph); patrolAt.set(c.camera, now)
+      patches.push({ op: 'setProps', id: c.unit, props: { x: tel.x + Math.cos(ph) * 5, z: tel.z + Math.sin(ph * 0.8) * 3.5, streaming: false, over: tel.over } })
       continue
     }
     const f = flight.get(c.camera)

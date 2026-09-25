@@ -1,65 +1,83 @@
 [
  {
+  "id": "ch3-dispatch-quake",
+  "speaker": "Dispatch",
+  "channel": "ch3",
+  "text": "All units, dispatch. Seismic sensor one confirms a magnitude five point eight event, downtown sector three. Drone one is airborne over Main Street. Report damage as you see it.",
+  "file": "ch3-dispatch-quake.wav",
+  "seconds": 11.5,
+  "voice": "en_US-lessac-medium"
+ },
+ {
+  "id": "ch3-engine7-b14-collapse",
+  "speaker": "Engine 7",
+  "channel": "ch3",
+  "text": "Dispatch, Engine 7. Building 14 on Main Street, the brick building at the corner, front wall is down, upper floor collapsed onto the sidewalk. Building 14 collapsed. Nobody visible in the rubble yet.",
+  "file": "ch3-engine7-b14-collapse.wav",
+  "seconds": 11.9,
+  "voice": "en_US-ryan-medium"
+ },
+ {
   "id": "ch3-engine7-main-blocked",
   "speaker": "Engine 7",
   "channel": "ch3",
-  "text": "Dispatch, Engine 7. We are at Main and Third. Main Street is blocked, debris across all lanes, no through traffic. Request heavy rescue to Building 14.",
+  "text": "Dispatch, Engine 7. Main Street is blocked at Building 14, bricks and debris across both lanes and the pavement is cracked open. No vehicles getting through.",
   "file": "ch3-engine7-main-blocked.wav",
-  "seconds": 9.6,
+  "seconds": 9.8,
   "voice": "en_US-ryan-medium"
  },
  {
   "id": "ch3-rescue4-enroute",
   "speaker": "Rescue 4",
   "channel": "ch3",
-  "text": "Dispatch, Rescue 4, en route to Building 14, E T A two minutes.",
+  "text": "Dispatch, Rescue 4, en route to Building 14, E T A two minutes, coming in on Oak Avenue.",
   "file": "ch3-rescue4-enroute.wav",
-  "seconds": 5.3,
+  "seconds": 7.1,
   "voice": "en_US-lessac-medium"
  },
  {
-  "id": "ch3-rescue4-onscene-gas",
+  "id": "ch3-dispatch-residents",
+  "speaker": "Dispatch",
+  "channel": "ch3",
+  "text": "All units, dispatch. Multiple callers on 3rd Street, roofs torn open and walls cracked, residents standing in the street. Building 22 reported damaged, no injuries yet.",
+  "file": "ch3-dispatch-residents.wav",
+  "seconds": 11.5,
+  "voice": "en_US-lessac-medium"
+ },
+ {
+  "id": "ch3-rescue4-onscene",
   "speaker": "Rescue 4",
   "channel": "ch3",
-  "text": "Rescue 4 on scene, Building 14. Partial collapse, north side. We have a strong gas odor at the north entrance, requesting utility shutoff.",
-  "file": "ch3-rescue4-onscene-gas.wav",
-  "seconds": 9.5,
+  "text": "Rescue 4 on scene, Building 14. Starting a primary search of the rubble. We have a strong gas odor at the north side, request utility shutoff.",
+  "file": "ch3-rescue4-onscene.wav",
+  "seconds": 9.2,
   "voice": "en_US-lessac-medium"
  },
  {
-  "id": "ch3-ambulance1-bridge-open",
+  "id": "ch3-ambulance1-bridge-collapsed",
   "speaker": "Ambulance 1",
   "channel": "ch3",
-  "text": "Ambulance 2, Ambulance 1. Bridge Street looked clear when we passed it ten minutes ago, you should be good to go.",
-  "file": "ch3-ambulance1-bridge-open.wav",
-  "seconds": 7.3,
+  "text": "Dispatch, Ambulance 1. Bridge Street is blocked. The bridge deck over the river has collapsed into the water, the whole center span is gone. Do not send anyone across Bridge Street.",
+  "file": "ch3-ambulance1-bridge-collapsed.wav",
+  "seconds": 9.9,
+  "voice": "en_US-ryan-medium"
+ },
+ {
+  "id": "ch3-dispatch-reroute",
+  "speaker": "Dispatch",
+  "channel": "ch3",
+  "text": "Ambulance 2, dispatch. Bridge Street is out and Main Street is blocked. Hold at Lincoln High School staging until we confirm a route to County General.",
+  "file": "ch3-dispatch-reroute.wav",
+  "seconds": 9.2,
   "voice": "en_US-lessac-medium"
  },
  {
   "id": "ch3-ambulance2-holding",
   "speaker": "Ambulance 2",
   "channel": "ch3",
-  "text": "Dispatch, Ambulance 2, holding at Lincoln High School staging, awaiting a route to County General.",
+  "text": "Dispatch, Ambulance 2, copy. Holding at Lincoln High School staging, awaiting a route to County General.",
   "file": "ch3-ambulance2-holding.wav",
-  "seconds": 6.0,
-  "voice": "en_US-ryan-medium"
- },
- {
-  "id": "ch3-dispatch-building22",
-  "speaker": "Dispatch",
-  "channel": "ch3",
-  "text": "All units, dispatch. Caller reports large cracks in the facade at Building 22 on Oak Avenue, residents self evacuating. Treat Building 22 as damaged until checked.",
-  "file": "ch3-dispatch-building22.wav",
-  "seconds": 11.2,
-  "voice": "en_US-lessac-medium"
- },
- {
-  "id": "ch3-engine7-fire",
-  "speaker": "Engine 7",
-  "channel": "ch3",
-  "text": "Dispatch, Engine 7. We have visible smoke and flame from the rubble at Building 14, working fire. Requesting a second engine.",
-  "file": "ch3-engine7-fire.wav",
-  "seconds": 7.6,
+  "seconds": 6.5,
   "voice": "en_US-ryan-medium"
  },
  {
@@ -77,16 +95,7 @@
   "channel": "ch3",
   "text": "Dispatch, Rescue 4. We can hear voices under the debris at Building 14, at least two people trapped, starting extrication.",
   "file": "ch3-rescue4-people-trapped.wav",
-  "seconds": 8.5,
-  "voice": "en_US-lessac-medium"
- },
- {
-  "id": "ch3-dispatch-river-open",
-  "speaker": "Dispatch",
-  "channel": "ch3",
-  "text": "Ambulance 2, dispatch. Traffic camera shows River Road moving, congested but open. Use River Road for County General.",
-  "file": "ch3-dispatch-river-open.wav",
-  "seconds": 8.1,
+  "seconds": 8.8,
   "voice": "en_US-lessac-medium"
  }
 ]
