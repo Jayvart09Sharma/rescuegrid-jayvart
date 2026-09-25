@@ -389,7 +389,8 @@ export function Overlays({ ground = true }: { ground?: boolean }) {
   const nodes = useStore((s) => s.nodes)
   const list = Object.values(nodes)
   const hazards = list.filter((n) => n.label === 'Hazard')
-  const roads = list.filter((n) => (n.label === 'Road' || n.label === 'Bridge') && n.status !== 'normal')
+  // only roads the twin has geometry for (an entity the fusion agent created from a spoken name has no segment here)
+  const roads = list.filter((n) => (n.label === 'Road' || n.label === 'Bridge') && n.status !== 'normal' && Array.isArray(n.props.a) && Array.isArray(n.props.b))
   return (
     <>
       {ground && <Ground />}

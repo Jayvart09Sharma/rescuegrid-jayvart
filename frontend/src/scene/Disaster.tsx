@@ -299,7 +299,7 @@ export function Disaster() {
   const fireAt = new Set(fires.map((f) => f.props.at as string | undefined).filter(Boolean))
   const collapsed = list.filter((n) => n.label === 'Building' && n.props.collapsed)
   const damaged = list.filter((n) => n.label === 'Building' && !n.props.collapsed && n.status === 'warning' && typeof n.props.x === 'number')
-  const blocked = list.filter((n) => (n.label === 'Road' || n.label === 'Bridge') && n.status === 'danger' && Array.isArray(n.props.a))
+  const blocked = list.filter((n) => (n.label === 'Road' || n.label === 'Bridge') && n.status === 'danger' && Array.isArray(n.props.a) && Array.isArray(n.props.b))
   const epi = incident ? nodePos(incident) : null
   return (
     <group>
