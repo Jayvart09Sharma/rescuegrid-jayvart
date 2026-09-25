@@ -539,8 +539,8 @@ async def decide(sid: str, body: dict):
             if e and e.get("lat") is not None: pts.append((e["lat"], e["lon"]))
         if team and team.get("lat") is not None and pts:
             dest = G.get_entity(ids[-1]) or {}
-            threading.Thread(target=sim_drive, args=(team, pts, "on_scene", dest.get("name"), f"Dispatch, {team['name']}, arrived {dest.get('name') or 'destination'}, patient transfer in progress.", VOICE_FOR.get(team["id"], "ryan")), daemon=True).start()
-            threading.Thread(target=sim_radio, args=(f"Dispatch, {team['name']}, copy the reroute, proceeding via {', '.join(sg.get('routeNames') or [])}.", team["name"], VOICE_FOR.get(team["id"], "ryan")), daemon=True).start()
+            spawn(sim_drive, team, pts, "on_scene", dest.get("name"), f"Dispatch, {team['name']}, arrived {dest.get('name') or 'destination'}, patient transfer in progress.", VOICE_FOR.get(team["id"], "ryan"))
+            spawn(sim_radio, f"Dispatch, {team['name']}, copy the reroute, proceeding via {', '.join(sg.get('routeNames') or [])}.", team["name"], VOICE_FOR.get(team["id"], "ryan"))
     return {"suggestion": sg, "recorded": res}
 
 
@@ -787,7 +787,29 @@ UNIT_SPEED_MPS = {"rescue": 16.0, "ambulance": 22.0, "fire": 16.0, "police": 24.
 VOICE_FOR = {"Team-Rescue4": "lessac", "Team-Engine7": "ryan", "Team-Ambulance2": "ryan", "Team-Ambulance1": "lessac", "Dispatch": "lessac"}
 
 
+def _ep(): return getattr(threading.current_thread(), "epoch", None)
+
+
+def stale() -> bool:
+    """True when this thread belongs to an incident that has since been reset (or the simulation was switched off)."""
+    ep = _ep(); return (not REACTIVE["enabled"]) or (ep is not None and ep != STATE["epoch"])
+
+
+def nap(sec: float) -> bool:
+    """Sleep in small steps; False (caller must stop) if the incident was reset or the simulation switched off meanwhile."""
+    end = time.time() + sec
+    while time.time() < end:
+        if stale(): return False
+        time.sleep(0.2)
+    return not stale()
+
+
+def spawn(fn, *a):
+    t = threading.Thread(target=fn, args=a, daemon=True); t.epoch = _ep() if _ep() is not None else STATE["epoch"]; t.start(); return t
+
+
 def sim_post(ev: dict, note: str) -> dict:
+    if stale(): return {"action": "dropped", "note": "incident reset"}
     ev.setdefault("details", {})["simulated"] = True
     ev["details"]["sim_note"] = note
     try: r = httpx.post(f"{BUS}/events", json=ev, timeout=60).json()
@@ -796,14 +818,18 @@ def sim_post(ev: dict, note: str) -> dict:
     return r
 
 
-def sim_radio(text: str, speaker: str, voice: str = "ryan"):
-    """Speak a line with Piper, then run it through the REAL radio path (ASR -> LLM -> bus), like any transmission."""
+def sim_radio(text: str, speaker: str, voice: str = "ryan", claim: bool = True):
+    """Speak a line with Piper, then run it through the REAL radio path (ASR -> LLM -> bus), like any transmission.
+    claim=False for lines that only RELAY a detection (dispatch repeating what the drone showed): the drone's own claim
+    is the evidence, the radio must not become a second, weaker source for the same fact."""
+    if stale(): return
     os.makedirs(RADIO_UPLOADS, exist_ok=True)
     name = f"sim_{int(time.time() * 1000)}_{re.sub(r'[^A-Za-z0-9]+', '_', speaker)[:16]}.wav"
     path = os.path.join(RADIO_UPLOADS, name)
     try:
         subprocess.run([RADIO_PY, RADIO_SAY, path, voice, text], check=True, capture_output=True, timeout=60)
-        process_radio(path, name, speaker, "ch3", note="simulated crew voice (Piper); transcript and claim are real")
+        if stale(): return
+        process_radio(path, name, speaker, "ch3", note="simulated crew voice (Piper); transcript is real" + ("" if claim else "; relay only, no claim"), post=claim)
     except Exception as e:
         print("sim_radio failed:", repr(e)[:200], file=sys.stderr, flush=True)
 
@@ -827,12 +853,12 @@ def sim_drive(team: dict, waypoints: list, arrive_claim: str | None, arrive_targ
     for wlat, wlon in waypoints:
         dist = haversine_m(lat, lon, wlat, wlon); steps = max(1, int(dist / (speed * fix_s)))
         for i in range(1, steps + 1):
-            if not REACTIVE["enabled"]: return
+            if stale(): return
             lat2, lon2 = geo_step(lat, lon, wlat, wlon, i / steps)
             sim_post({"source": "gps", "timestamp": scen_now_iso(), "confidence": 0.95, "entity": team["name"], "claim": "position_update",
                       "raw_evidence_ref": f"sim/gps/{team['id']}/{int(time.time())}", "details": {"lat": round(lat2, 6), "lon": round(lon2, 6), "speed_mps": speed}},
                      f"{team['name']} moving ({dist:.0f} m leg)")
-            time.sleep(fix_s)
+            if not nap(fix_s): return
         lat, lon = wlat, wlon
     # arrival is reported by voice only (same source as the en-route call, so the fusion policy sees a progression, not
     # two sources disagreeing); the LLM turns "on scene" into the on_scene claim
@@ -857,36 +883,36 @@ def react_to(rec: dict, ev: dict):
     if key in REACTIVE["fired"]: return
     ent = G.get_entity(gid) if gid else None
     if not ent: return
-    def go(fn, *a): threading.Thread(target=fn, args=a, daemon=True).start()
+    def go(fn, *a): spawn(fn, *a)
 
     if ent.get("kind") == "building" and claim in ("collapsed", "damaged"):
         REACTIVE["fired"].add(key)
         def chain():
             name = ent.get("name") or gid; lat, lon = ent.get("lat"), ent.get("lon")
             # 1. dispatch acknowledges on the radio (spoken -> ASR -> LLM -> graph), ~5 s later
-            time.sleep(5); sim_radio(f"All units, dispatch. Drone shows {name} {claim}. Nearest rescue unit respond to {name}, heavy rescue assignment.", "Dispatch", VOICE_FOR["Dispatch"])
+            nap(5) and sim_radio(f"All units, dispatch. Drone shows {name} {claim}. Nearest rescue unit respond to {name}, heavy rescue assignment.", "Dispatch", VOICE_FOR["Dispatch"], claim=False)
             # 2. the nearest rescue unit rolls: radio + GPS track + on-scene report
             team = nearest_available_team(lat, lon, "rescue") if lat is not None else None
             if team:
-                time.sleep(4); sim_radio(f"Dispatch, {team['name']}, en route to {name}, E T A two minutes.", team["name"], VOICE_FOR.get(team["id"], "joe"))
+                nap(4) and sim_radio(f"Dispatch, {team['name']}, en route to {name}, E T A two minutes.", team["name"], VOICE_FOR.get(team["id"], "joe"))
                 go(sim_drive, team, [(lat, lon)], "on_scene", name, f"{team['name']} on scene {name}, beginning primary search.", VOICE_FOR.get(team["id"], "joe"))
             # 3. the gas main next to a collapsed building lets go ~25 s after the collapse: the sensor that MONITORS it spikes
             if claim == "collapsed":
-                time.sleep(25)
+                if not nap(25): return
                 sens = G.read_dicts("MATCH (s:Sensor)-[:MONITORS]->(b:Entity {id:$id}) WHERE s.sensor_type='gas' RETURN s.id AS id, s.name AS name, s.threshold AS threshold LIMIT 1", id=gid)
                 if sens:
                     sim_post({"source": "sensor", "timestamp": scen_now_iso(), "confidence": 0.97, "entity": sens[0]["id"], "claim": "spike",
                               "raw_evidence_ref": f"sim/sensors/gas/{sens[0]['id']}/{int(time.time())}", "details": {"reading": round((sens[0].get('threshold') or 25) * 1.8, 1), "unit": "ppm", "sensor_type": "gas"}},
                              f"gas sensor next to {name} spikes after the collapse")
-                    time.sleep(6)
+                    if not nap(6): return
                     if team: sim_radio(f"Dispatch, {team['name']}, strong gas odor at the north entrance of {name}, requesting utility shutoff.", team["name"], VOICE_FOR.get(team["id"], "joe"))
         go(chain)
 
     elif ent.get("kind") == "road" and claim in ("blocked", "restricted"):
         REACTIVE["fired"].add(key)
         def chain():
-            time.sleep(4)
-            sim_radio(f"All units, dispatch. {ent.get('name') or gid} is {claim}, {'avoid it' if claim == 'blocked' else 'expect delays'}. Units heading to County General use an alternate route.", "Dispatch", VOICE_FOR["Dispatch"])
+            if not nap(4): return
+            sim_radio(f"All units, dispatch. {ent.get('name') or gid} is {claim}, {'avoid it' if claim == 'blocked' else 'expect delays'}. Units heading to County General use an alternate route.", "Dispatch", VOICE_FOR["Dispatch"], claim=False)
         go(chain)
 
     elif is_quake:
@@ -907,8 +933,7 @@ def react_to(rec: dict, ev: dict):
                 if not claim: continue
                 delay = 8 + rng.uniform(0, 40)
                 def report(b=b, claim=claim, delay=delay):
-                    time.sleep(delay)
-                    if not REACTIVE["enabled"]: return
+                    if not nap(delay): return
                     txt = (f"Caller reports {b['name']} has collapsed, people may be inside." if claim == "collapsed"
                            else f"Structural triage: {b['name']} has facade cracks and displaced floors, residents evacuating.")
                     sim_post({"source": "field_report", "timestamp": scen_now_iso(), "confidence": 0.75 if claim == "collapsed" else 0.7, "entity": b["id"], "claim": claim,
@@ -920,7 +945,7 @@ def react_to(rec: dict, ev: dict):
     elif ent.get("kind") == "hazard" and claim == "spike" or (ent.get("kind") == "sensor" and claim == "spike"):
         REACTIVE["fired"].add(key)
         def chain():
-            time.sleep(3)
+            if not nap(3): return
             rows = G.read_dicts("MATCH (t:Team)-[n:NEAR {active:true}]->(h:Hazard {status:'active'}) WHERE h.hazard_type='gas' RETURN t.id AS id, t.name AS name, h.name AS hazard, n.distance_m AS d LIMIT 3")
             for r in rows:
                 sg = {"id": f"sg-withdraw-{r['id']}".lower(), "kind": "withdraw", "unit": twin_id(r["id"]), "path": [], "routeIds": [],
@@ -941,10 +966,14 @@ def seismic_incident(mag: float = 5.8):
     if not sens: return
     sid = sens[0]["id"]; t_start = time.time()
     for sec, r in SEISMIC_PREROLL:
-        while time.time() - t_start < sec: time.sleep(0.05)
+        while time.time() - t_start < sec:
+            if stale(): return
+            time.sleep(0.05)
         sim_post({"source": "sensor", "timestamp": scen_now_iso(), "confidence": 0.99, "entity": sid, "claim": "normal",
                   "raw_evidence_ref": f"sim/sensors/seismic/{sid}/{int(time.time())}", "details": {"reading": r, "unit": "magnitude", "sensor_type": "seismic"}}, f"seismic reading {r}")
-    while time.time() - t_start < 5: time.sleep(0.05)
+    while time.time() - t_start < 5:
+        if stale(): return
+        time.sleep(0.05)
     sim_post({"source": "sensor", "timestamp": scen_now_iso(), "confidence": 0.99, "entity": sid, "claim": "spike",
               "raw_evidence_ref": f"sim/sensors/seismic/{sid}/{int(time.time())}", "details": {"reading": mag, "unit": "magnitude", "sensor_type": "seismic", "note": "earthquake"}},
              f"earthquake M{mag} after 5 s of readings")
@@ -955,7 +984,7 @@ async def incident_start(body: dict | None = None):
     """START INCIDENT: the seismic sensor starts measuring now; the quake fires 5 s later. {magnitude?: 5.8}"""
     mag = float((body or {}).get("magnitude") or 5.8)
     REACTIVE["armed"] = True
-    threading.Thread(target=seismic_incident, args=(mag,), daemon=True).start()
+    spawn(seismic_incident, mag)
     return {"started": True, "quake_in_s": 5, "magnitude": mag}
 
 
@@ -1005,7 +1034,7 @@ def radio_claim(transcript: str, speaker: str) -> dict:
     out["llm_ms"] = None; return out
 
 
-def process_radio(path: str, file_name: str, speaker: str, channel: str, note: str = "") -> dict:
+def process_radio(path: str, file_name: str, speaker: str, channel: str, note: str = "", post: bool = True) -> dict:
     epoch = STATE["epoch"]
     t0 = time.perf_counter()
     with open(path, "rb") as f:
@@ -1021,7 +1050,7 @@ def process_radio(path: str, file_name: str, speaker: str, channel: str, note: s
         try:
             c = radio_claim(transcript, speaker); rec["claim"] = c; rec["llm_ms"] = round((time.perf_counter() - t_asr) * 1000)
             if STATE["epoch"] != epoch: rec["note"] = "dropped: incident was reset while this transmission was being processed"; return rec
-            if c.get("entity") and c.get("claim"):
+            if post and c.get("entity") and c.get("claim"):
                 ev = {"source": "radio_asr", "timestamp": rec["ts"], "confidence": max(0.05, min(0.99, float(c.get("confidence") or 0.7))),
                       "entity": c["entity"], "claim": c["claim"], "raw_evidence_ref": f"radio/{file_name}",
                       "event_id": f"radio-{uuid.uuid4().hex[:10]}",
