@@ -634,6 +634,22 @@ async def stop_stream(sid: str):
     out = stream_status(st); broadcast({"type": "stream", "stream": out}); return out
 
 
+CLIENT_ERRORS: list[dict] = []
+
+
+@app.post("/client-error")
+async def client_error(body: dict):
+    """The twin posts uncaught browser errors here (main.tsx), so a crash on someone's laptop can be read on the Nano."""
+    rec = {"at": now_iso_wall(), **{k: str(v)[:2000] for k, v in (body or {}).items()}}
+    CLIENT_ERRORS.append(rec); del CLIENT_ERRORS[:-50]
+    print(f"CLIENT ERROR {rec.get('kind','')}: {rec.get('message','')[:300]} @ {rec.get('url','')} :: {rec.get('stack','')[:400]}", file=sys.stderr, flush=True)
+    return {"ok": True}
+
+
+@app.get("/client-errors")
+async def client_errors(): return {"errors": CLIENT_ERRORS}
+
+
 @app.get("/entities")
 async def entities():
     """Seeded entity names by kind, for the upload form (what a camera can be pointed at)."""
