@@ -1,0 +1,957 @@
+[
+ {
+  "id": "st01",
+  "category": "status",
+  "question": "What is the status of Building 14?",
+  "answerable": true,
+  "gold_cypher": "MATCH (n:Entity {id:'Building-14'}) RETURN n.id AS id, n.status AS status",
+  "must_mention": [
+   "collapsed"
+  ]
+ },
+ {
+  "id": "st02",
+  "category": "status",
+  "question": "Is Main Street open?",
+  "answerable": true,
+  "gold_cypher": "MATCH (r:Road {id:'Road-Main'}) RETURN r.id AS id, r.status AS status",
+  "must_mention": [
+   "blocked"
+  ]
+ },
+ {
+  "id": "st03",
+  "category": "status",
+  "question": "Which buildings are intact?",
+  "answerable": true,
+  "gold_cypher": "MATCH (b:Building) WHERE b.status = 'intact' RETURN b.id AS id",
+  "must_mention": [
+   [
+    "Building 7",
+    "Building-7"
+   ],
+   [
+    "Building 22",
+    "Building-22"
+   ],
+   [
+    "Building 3",
+    "Building-3"
+   ]
+  ],
+  "must_not_mention": [
+   "Building 14"
+  ]
+ },
+ {
+  "id": "st04",
+  "category": "status",
+  "question": "What is the current status of every road?",
+  "answerable": true,
+  "gold_cypher": "MATCH (r:Road) RETURN r.id AS id, r.status AS status",
+  "must_mention": [
+   "blocked",
+   "open"
+  ]
+ },
+ {
+  "id": "st05",
+  "category": "status",
+  "question": "Which sensors are currently spiking?",
+  "answerable": true,
+  "gold_cypher": "MATCH (s:Sensor) WHERE s.status = 'spike' RETURN s.id AS id",
+  "must_mention": [
+   [
+    "Gas Sensor 3",
+    "Sensor-Gas3",
+    "gas sensor"
+   ],
+   [
+    "Seismic Sensor 1",
+    "Sensor-Seismic1",
+    "seismic"
+   ]
+  ],
+  "must_not_mention": [
+   "Water"
+  ]
+ },
+ {
+  "id": "st06",
+  "category": "status",
+  "question": "How many beds does County General have available?",
+  "answerable": true,
+  "gold_cypher": "MATCH (f:Facility {id:'Facility-CountyGeneral'}) RETURN f.id AS id, f.beds_available AS beds_available",
+  "must_mention": [
+   "18"
+  ]
+ },
+ {
+  "id": "st07",
+  "category": "status",
+  "question": "What is the reading on Gas Sensor 3?",
+  "answerable": true,
+  "gold_cypher": "MATCH (s:Sensor {id:'Sensor-Gas3'}) RETURN s.id AS id, s.reading AS reading, s.unit AS unit",
+  "must_mention": [
+   "45"
+  ]
+ },
+ {
+  "id": "st08",
+  "category": "status",
+  "question": "Which facilities are open?",
+  "answerable": true,
+  "gold_cypher": "MATCH (f:Facility) WHERE f.status = 'open' RETURN f.id AS id",
+  "must_mention": [
+   [
+    "County General",
+    "Facility-CountyGeneral",
+    "hospital"
+   ],
+   [
+    "Lincoln",
+    "LincolnHS",
+    "shelter"
+   ]
+  ]
+ },
+ {
+  "id": "pv01",
+  "category": "provenance",
+  "question": "Who reported that Building 14 collapsed, and how confident was it?",
+  "answerable": true,
+  "gold_cypher": "MATCH (e:Event)-[:ABOUT]->(n:Entity {id:'Building-14'}) WHERE e.claim = 'collapsed' RETURN n.id AS id, e.source AS source, e.confidence AS confidence",
+  "compare": {
+   "contains_any": [
+    "Building-14",
+    "evt-0002"
+   ]
+  },
+  "must_mention": [
+   [
+    "drone",
+    "Drone"
+   ],
+   "0.91"
+  ]
+ },
+ {
+  "id": "pv02",
+  "category": "provenance",
+  "question": "What evidence is there for Main Street being blocked?",
+  "answerable": true,
+  "gold_cypher": "MATCH (e:Event)-[:ABOUT]->(n:Entity {id:'Road-Main'}) WHERE e.claim = 'blocked' RETURN n.id AS id, e.source AS source, e.raw_evidence_ref AS raw_evidence_ref",
+  "compare": {
+   "contains_any": [
+    "Road-Main",
+    "evt-0003"
+   ]
+  },
+  "must_mention": [
+   [
+    "radio",
+    "Radio"
+   ]
+  ]
+ },
+ {
+  "id": "pv03",
+  "category": "provenance",
+  "question": "When was the gas spike detected and by which sensor?",
+  "answerable": true,
+  "gold_cypher": "MATCH (h:Hazard {hazard_type:'gas'})-[:DETECTED_BY]->(s:Sensor) RETURN h.id AS id, s.id AS sensor, h.status_since AS status_since",
+  "compare": {
+   "contains_any": [
+    "Hazard-gas-Sensor-Gas3",
+    "Sensor-Gas3"
+   ]
+  },
+  "must_mention": [
+   "14:01:30",
+   [
+    "Gas Sensor 3",
+    "Sensor-Gas3",
+    "gas sensor"
+   ]
+  ]
+ },
+ {
+  "id": "pv04",
+  "category": "provenance",
+  "question": "How confident are we that Bridge Street is blocked?",
+  "answerable": true,
+  "gold_cypher": "MATCH (r:Road {id:'Road-Bridge'}) RETURN r.id AS id, r.confidence AS confidence, r.source AS source, r.conflict AS conflict",
+  "must_mention": [
+   "0.85",
+   "conflict"
+  ]
+ },
+ {
+  "id": "pv05",
+  "category": "provenance",
+  "question": "Which source last confirmed Rescue Team 4's status?",
+  "answerable": true,
+  "gold_cypher": "MATCH (t:Team {id:'Team-Rescue4'}) RETURN t.id AS id, t.source AS source, t.last_confirmed_source AS last_confirmed_source",
+  "must_mention": [
+   [
+    "field_report",
+    "field report"
+   ]
+  ]
+ },
+ {
+  "id": "pv06",
+  "category": "provenance",
+  "question": "List every report about Bridge Street with its source and confidence.",
+  "answerable": true,
+  "gold_cypher": "MATCH (e:Event)-[:ABOUT]->(n:Entity {id:'Road-Bridge'}) RETURN e.id AS id, e.source AS source, e.confidence AS confidence, e.claim AS claim",
+  "compare": {
+   "contains_any": [
+    "evt-0009",
+    "evt-0010"
+   ]
+  },
+  "must_mention": [
+   [
+    "radio",
+    "Radio"
+   ],
+   [
+    "drone",
+    "Drone"
+   ],
+   "0.7",
+   "0.85"
+  ]
+ },
+ {
+  "id": "pv07",
+  "category": "provenance",
+  "question": "What did the drone see at Building 14?",
+  "answerable": true,
+  "gold_cypher": "MATCH (e:Event)-[:ABOUT]->(n:Entity {id:'Building-14'}) WHERE e.source = 'drone_vision' RETURN e.id AS id, e.claim AS claim, e.timestamp AS timestamp",
+  "compare": {
+   "contains_any": [
+    "evt-0002",
+    "Building-14"
+   ]
+  },
+  "must_mention": [
+   "collapsed"
+  ]
+ },
+ {
+  "id": "tm01",
+  "category": "temporal",
+  "question": "What changed in the last 2 minutes?",
+  "answerable": true,
+  "gold_cypher": "MATCH (e:Event)-[:ABOUT]->(n) WHERE e.timestamp >= $now - duration({minutes: 2}) RETURN e.id AS id",
+  "compare": {
+   "rowcount": true
+  },
+  "must_mention": [
+   [
+    "Bridge Street",
+    "Road-Bridge",
+    "bridge"
+   ]
+  ]
+ },
+ {
+  "id": "tm02",
+  "category": "temporal",
+  "question": "What did radio report in the last 5 minutes?",
+  "answerable": true,
+  "gold_cypher": "MATCH (e:Event)-[:ABOUT]->(n) WHERE e.source = 'radio_asr' AND e.timestamp >= $now - duration({minutes: 5}) RETURN e.id AS id",
+  "compare": {
+   "rowcount": true
+  },
+  "must_mention": [
+   [
+    "Main Street",
+    "Road-Main"
+   ],
+   [
+    "Bridge Street",
+    "Road-Bridge",
+    "bridge"
+   ]
+  ]
+ },
+ {
+  "id": "tm03",
+  "category": "temporal",
+  "question": "When did Rescue Team 4 arrive on scene?",
+  "answerable": true,
+  "gold_cypher": "MATCH (t:Team {id:'Team-Rescue4'}) RETURN t.id AS id, t.status_since AS status_since",
+  "must_mention": [
+   "14:02:00"
+  ]
+ },
+ {
+  "id": "tm04",
+  "category": "temporal",
+  "question": "What was the first event of the incident?",
+  "answerable": true,
+  "gold_cypher": "MATCH (e:Event)-[:ABOUT]->(n) RETURN e.id AS id, n.id AS entity_id ORDER BY e.timestamp ASC LIMIT 1",
+  "compare": {
+   "key_any": [
+    "id",
+    "entity_id"
+   ]
+  },
+  "must_mention": [
+   [
+    "Seismic Sensor 1",
+    "Sensor-Seismic1",
+    "seismic"
+   ]
+  ]
+ },
+ {
+  "id": "tm05",
+  "category": "temporal",
+  "question": "How long has Main Street been blocked?",
+  "answerable": true,
+  "gold_cypher": "MATCH (r:Road {id:'Road-Main'}) RETURN r.id AS id, r.status_since AS status_since",
+  "must_mention": [
+   [
+    "14:00:32",
+    "2 minutes",
+    "2 min",
+    "two minutes"
+   ]
+  ]
+ },
+ {
+  "id": "tm06",
+  "category": "temporal",
+  "question": "Which entities have had their status confirmed since 14:02?",
+  "answerable": true,
+  "gold_cypher": "MATCH (n:Entity) WHERE n.last_confirmed >= datetime('2026-09-25T14:02:00Z') RETURN n.id AS id",
+  "must_mention": [
+   [
+    "Rescue Team 4",
+    "Team-Rescue4",
+    "Rescue 4"
+   ],
+   [
+    "Bridge Street",
+    "Road-Bridge",
+    "bridge"
+   ]
+  ]
+ },
+ {
+  "id": "tm07",
+  "category": "temporal",
+  "question": "What happened between 14:00 and 14:01?",
+  "answerable": true,
+  "gold_cypher": "MATCH (e:Event)-[:ABOUT]->(n) WHERE e.timestamp >= datetime('2026-09-25T14:00:00Z') AND e.timestamp < datetime('2026-09-25T14:01:00Z') RETURN e.id AS id, n.id AS entity_id",
+  "compare": {
+   "rowcount": true
+  },
+  "must_mention": [
+   [
+    "Building 14",
+    "Building-14"
+   ],
+   [
+    "Main Street",
+    "Road-Main"
+   ]
+  ]
+ },
+ {
+  "id": "px01",
+  "category": "proximity",
+  "question": "Which units are near Building 14?",
+  "answerable": true,
+  "gold_cypher": "MATCH (t:Team)-[n:NEAR]->(:Entity {id:'Building-14'}) WHERE n.active = true RETURN t.id AS id",
+  "must_mention": [
+   [
+    "Rescue Team 4",
+    "Team-Rescue4",
+    "Rescue 4"
+   ]
+  ]
+ },
+ {
+  "id": "px02",
+  "category": "proximity",
+  "question": "How far is Rescue Team 4 from Building 14?",
+  "answerable": true,
+  "gold_cypher": "MATCH (t:Team {id:'Team-Rescue4'})-[n:NEAR]->(:Entity {id:'Building-14'}) WHERE n.active = true RETURN t.id AS id, n.distance_m AS distance_m",
+  "must_mention": [
+   [
+    "20.9",
+    "21 m",
+    "21 metres",
+    "21 meters",
+    "20.9 m"
+   ]
+  ]
+ },
+ {
+  "id": "px03",
+  "category": "proximity",
+  "question": "Is any unit inside the gas hazard zone?",
+  "answerable": true,
+  "gold_cypher": "MATCH (t:Team)-[n:NEAR]->(h:Hazard {hazard_type:'gas'}) WHERE n.active = true AND h.status = 'active' RETURN t.id AS id",
+  "must_mention": [
+   [
+    "Rescue Team 4",
+    "Team-Rescue4",
+    "Rescue 4"
+   ]
+  ]
+ },
+ {
+  "id": "px04",
+  "category": "proximity",
+  "question": "Which units are within 200 metres of the hospital?",
+  "answerable": true,
+  "gold_cypher": "MATCH (f:Facility {id:'Facility-CountyGeneral'}), (t:Team) WHERE point.distance(t.location, f.location) <= 200 RETURN t.id AS id",
+  "must_mention": [
+   [
+    "Ambulance 1",
+    "Team-Ambulance1",
+    "Medic 1"
+   ]
+  ],
+  "must_not_mention": [
+   "Engine 7",
+   "Rescue Team 4"
+  ]
+ },
+ {
+  "id": "px05",
+  "category": "proximity",
+  "question": "What is near Ambulance 2 right now?",
+  "answerable": true,
+  "gold_cypher": "MATCH (:Team {id:'Team-Ambulance2'})-[n:NEAR]->(x) WHERE n.active = true RETURN x.id AS id",
+  "must_mention": [
+   [
+    "Lincoln",
+    "LincolnHS",
+    "shelter"
+   ]
+  ]
+ },
+ {
+  "id": "px06",
+  "category": "proximity",
+  "question": "Which buildings does the gas hazard affect?",
+  "answerable": true,
+  "gold_cypher": "MATCH (h:Hazard {hazard_type:'gas'})-[a:AFFECTS]->(b) WHERE a.active = true RETURN b.id AS id",
+  "must_mention": [
+   [
+    "Building 14",
+    "Building-14"
+   ]
+  ]
+ },
+ {
+  "id": "rt01",
+  "category": "route",
+  "question": "Can Ambulance 2 still reach the hospital?",
+  "answerable": true,
+  "gold_cypher": null,
+  "must_mention": [
+   [
+    "Bridge Street",
+    "Road-Bridge",
+    "bridge"
+   ],
+   [
+    "Main Street",
+    "Road-Main"
+   ],
+   "conflict"
+  ],
+  "note": "no gold rows: route row shapes vary; scored on facts + grounding"
+ },
+ {
+  "id": "rt02",
+  "category": "route",
+  "question": "Which roads connect to Oak Avenue?",
+  "answerable": true,
+  "gold_cypher": "MATCH (:Road {id:'Road-Oak'})-[:CONNECTS_TO]-(r:Road) RETURN r.id AS id",
+  "must_mention": [
+   [
+    "Main Street",
+    "Road-Main"
+   ],
+   [
+    "Bridge Street",
+    "Road-Bridge",
+    "bridge"
+   ]
+  ]
+ },
+ {
+  "id": "rt03",
+  "category": "route",
+  "question": "Which road is County General Hospital on?",
+  "answerable": true,
+  "gold_cypher": "MATCH (:Facility {id:'Facility-CountyGeneral'})-[:ON_ROAD]->(r:Road) RETURN r.id AS id",
+  "must_mention": [
+   [
+    "River Road",
+    "Road-River"
+   ]
+  ]
+ },
+ {
+  "id": "rt04",
+  "category": "route",
+  "question": "Is there an open route from the shelter to the hospital that avoids blocked roads?",
+  "answerable": true,
+  "gold_cypher": null,
+  "must_mention": [
+   [
+    "Bridge Street",
+    "Road-Bridge",
+    "bridge"
+   ],
+   [
+    "Main Street",
+    "Road-Main"
+   ]
+  ],
+  "note": "expected: no clean route; Bridge Street conflicted, Main Street blocked"
+ },
+ {
+  "id": "rt05",
+  "category": "route",
+  "question": "Which blocked roads have buildings on them?",
+  "answerable": true,
+  "gold_cypher": "MATCH (b)-[:ON_ROAD]->(r:Road) WHERE r.status = 'blocked' RETURN DISTINCT r.id AS id",
+  "must_mention": [
+   [
+    "Main Street",
+    "Road-Main"
+   ],
+   [
+    "Building 14",
+    "Building-14"
+   ]
+  ]
+ },
+ {
+  "id": "ag01",
+  "category": "aggregation",
+  "question": "How many people are estimated to be in collapsed buildings?",
+  "answerable": true,
+  "gold_cypher": "MATCH (b:Building) WHERE b.status = 'collapsed' RETURN sum(b.occupancy_est) AS people",
+  "compare": {
+   "value": 120
+  },
+  "must_mention": [
+   "120"
+  ]
+ },
+ {
+  "id": "ag02",
+  "category": "aggregation",
+  "question": "How many events have been ingested in total?",
+  "answerable": true,
+  "gold_cypher": "MATCH (e:Event) RETURN count(e) AS n",
+  "compare": {
+   "value": 10
+  },
+  "must_mention": [
+   "10"
+  ]
+ },
+ {
+  "id": "ag03",
+  "category": "aggregation",
+  "question": "How many roads are blocked?",
+  "answerable": true,
+  "gold_cypher": "MATCH (r:Road) WHERE r.status = 'blocked' RETURN count(r) AS n",
+  "compare": {
+   "value": 2
+  },
+  "must_mention": [
+   [
+    "2",
+    "two"
+   ]
+  ]
+ },
+ {
+  "id": "ag04",
+  "category": "aggregation",
+  "question": "What is the total shelter capacity?",
+  "answerable": true,
+  "gold_cypher": "MATCH (f:Facility {facility_type:'shelter'}) RETURN sum(f.capacity) AS capacity",
+  "compare": {
+   "value": 300
+  },
+  "must_mention": [
+   "300"
+  ]
+ },
+ {
+  "id": "ag05",
+  "category": "aggregation",
+  "question": "Which hazard affects the most people?",
+  "answerable": true,
+  "gold_cypher": "MATCH (h:Hazard)-[a:AFFECTS]->(b:Building) WHERE a.active = true RETURN h.id AS id, sum(b.occupancy_est) AS people ORDER BY people DESC LIMIT 1",
+  "compare": {
+   "contains_any": [
+    "Hazard-gas-Sensor-Gas3"
+   ]
+  },
+  "must_mention": [
+   [
+    "gas",
+    "Gas"
+   ],
+   "120"
+  ]
+ },
+ {
+  "id": "ag06",
+  "category": "aggregation",
+  "question": "How many units are available?",
+  "answerable": true,
+  "gold_cypher": "MATCH (t:Team {status:'available'}) RETURN count(t) AS n",
+  "compare": {
+   "value": 3
+  },
+  "must_mention": [
+   [
+    "3",
+    "three"
+   ]
+  ]
+ },
+ {
+  "id": "cf01",
+  "category": "conflict",
+  "question": "Are there any conflicting reports?",
+  "answerable": true,
+  "gold_cypher": "MATCH (n:Entity) WHERE n.conflict = true RETURN n.id AS id",
+  "must_mention": [
+   [
+    "Bridge Street",
+    "Road-Bridge",
+    "bridge"
+   ],
+   [
+    "radio",
+    "Radio"
+   ],
+   [
+    "drone",
+    "Drone"
+   ]
+  ]
+ },
+ {
+  "id": "cf02",
+  "category": "conflict",
+  "question": "Which reports about the bridge disagree?",
+  "answerable": true,
+  "gold_cypher": "MATCH (a:Event)-[:CONFLICTS_WITH]->(b:Event) RETURN a.id AS id, b.id AS other",
+  "compare": {
+   "contains_any": [
+    "evt-0009",
+    "evt-0010",
+    "Road-Bridge"
+   ]
+  },
+  "must_mention": [
+   [
+    "radio",
+    "Radio"
+   ],
+   [
+    "drone",
+    "Drone"
+   ]
+  ]
+ },
+ {
+  "id": "cf03",
+  "category": "conflict",
+  "question": "What does radio say about Bridge Street versus the drone?",
+  "answerable": true,
+  "gold_cypher": "MATCH (e:Event)-[:ABOUT]->(n:Entity {id:'Road-Bridge'}) RETURN e.id AS id, e.source AS source, e.claim AS claim",
+  "compare": {
+   "contains_any": [
+    "evt-0009",
+    "evt-0010",
+    "Road-Bridge"
+   ]
+  },
+  "must_mention": [
+   "open",
+   "blocked"
+  ]
+ },
+ {
+  "id": "cf04",
+  "category": "conflict",
+  "question": "Has the Bridge Street conflict been resolved?",
+  "answerable": true,
+  "gold_cypher": "MATCH (r:Road {id:'Road-Bridge'}) RETURN r.id AS id, r.conflict AS conflict",
+  "must_mention": [
+   [
+    "still",
+    "unresolved",
+    "not been resolved",
+    "not resolved",
+    "conflicting",
+    "No,",
+    "no,",
+    "remains",
+    "open conflict"
+   ]
+  ]
+ },
+ {
+  "id": "un01",
+  "category": "units",
+  "question": "Which units are assigned to Building 14?",
+  "answerable": true,
+  "gold_cypher": "MATCH (t:Team)-[a:ASSIGNED_TO]->(:Entity {id:'Building-14'}) WHERE a.active = true RETURN t.id AS id",
+  "must_mention": [
+   [
+    "Rescue Team 4",
+    "Team-Rescue4",
+    "Rescue 4"
+   ]
+  ]
+ },
+ {
+  "id": "un02",
+  "category": "units",
+  "question": "Where is Ambulance 1 staged?",
+  "answerable": true,
+  "gold_cypher": "MATCH (:Team {id:'Team-Ambulance1'})-[:STAGED_AT]->(f) RETURN f.id AS id",
+  "must_mention": [
+   [
+    "County General",
+    "Facility-CountyGeneral",
+    "hospital"
+   ]
+  ]
+ },
+ {
+  "id": "un03",
+  "category": "units",
+  "question": "Which ambulances are available?",
+  "answerable": true,
+  "gold_cypher": "MATCH (t:Team {unit_type:'ambulance', status:'available'}) RETURN t.id AS id",
+  "must_mention": [
+   [
+    "Ambulance 1",
+    "Team-Ambulance1",
+    "Medic 1"
+   ],
+   [
+    "Ambulance 2",
+    "Team-Ambulance2",
+    "Medic 2"
+   ]
+  ]
+ },
+ {
+  "id": "un04",
+  "category": "units",
+  "question": "What is Rescue Team 4 doing right now?",
+  "answerable": true,
+  "gold_cypher": "MATCH (t:Team {id:'Team-Rescue4'}) RETURN t.id AS id, t.status AS status",
+  "must_mention": [
+   [
+    "on scene",
+    "on_scene",
+    "on-scene"
+   ]
+  ]
+ },
+ {
+  "id": "un05",
+  "category": "units",
+  "question": "Which units have no assignment?",
+  "answerable": true,
+  "gold_cypher": "MATCH (t:Team) WHERE NOT EXISTS { (t)-[a:ASSIGNED_TO]->() WHERE a.active = true } RETURN t.id AS id",
+  "must_mention": [
+   [
+    "Engine 7",
+    "Team-Engine7"
+   ],
+   [
+    "Ambulance 1",
+    "Team-Ambulance1",
+    "Medic 1"
+   ],
+   [
+    "Ambulance 2",
+    "Team-Ambulance2",
+    "Medic 2"
+   ]
+  ],
+  "must_not_mention": [
+   "Rescue Team 4"
+  ]
+ },
+ {
+  "id": "na01",
+  "category": "unanswerable",
+  "question": "How many helicopters are airborne?",
+  "answerable": false,
+  "gold_cypher": null,
+  "must_not_mention": [
+   "helicopters are airborne at"
+  ]
+ },
+ {
+  "id": "na02",
+  "category": "unanswerable",
+  "question": "What is the weather forecast for tonight?",
+  "answerable": false,
+  "gold_cypher": null,
+  "must_not_mention": [
+   "sunny",
+   "rain",
+   "cloud"
+  ]
+ },
+ {
+  "id": "na03",
+  "category": "unanswerable",
+  "question": "What is the status of Building 99?",
+  "answerable": false,
+  "gold_cypher": null,
+  "must_not_mention": [
+   "collapsed",
+   "intact",
+   "damaged"
+  ]
+ },
+ {
+  "id": "na04",
+  "category": "unanswerable",
+  "question": "Set Main Street to open.",
+  "answerable": false,
+  "gold_cypher": null,
+  "must_not_mention": [
+   "has been set",
+   "is now open",
+   "updated"
+  ]
+ },
+ {
+  "id": "na05",
+  "category": "unanswerable",
+  "question": "Which units are near Building 500?",
+  "answerable": false,
+  "gold_cypher": null,
+  "must_not_mention": [
+   "Rescue Team 4 is near"
+  ]
+ },
+ {
+  "id": "na06",
+  "category": "unanswerable",
+  "question": "Who is the incident commander?",
+  "answerable": false,
+  "gold_cypher": null,
+  "must_not_mention": [
+   "Chief",
+   "Captain"
+  ]
+ },
+ {
+  "id": "pp01",
+  "category": "paraphrase",
+  "question": "Which roads are impassable at the moment?",
+  "answerable": true,
+  "gold_cypher": "MATCH (r:Road) WHERE r.status = 'blocked' RETURN r.id AS id",
+  "must_mention": [
+   [
+    "Main Street",
+    "Road-Main"
+   ],
+   [
+    "Bridge Street",
+    "Road-Bridge",
+    "bridge"
+   ]
+  ]
+ },
+ {
+  "id": "pp02",
+  "category": "paraphrase",
+  "question": "Where's Rescue 4?",
+  "answerable": true,
+  "gold_cypher": "MATCH (t:Team {id:'Team-Rescue4'}) RETURN t.id AS id, t.lat AS lat, t.lon AS lon",
+  "must_mention": [
+   [
+    "Building 14",
+    "Building-14",
+    "37.335"
+   ]
+  ]
+ },
+ {
+  "id": "pp03",
+  "category": "paraphrase",
+  "question": "Who's most at risk right now?",
+  "answerable": true,
+  "gold_cypher": null,
+  "must_mention": [
+   [
+    "Rescue Team 4",
+    "Team-Rescue4",
+    "Rescue 4"
+   ]
+  ],
+  "note": "scored on facts + grounding"
+ },
+ {
+  "id": "pp04",
+  "category": "paraphrase",
+  "question": "Give me the latest on Building 14.",
+  "answerable": true,
+  "gold_cypher": "MATCH (n:Entity {id:'Building-14'}) RETURN n.id AS id, n.status AS status",
+  "must_mention": [
+   "collapsed"
+  ]
+ },
+ {
+  "id": "pp05",
+  "category": "paraphrase",
+  "question": "What's new in the last minute?",
+  "answerable": true,
+  "gold_cypher": "MATCH (e:Event) WHERE e.timestamp >= $now - duration({minutes: 1}) RETURN e.id AS id",
+  "compare": {
+   "rowcount": true
+  },
+  "must_mention": [
+   [
+    "Bridge Street",
+    "Road-Bridge",
+    "bridge"
+   ]
+  ]
+ },
+ {
+  "id": "pp06",
+  "category": "paraphrase",
+  "question": "Any disagreements between sources?",
+  "answerable": true,
+  "gold_cypher": "MATCH (n:Entity) WHERE n.conflict = true RETURN n.id AS id",
+  "must_mention": [
+   [
+    "Bridge Street",
+    "Road-Bridge",
+    "bridge"
+   ]
+  ]
+ }
+]
