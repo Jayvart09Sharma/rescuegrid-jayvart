@@ -1,4 +1,4 @@
-# RescueGrid · Command Twin (frontend)
+# ResQ · Command Twin (frontend)
 
 The single frontend for RescueGrid: 3D digital twin, feed panel, event timeline, commander Q&A,
 provenance click-through, cloud/network status, and a Sim Director for rehearsing the demo.

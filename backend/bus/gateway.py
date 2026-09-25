@@ -267,7 +267,7 @@ def logged_event(rec: dict, name_of: dict) -> dict:
 
 
 # ---------------------------------------------------------------- state + broadcast
-app = FastAPI(title="RescueGrid twin gateway")
+app = FastAPI(title="ResQ twin gateway")
 G: Optional[GraphStore] = None
 CLIENTS: set[WebSocket] = set()
 STATE: dict[str, Any] = {"snap": None, "last_received": "", "events": [], "network": {"state": "normal", "kbps": None, "latencyMs": 140},

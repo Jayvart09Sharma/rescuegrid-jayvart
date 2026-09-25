@@ -26,7 +26,7 @@ export function TopBar() {
           <circle cx="20" cy="20" r="3" />
         </svg>
         <div>
-          <Scramble text="RESCUEGRID" className="brand-name" />
+          <Scramble text="RESQ" className="brand-name" />
           <div className="brand-sub">COUNTY EOC · WATCH OFFICER CONSOLE</div>
         </div>
       </div>

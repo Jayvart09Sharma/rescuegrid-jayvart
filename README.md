@@ -1,9 +1,9 @@
-# RescueGrid
+# ResQ
 
-**One live graph of a disaster, built on the edge.** Drone video, radio, responder GPS, road cameras and sensors are fused
+**ResQ (formerly RescueGrid): one live graph of a disaster, built on the edge.** Drone video, radio, responder GPS, road cameras and sensors are fused
 into a single temporal, provenance-tagged Neo4j graph and rendered as a 3D command-post twin for a county EOC watch
 officer. All inference runs on an HP ZGX Nano (GB10, 128 GB unified memory), so it keeps working when the internet
-does not. Built at the HP Edge AI SJSUHack by Shresth, Aditya, Kenil, Pranay and Jayvant.
+does not. Built at the HP Edge AI SJSUHack by Shresth, Aditya, Kenil, Pranay and Jayvant. Code identifiers, env vars and the package keep the original `rescuegrid` name.
 
 > Honesty line: the **inputs** are replayed (drone clips, two of them AI-generated; scripted or Piper-spoken radio;
 > simulated GPS, sensors and field reports). **Detection, transcription, claim extraction, fusion, graph writes and

@@ -135,7 +135,7 @@ export function Starter() {
           <div className="starter-card">
             <header>
               <div>
-                <div className="boot-title">RESCUEGRID</div>
+                <div className="boot-title">RESQ</div>
                 <div className="brand-sub">COUNTY EOC · WATCH OFFICER CONSOLE · STAGE THE INCIDENT, THEN START</div>
               </div>
               <button className="x" onClick={close} title="Enter the console">✕</button>

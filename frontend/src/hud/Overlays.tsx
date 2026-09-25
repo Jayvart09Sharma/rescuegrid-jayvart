@@ -29,7 +29,7 @@ export function Boot() {
       {!gone && (
         <motion.div className="boot" exit={{ opacity: 0, scale: 1.08, filter: 'blur(8px)' }} transition={{ duration: 0.7 }}>
           <div className="boot-inner">
-            <div className="boot-title">RESCUEGRID</div>
+            <div className="boot-title">RESQ</div>
             <div className="boot-bar"><i style={{ width: `${Math.min(100, (n / BOOT.length) * 100)}%` }} /></div>
             {BOOT.slice(0, n).map((l) => (
               <div key={l} className="boot-line"><span>▸</span>{l}<b>OK</b></div>
