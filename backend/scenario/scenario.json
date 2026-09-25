@@ -1,6 +1,6 @@
 {
   "scenario_name": "pine_county_earthquake",
-  "description": "RescueGrid demo timeline (13 events). ONE clock for every replay adapter. t = seconds after scenario_start. Entity ids match the seeded graph (Shresth/rescuegrid/neo4j/schema/seed_static.cypher). Every event is the six-field contract + optional details; the adapter for its source posts it to the event bus at t. Owner: Shresth. Add events, keep the story coherent.",
+  "description": "RescueGrid demo timeline (18 events; the seismic sensor reports for 5 s before the quake at t=5). ONE clock for every replay adapter. t = seconds after scenario_start. Entity ids match the seeded graph (Shresth/rescuegrid/neo4j/schema/seed_static.cypher). Every event is the six-field contract + optional details; the adapter for its source posts it to the event bus at t. Owner: Shresth. Add events, keep the story coherent.",
   "scenario_start": "2026-09-25T14:00:00Z",
   "contract": ["source", "timestamp", "confidence", "entity", "claim", "raw_evidence_ref"],
   "sources": {
@@ -11,8 +11,18 @@
     "radio_asr":    {"adapter": "Pranay  radio TTS -> ASR :8090 -> claim; until then scenario/replay.py --sources radio_asr posts the scripted claim with the transcript"}
   },
   "events": [
-    {"t": 0,   "event_id": "evt-0001", "source": "sensor",       "entity": "Sensor-Seismic1", "claim": "spike",           "confidence": 0.99, "raw_evidence_ref": "mqtt/sensors/seismic/1/t0",
-     "details": {"reading": 5.8, "unit": "magnitude", "note": "t=0: the earthquake. Starts the scenario."}},
+    {"t": 0,   "event_id": "evt-0000a", "source": "sensor",      "entity": "Sensor-Seismic1", "claim": "normal",          "confidence": 0.99, "raw_evidence_ref": "mqtt/sensors/seismic/1/t0",
+     "details": {"reading": 0.02, "unit": "magnitude", "note": "Seismic sensor 1 measuring: quiet. Five seconds of readings before the quake."}},
+    {"t": 1,   "event_id": "evt-0000b", "source": "sensor",      "entity": "Sensor-Seismic1", "claim": "normal",          "confidence": 0.99, "raw_evidence_ref": "mqtt/sensors/seismic/1/t1",
+     "details": {"reading": 0.05, "unit": "magnitude"}},
+    {"t": 2,   "event_id": "evt-0000c", "source": "sensor",      "entity": "Sensor-Seismic1", "claim": "normal",          "confidence": 0.99, "raw_evidence_ref": "mqtt/sensors/seismic/1/t2",
+     "details": {"reading": 0.14, "unit": "magnitude", "note": "foreshock"}},
+    {"t": 3,   "event_id": "evt-0000d", "source": "sensor",      "entity": "Sensor-Seismic1", "claim": "normal",          "confidence": 0.99, "raw_evidence_ref": "mqtt/sensors/seismic/1/t3",
+     "details": {"reading": 0.31, "unit": "magnitude"}},
+    {"t": 4,   "event_id": "evt-0000e", "source": "sensor",      "entity": "Sensor-Seismic1", "claim": "normal",          "confidence": 0.99, "raw_evidence_ref": "mqtt/sensors/seismic/1/t4",
+     "details": {"reading": 0.9, "unit": "magnitude", "note": "P-wave arriving"}},
+    {"t": 5,   "event_id": "evt-0001", "source": "sensor",       "entity": "Sensor-Seismic1", "claim": "spike",           "confidence": 0.99, "raw_evidence_ref": "mqtt/sensors/seismic/1/t5",
+     "details": {"reading": 5.8, "unit": "magnitude", "note": "t=5: the earthquake, after five seconds of live readings."}},
     {"t": 15,  "event_id": "evt-0002", "source": "drone_vision", "entity": "Building-14",     "claim": "collapsed",       "confidence": 0.91, "raw_evidence_ref": "vision/samples/collapsed_building.jpg",
      "details": {"media": "videos/pixverse_c1 (3).mp4", "camera": "drone-1", "note": "Drone 1 over downtown sees Building 14 down. Clip -> vision v2 -> `Building-14 collapsed` ~0.93 at t+3 s."}},
     {"t": 32,  "event_id": "evt-0003", "source": "radio_asr",    "entity": "Main Street",     "claim": "blocked",         "confidence": 0.78, "raw_evidence_ref": "radio/ch3/clip_000032.wav",

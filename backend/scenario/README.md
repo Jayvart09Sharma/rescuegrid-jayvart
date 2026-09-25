@@ -19,7 +19,7 @@ scenario.json ─┬─ Jaya/jayvart/sensors/sensor_replay.py        (sensor)   
 
 ## The timeline (`scenario.json`)
 
-13 events over 3 minutes of scenario time, starting `2026-09-25T14:00:00Z`. `t` is seconds after start; the helper
+18 events over 3 minutes of scenario time (the seismic sensor reports for 5 s, then the quake at t=5), starting `2026-09-25T14:00:00Z`. `t` is seconds after start; the helper
 turns it into the event's `timestamp`. Entity names are the seeded graph's names or aliases (`Rescue Team 4`, `Main
 Street`, `Building-14`), so the fusion agent resolves them without creating strays. The story: quake at t=0, drone
 sees Building 14 down at 15 s, radio says Main Street blocked at 32 s, Rescue 4 arrives (GPS + vision agree), gas

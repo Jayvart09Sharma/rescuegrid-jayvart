@@ -76,6 +76,8 @@ export function Starter() {
     if (!ready) return setMsg('Stage at least one drone video or one radio transmission.')
     setBusy('start')
     try {
+      // 0. the earthquake: the seismic sensor starts measuring now, the quake fires 5 s later
+      await post('/incident/start', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ magnitude: 5.8 }) })
       // 1. drone streams
       for (const c of selected) {
         const row = rows[c.camera]
@@ -205,7 +207,7 @@ export function Starter() {
                 <button className="primary big-start" disabled={!ready || busy !== null} onClick={startIncident}>
                   {busy === 'start' ? 'STARTING…' : `▶ START INCIDENT · ${selected.length} DRONE${selected.length === 1 ? '' : 'S'} · ${picks.length} RADIO`}
                 </button>
-                <p className="dim small">Uploads the videos, queues the radio, closes this screen. The Nano runs it from there.</p>
+                <p className="dim small">Starts the seismic sensor (quake fires after 5 s of readings), uploads the videos, queues the radio, closes this screen. The Nano runs it from there.</p>
 
                 <h4 style={{ marginTop: 14 }}>REACTIVE INCIDENT</h4>
                 <button className={reactive ? 'primary' : ''} disabled={!live} onClick={() => { void post('/reactive', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ enabled: !reactive }) }); useStore.setState({ reactive: !reactive }) }}>

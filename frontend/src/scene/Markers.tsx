@@ -195,7 +195,8 @@ function Sensor({ n }: { n: GraphNode }) {
   const color = new THREE.Color(n.status === 'normal' ? STATUS_HEX.normal : STATUS_HEX[n.status]).multiplyScalar(n.status === 'normal' ? 1.2 : 3)
   useFrame((s) => {
     if (!ring.current) return
-    const speed = n.status === 'normal' ? 0.4 : 1.6
+    const level = kind === 'seismic' ? Math.min(1, parseFloat(String(reading ?? '0')) / 1.0 || 0) : 0
+    const speed = n.status === 'normal' ? 0.4 + level * 2.4 : 1.6
     const f = (s.clock.elapsedTime * speed) % 1
     ring.current.scale.setScalar(1 + f * (n.status === 'normal' ? 1.5 : 5))
     ;(ring.current.material as THREE.MeshBasicMaterial).opacity = 1 - f
@@ -210,7 +211,7 @@ function Sensor({ n }: { n: GraphNode }) {
         <ringGeometry args={[0.5, 0.62, 32]} />
         <meshBasicMaterial color={color} toneMapped={false} transparent />
       </mesh>
-      {n.status !== 'normal' && (
+      {(n.status !== 'normal' || (kind === 'seismic' && reading)) && (
         <Html center position={[0, 3, 0]} zIndexRange={[4, 0]}>
           <div className={`tag tag-sensor s-${n.status}`}>
             {kind.toUpperCase()} · {reading}

@@ -250,6 +250,7 @@ def logged_event(rec: dict, name_of: dict) -> dict:
     pretty = name_of.get(gid) or ev.get("entity")
     title = {"position_update": f"{pretty} position fix", "near": f"{pretty} near {d.get('target', '')}".strip(), "on_scene": f"{pretty} on scene {d.get('target', '')}".strip()}.get(
         claim, f"{pretty} {claim.replace('_', ' ')}")
+    if ev.get("source") == "sensor" and claim == "normal" and d.get("reading") is not None: title = f"{pretty} reading {d.get('reading')} {d.get('unit') or ''}".strip()
     if action == "conflict": title = f"Conflicting reports, {pretty}"
     elif action == "stale": title += " (stale, not applied)"
     elif action == "confirm": title += " (confirmed)"
@@ -790,6 +791,33 @@ def react_to(rec: dict, ev: dict):
                 if sg["id"] not in STATE["suggestions"]:
                     STATE["suggestions"][sg["id"]] = sg; broadcast({"type": "suggestion", "suggestion": sg})
         go(chain)
+
+
+SEISMIC_PREROLL = [(0, 0.02), (1, 0.05), (2, 0.14), (3, 0.31), (4, 0.9)]   # (second, magnitude) before the quake at t=5
+
+
+def seismic_incident(mag: float = 5.8):
+    """The earthquake as the sensor would report it: five seconds of live seismic readings, then the spike.
+    Simulated sensor telemetry (marked as such); the fusion agent writes the readings to the graph like any sensor."""
+    sens = G.read_dicts("MATCH (s:Sensor {sensor_type:'seismic'}) RETURN s.id AS id LIMIT 1")
+    if not sens: return
+    sid = sens[0]["id"]; t_start = time.time()
+    for sec, r in SEISMIC_PREROLL:
+        while time.time() - t_start < sec: time.sleep(0.05)
+        sim_post({"source": "sensor", "timestamp": scen_now_iso(), "confidence": 0.99, "entity": sid, "claim": "normal",
+                  "raw_evidence_ref": f"sim/sensors/seismic/{sid}/{int(time.time())}", "details": {"reading": r, "unit": "magnitude", "sensor_type": "seismic"}}, f"seismic reading {r}")
+    while time.time() - t_start < 5: time.sleep(0.05)
+    sim_post({"source": "sensor", "timestamp": scen_now_iso(), "confidence": 0.99, "entity": sid, "claim": "spike",
+              "raw_evidence_ref": f"sim/sensors/seismic/{sid}/{int(time.time())}", "details": {"reading": mag, "unit": "magnitude", "sensor_type": "seismic", "note": "earthquake"}},
+             f"earthquake M{mag} after 5 s of readings")
+
+
+@app.post("/incident/start")
+async def incident_start(body: dict | None = None):
+    """START INCIDENT: the seismic sensor starts measuring now; the quake fires 5 s later. {magnitude?: 5.8}"""
+    mag = float((body or {}).get("magnitude") or 5.8)
+    threading.Thread(target=seismic_incident, args=(mag,), daemon=True).start()
+    return {"started": True, "quake_in_s": 5, "magnitude": mag}
 
 
 @app.post("/reactive")
