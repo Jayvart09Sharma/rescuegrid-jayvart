@@ -1,0 +1,30 @@
+{
+ "label": "ho-baseline-llm",
+ "git": "d0b3640",
+ "repeats": 3,
+ "correct_mean": 0.373,
+ "correct_se": 0.012,
+ "pass_k": 0.31,
+ "runs": [
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/ho-baseline-llm-d0b3640-r1.json",
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/ho-baseline-llm-d0b3640-r2.json",
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/ho-baseline-llm-d0b3640-r3.json"
+ ],
+ "flaky_ids": [
+  "hag04",
+  "hag06",
+  "hcf07",
+  "hna01",
+  "hna03",
+  "hna05",
+  "hna19",
+  "hpv02",
+  "hpv03",
+  "hpv07",
+  "hpx06",
+  "hst02",
+  "htm03",
+  "htm08",
+  "hun03"
+ ]
+}
