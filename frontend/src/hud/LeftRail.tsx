@@ -7,6 +7,7 @@ import { ENV, STATUS_HEX } from '../config'
 import { fmtClock } from '../data/clock'
 import { Panel } from './Panel'
 import { RadioPanel } from './Radio'
+import { PLAYBACK } from './Starter'
 import type { CameraFrame, LoggedEvent } from '../types'
 
 const FEEDS = [
@@ -163,7 +164,8 @@ function LiveVideo({ src, cam }: { src: string; cam?: CameraFrame }) {
   }, [])
   return (
     <>
-      <video ref={vid} src={src} autoPlay muted loop playsInline width={PIP_W} height={PIP_H} style={{ objectFit: 'contain', background: '#04121a', display: 'block' }} />
+      <video ref={vid} src={src} autoPlay muted loop playsInline width={PIP_W} height={PIP_H} style={{ objectFit: 'contain', background: '#04121a', display: 'block' }}
+        onLoadedMetadata={(e) => { e.currentTarget.playbackRate = PLAYBACK }} onPlay={(e) => { e.currentTarget.playbackRate = PLAYBACK }} />
       <canvas ref={ovl} width={PIP_W} height={PIP_H} style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }} />
     </>
   )
@@ -264,7 +266,7 @@ function DroneFeed() {
           <LiveVideo src={`${ENV.restUrl}${video}`} cam={cam} />
         ) : liveFrame ? <LiveFrame cam={liveFrame} /> : <canvas ref={ref} width={PIP_W} height={PIP_H} />}
         <div className="pip-scan" />
-        <span className="pip-badge">{video ? (cam && !cam.replayed && performance.now() - cam.receivedAt < 5000 ? `ANALYSING · ${camId?.toUpperCase()} · YOLO-WORLD + CLIP` : `REPLAY · ${camId?.toUpperCase()} · ANALYSED ONCE`) : liveFrame ? (stale ? `LAST ANALYSED FRAME ${fmtClock(liveFrame.ts)} · ${liveFrame.camera.toUpperCase()}` : `LIVE FRAME · ${liveFrame.camera.toUpperCase()} · YOLO-WORLD + CLIP`) : isLive ? 'NO STREAM' : 'PLACEHOLDER FRAME · REPLAY'}</span>
+        <span className="pip-badge">{video ? (cam && !cam.replayed && performance.now() - cam.receivedAt < 5000 ? `ANALYSING · ${camId?.toUpperCase()} · ${PLAYBACK}x · YOLO-WORLD + CLIP` : `REPLAY · ${camId?.toUpperCase()} · ANALYSED ONCE`) : liveFrame ? (stale ? `LAST ANALYSED FRAME ${fmtClock(liveFrame.ts)} · ${liveFrame.camera.toUpperCase()}` : `LIVE FRAME · ${liveFrame.camera.toUpperCase()} · YOLO-WORLD + CLIP`) : isLive ? 'NO STREAM' : 'PLACEHOLDER FRAME · REPLAY'}</span>
       </div>
     </Panel>
   )

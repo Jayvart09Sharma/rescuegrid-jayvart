@@ -13,6 +13,8 @@ import { fmtClock } from '../data/clock'
 interface EntityOpt { id: string; name: string }
 interface RadioLine { id: string; speaker: string; channel: string; text: string; seconds: number }
 interface Row { on: boolean; file: File | null; building: string; road: string; bridge: string; plan: string }
+/** Footage plays at this speed, in the camera panel and through the detector, so boxes, claims and the drone stay in step. */
+export const PLAYBACK = 0.4
 interface RadioPick { key: string; library_id?: string; file?: File; speaker: string; label: string }
 
 export function Starter() {
@@ -83,7 +85,7 @@ export function Starter() {
         const row = rows[c.camera]
         const fd = new FormData()
         fd.append('file', row.file!); fd.append('camera', c.camera); fd.append('building', row.building); fd.append('road', row.road); fd.append('bridge', row.bridge); fd.append('plan', row.plan)
-        fd.append('fps', String(fps)); fd.append('speed', '1'); fd.append('loop', 'false')
+        fd.append('fps', String(fps)); fd.append('speed', String(PLAYBACK)); fd.append('loop', 'false')
         setMsg(`Uploading ${row.file!.name} for ${c.callsign}…`)
         await post('/streams', { method: 'POST', body: fd })
       }
@@ -163,7 +165,7 @@ export function Starter() {
                 <datalist id="rg-roads">{(entities.road ?? []).map((r) => <option key={r.id} value={r.name}>{r.id}</option>)}</datalist>
                 <div className="row">
                   <label>FPS TO DETECTOR<input type="number" min={0.5} max={10} step={0.5} value={fps} onChange={(e) => setFps(Number(e.target.value))} /></label>
-                  <p className="dim small">The drone flies the plan across the clip: it hovers at each place, moves between them at 12 m/s, and every frame is tagged with the building, road and bridge nearest to it at that moment. Whatever the detector confirms lands on those. Order the places like the scenes in the footage. Each video plays once; the drone then holds where it ended.</p>
+                  <p className="dim small">The drone flies the plan across the clip: it hovers at each place, moves between them at 12 m/s, and every frame is tagged with the building, road and bridge nearest to it at that moment. Whatever the detector confirms lands on those. Order the places like the scenes in the footage. Each video plays once at 0.4x speed, in the panel and through the detector alike; the drone then holds where it ended.</p>
                 </div>
 
                 <h4 style={{ marginTop: 14 }}>02 · RADIO CH3 · IN ORDER</h4>
