@@ -630,7 +630,7 @@ async def camera_telemetry(camera: str, body: dict):
 
 @app.post("/streams")
 async def start_stream(file: UploadFile = File(...), camera: str = Form("drone-1"), building: str = Form(""), road: str = Form(""), bridge: str = Form(""),
-                       plan: str = Form(""), fps: float = Form(2.0), speed: float = Form(1.0), loop: bool = Form(True)):
+                       plan: str = Form(""), fps: float = Form(2.0), speed: float = Form(1.0), loop: bool = Form(False)):
     """Upload a video and play it into the vision service as `camera`, one frame per request at `fps`, exactly like a live
     feed. `building` / `road` say what the camera is looking at (seeded names; default = camera_entities.json). Claims are
     whatever the detector confirms; nothing about the file is assumed."""

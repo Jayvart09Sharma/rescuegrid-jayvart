@@ -163,7 +163,7 @@ function LiveVideo({ src, cam }: { src: string; cam?: CameraFrame }) {
   }, [])
   return (
     <>
-      <video ref={vid} src={src} autoPlay muted loop playsInline width={PIP_W} height={PIP_H} style={{ objectFit: 'contain', background: '#04121a', display: 'block' }} />
+      <video ref={vid} src={src} autoPlay muted playsInline width={PIP_W} height={PIP_H} style={{ objectFit: 'contain', background: '#04121a', display: 'block' }} />
       <canvas ref={ovl} width={PIP_W} height={PIP_H} style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }} />
     </>
   )
@@ -264,7 +264,7 @@ function DroneFeed() {
           <LiveVideo src={`${ENV.restUrl}${video}`} cam={cam} />
         ) : liveFrame ? <LiveFrame cam={liveFrame} /> : <canvas ref={ref} width={PIP_W} height={PIP_H} />}
         <div className="pip-scan" />
-        <span className="pip-badge">{video ? `VIDEO LOOP · ${camId?.toUpperCase()} · BOXES FROM YOLO-WORLD` : liveFrame ? (stale ? `LAST ANALYSED FRAME ${fmtClock(liveFrame.ts)} · ${liveFrame.camera.toUpperCase()}` : `LIVE FRAME · ${liveFrame.camera.toUpperCase()} · YOLO-WORLD + CLIP`) : isLive ? 'NO STREAM' : 'PLACEHOLDER FRAME · REPLAY'}</span>
+        <span className="pip-badge">{video ? `LIVE VIDEO · ${camId?.toUpperCase()} · BOXES FROM YOLO-WORLD` : liveFrame ? (stale ? `LAST ANALYSED FRAME ${fmtClock(liveFrame.ts)} · ${liveFrame.camera.toUpperCase()}` : `LIVE FRAME · ${liveFrame.camera.toUpperCase()} · YOLO-WORLD + CLIP`) : isLive ? 'NO STREAM' : 'PLACEHOLDER FRAME · REPLAY'}</span>
       </div>
     </Panel>
   )

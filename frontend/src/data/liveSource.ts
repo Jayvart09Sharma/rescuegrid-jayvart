@@ -155,7 +155,7 @@ function handle(msg: Msg) {
       const st = msg.stream
       if (st.kind === 'stream' && st.camera) {
         if (st.state === 'running') ensureDrone(st.camera)
-        else if (!useStore.getState().cameras[st.camera] || performance.now() - useStore.getState().cameras[st.camera].receivedAt > 10000) retireDrone(st.camera)
+        else if (st.state === 'cancelled' || st.state.startsWith('failed')) retireDrone(st.camera)
       }
       break
     }
@@ -261,8 +261,7 @@ function placeCameras() {
     if (!c.unit || !s.nodes[c.unit]) continue
     const frame = s.cameras[c.camera]
     const streaming = Boolean(frame && !frame.replayed && now - frame.receivedAt < 3000)
-    const running = s.streams.some((st) => st.camera === c.camera && st.state === 'running')
-    if (!running && (!frame || frame.replayed || now - frame.receivedAt > 10000)) { retireDrone(c.camera); continue }
+    // a drone stays where its flight ended (it is still in the air); only a reset or a stopped stream removes it
     const tel = telemetry.get(c.camera)
     if (tel && now - tel.at < 15000) {
       patches.push({ op: 'setProps', id: c.unit, props: { x: tel.x, z: tel.z, streaming, over: tel.over } })
