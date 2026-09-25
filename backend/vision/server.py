@@ -67,7 +67,8 @@ HAZARD_OBJECTS = {  # detector label -> hazard kind (shared with scene keys so e
     "debris on road": "debris", "flooded road": "flooded_road", "flood water": "flooded_road", "fire": "fire",
     "smoke": "smoke", "fallen tree": "fallen_tree", "downed power line": "downed_power_line",
     "landslide": "landslide", "crashed car": "vehicle_crash",
-    "dust cloud": "collapsed_building", "collapsed wall": "collapsed_building", "burning building": "structure_fire"}   # 2026-09-25 (Shresth): disaster-video words
+    "dust cloud": "collapsed_building", "collapsed wall": "collapsed_building", "burning building": "structure_fire",   # 2026-09-25 (Shresth): disaster-video words
+    "collapsed bridge": "damaged_bridge", "damaged bridge": "damaged_bridge", "broken bridge span": "damaged_bridge"}
 CONTEXT_OBJECTS = ["car", "truck", "bus", "person", "ambulance", "fire truck", "police car", "boat", "helicopter",
                    "injured person", "stretcher", "rescue worker", "firefighter"]
 PEOPLE_LABELS = {"person", "injured person", "rescue worker", "firefighter"}
@@ -82,6 +83,7 @@ SCENES = {
     "landslide":          ["a landslide of mud and rock covering a road"],
     "fallen_tree":        ["a fallen tree blocking a road"],
     "vehicle_crash":      ["a car crash with damaged vehicles on the road"],
+    "damaged_bridge":     ["a concrete bridge with a collapsed span and a gap in the deck", "a road bridge broken in the middle after an earthquake, guardrail twisted", "a bridge over a river with one span dropped and cars stopped at the edge"],
     "blocked_road":       ["cars stopped behind broken concrete and bricks scattered across the road surface", "a street physically blocked by fallen debris with a barrier of rubble across all lanes, buildings intact", "a pickup truck halted at a pile of debris lying across the pavement at an intersection"],
     "normal":             ["normal traffic on a highway", "an intact street with no damage", "a clear road with cars driving normally", "bumper-to-bumper traffic congestion on a road with nothing blocking it", "a busy multi-lane road full of slow-moving cars, no debris"],
 }
@@ -95,6 +97,7 @@ CLAIM_RULES = {
     "blocked_road": ("road", "blocked"), "debris": ("road", "blocked"), "flooded_road": ("road", "blocked"),
     "landslide": ("road", "blocked"), "fallen_tree": ("road", "blocked"), "vehicle_crash": ("road", "blocked"),
     "downed_power_line": ("road", "blocked"),
+    "damaged_bridge": ("bridge", "blocked"),   # camera_entities.json / entities form field: "bridge": "Bridge Street"
 }
 
 # ---- state ------------------------------------------------------------------

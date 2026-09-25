@@ -1,7 +1,8 @@
 // The earthquake, made visible. Everything here is driven by the graph mirror (store), never the other way round:
 //  - Incident / seismic spike       -> a heavy first jolt, fissures with real width radiating from the epicentre with
 //                                      rubble along their lips, a dust burst, dust haze, aftershock tremors
-//  - Building collapsed             -> fire and smoke in the rubble (a bigger blaze when a fire hazard sits on it)
+//  - Building collapsed             -> dust and smoke settling over the rubble (no flames: a gas leak is not a fire)
+//                                      with a fire hazard on it: flames, black smoke, fire light
 //  - Building damaged (warning)     -> thin smoke wisps
 //  - Hazard kind 'fire'             -> flames + smoke on the entity it affects
 //  - Road blocked (danger)          -> rubble chunks scattered across the segment
@@ -308,7 +309,9 @@ export function Disaster() {
       {epi && <Plume x={epi[0]} z={epi[1]} y={0.2} mode="burst" h={16} w={22} n={3000} rate={0.12} />}
       {collapsed.map((b) => {
         const w = (b.props.w as number) ?? 6
-        return <Fire key={b.id} x={b.props.x as number} z={b.props.z as number} w={w} big={fireAt.has(b.id)} />
+        return fireAt.has(b.id)
+          ? <Fire key={b.id} x={b.props.x as number} z={b.props.z as number} w={w} big />
+          : <Plume key={b.id} x={b.props.x as number} z={b.props.z as number} y={0.3} mode="smoke" h={20} w={w * 0.9} n={2200} />
       })}
       {damaged.map((b) => <Wisps key={b.id} x={b.props.x as number} z={b.props.z as number} w={(b.props.w as number) ?? 6} h={(b.props.h as number) ?? 6} />)}
       {fires.filter((f) => !collapsed.some((b) => b.id === f.props.at)).map((f) => {

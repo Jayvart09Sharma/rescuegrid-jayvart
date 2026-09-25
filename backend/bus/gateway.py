@@ -378,11 +378,11 @@ def load_cameras():
     for i in range(1, int(os.environ.get("RESCUEGRID_DRONES", "3")) + 1):
         cam = f"drone-{i}"; ents = cams.get(cam) or {}
         watching = []
-        for k in ("building", "road", "facility"):
+        for k in ("building", "road", "bridge", "facility"):
             v = ents.get(k)
             if v: watching.append(twin_id(alias.get(str(v).lower(), str(v))))
         CAMERAS[cam] = {"unit": f"Drone-{i}", "watching": watching, "type": "drone", "camera": cam, "callsign": f"Drone {i}",
-                        "entities": {k: v for k, v in ents.items() if k in ("building", "road", "facility")}}
+                        "entities": {k: v for k, v in ents.items() if k in ("building", "road", "bridge", "facility")}}
     print("gateway cameras:", CAMERAS, flush=True)
 
 
@@ -582,7 +582,7 @@ def spawn_stream(kind: str, cmd: list, cwd: str, meta: dict) -> dict:
 
 
 @app.post("/streams")
-async def start_stream(file: UploadFile = File(...), camera: str = Form("drone-1"), building: str = Form(""), road: str = Form(""),
+async def start_stream(file: UploadFile = File(...), camera: str = Form("drone-1"), building: str = Form(""), road: str = Form(""), bridge: str = Form(""),
                        fps: float = Form(2.0), speed: float = Form(1.0), loop: bool = Form(True)):
     """Upload a video and play it into the vision service as `camera`, one frame per request at `fps`, exactly like a live
     feed. `building` / `road` say what the camera is looking at (seeded names; default = camera_entities.json). Claims are
@@ -593,7 +593,7 @@ async def start_stream(file: UploadFile = File(...), camera: str = Form("drone-1
     with open(path, "wb") as f:
         while chunk := await file.read(1 << 20): f.write(chunk); size += len(chunk)
     if size == 0: raise HTTPException(400, "empty upload")
-    ents = {k: v for k, v in (("building", building.strip()), ("road", road.strip())) if v}
+    ents = {k: v for k, v in (("building", building.strip()), ("road", road.strip()), ("bridge", bridge.strip())) if v}
     for st in STREAMS.values():   # one stream per drone: a new upload for the same camera replaces the running one
         if st.get("camera") == camera and st["proc"].poll() is None: st["proc"].terminate()
     cmd = [VISION_PY, VISION_ADAPTER, path, "--url", VISION, "--source-id", camera, "--source-type", "roadcam" if camera.startswith("roadcam") else "drone",
