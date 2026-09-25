@@ -1,0 +1,1299 @@
+{
+"nodes": [
+{
+"confirmations": 0,
+"last_confirmed": "2026-09-25T14:00:32+00:00",
+"location": [
+-121.889,
+37.3355
+],
+"aliases": [
+"Main Street",
+"Main St",
+"Main"
+],
+"previous_source": "seed_dataset",
+"raw_evidence_ref": "radio/ch3/clip_000032.wav",
+"kind": "road",
+"id": "Road-Main",
+"name": "Main Street",
+"last_confirmed_source": "radio_asr",
+"created_at": "2026-09-25T00:35:07.028000+00:00",
+"lanes": 4,
+"lat": 37.3355,
+"lon": -121.889,
+"last_confirmed_evidence_ref": "radio/ch3/clip_000032.wav",
+"status": "blocked",
+"previous_status_since": "2026-09-25T13:00:00+00:00",
+"confidence": 0.78,
+"confirmed_sources": [
+"radio_asr"
+],
+"status_event_id": "evt-0003",
+"previous_status": "open",
+"status_since": "2026-09-25T14:00:32+00:00",
+"updated_at": "2026-09-25T00:35:09.440000+00:00",
+"source": "radio_asr",
+"seeded": true,
+"conflict": false,
+"_labels": [
+"Entity",
+"Road"
+]
+},
+{
+"lon": -121.8945,
+"last_confirmed": "2026-09-25T13:00:00+00:00",
+"location": [
+-121.8945,
+37.3325
+],
+"status": "open",
+"confidence": 1.0,
+"aliases": [
+"Oak Avenue",
+"Oak Ave",
+"Oak"
+],
+"raw_evidence_ref": "seed/static_world_v1#Road-Oak",
+"kind": "road",
+"id": "Road-Oak",
+"status_since": "2026-09-25T13:00:00+00:00",
+"updated_at": "2026-09-25T00:35:07.358000+00:00",
+"source": "seed_dataset",
+"seeded": true,
+"name": "Oak Avenue",
+"created_at": "2026-09-25T00:35:07.358000+00:00",
+"lanes": 2,
+"lat": 37.3325,
+"_labels": [
+"Entity",
+"Road"
+]
+},
+{
+"lon": -121.8868,
+"last_confirmed": "2026-09-25T13:00:00+00:00",
+"location": [
+-121.8868,
+37.3372
+],
+"status": "open",
+"confidence": 1.0,
+"aliases": [
+"3rd Street",
+"Third Street",
+"3rd St"
+],
+"raw_evidence_ref": "seed/static_world_v1#Road-3rd",
+"kind": "road",
+"id": "Road-3rd",
+"status_since": "2026-09-25T13:00:00+00:00",
+"updated_at": "2026-09-25T00:35:07.436000+00:00",
+"source": "seed_dataset",
+"seeded": true,
+"name": "3rd Street",
+"created_at": "2026-09-25T00:35:07.436000+00:00",
+"lanes": 2,
+"lat": 37.3372,
+"_labels": [
+"Entity",
+"Road"
+]
+},
+{
+"lon": -121.8858,
+"last_confirmed": "2026-09-25T13:00:00+00:00",
+"location": [
+-121.8858,
+37.3395
+],
+"status": "open",
+"confidence": 1.0,
+"aliases": [
+"River Road",
+"River Rd"
+],
+"raw_evidence_ref": "seed/static_world_v1#Road-River",
+"kind": "road",
+"id": "Road-River",
+"status_since": "2026-09-25T13:00:00+00:00",
+"updated_at": "2026-09-25T00:35:07.468000+00:00",
+"source": "seed_dataset",
+"seeded": true,
+"name": "River Road",
+"created_at": "2026-09-25T00:35:07.468000+00:00",
+"lanes": 4,
+"lat": 37.3395,
+"_labels": [
+"Entity",
+"Road"
+]
+},
+{
+"confirmations": 0,
+"last_confirmed": "2026-09-25T14:02:45+00:00",
+"location": [
+-121.8935,
+37.336
+],
+"conflict_detected_at": "2026-09-25T00:35:10.441000+00:00",
+"aliases": [
+"Bridge Street",
+"Bridge St",
+"the bridge",
+"Pine Creek Bridge"
+],
+"previous_source": "radio_asr",
+"raw_evidence_ref": "drone/cam2/frame_000910.jpg",
+"kind": "road",
+"id": "Road-Bridge",
+"name": "Bridge Street",
+"last_confirmed_source": "drone_vision",
+"created_at": "2026-09-25T00:35:07.499000+00:00",
+"lanes": 2,
+"lat": 37.336,
+"conflict_confidence": 0.7,
+"lon": -121.8935,
+"last_confirmed_evidence_ref": "drone/cam2/frame_000910.jpg",
+"conflict_claim": "open",
+"conflict_source": "radio_asr",
+"status": "blocked",
+"conflict_note": "status follows the higher-confidence report (drone_vision 0.85); radio_asr reported 'open' (0.70)",
+"previous_status_since": "2026-09-25T13:00:00+00:00",
+"confidence": 0.85,
+"confirmed_sources": [
+"drone_vision"
+],
+"conflict_evidence_ref": "radio/ch3/clip_000150.wav",
+"status_event_id": "evt-0010",
+"previous_status": "open",
+"status_since": "2026-09-25T14:02:45+00:00",
+"updated_at": "2026-09-25T00:35:10.454000+00:00",
+"source": "drone_vision",
+"seeded": true,
+"conflict_event_id": "evt-0009",
+"conflict": true,
+"conflict_since": "2026-09-25T14:02:30+00:00",
+"_labels": [
+"Entity",
+"Road"
+]
+},
+{
+"occupancy_est": 120,
+"confirmations": 0,
+"last_confirmed": "2026-09-25T14:00:15+00:00",
+"location": [
+-121.8893,
+37.3352
+],
+"building_type": "apartment",
+"aliases": [
+"Building 14",
+"Bldg 14",
+"B14"
+],
+"previous_source": "seed_dataset",
+"raw_evidence_ref": "drone/cam1/frame_000450.jpg",
+"kind": "building",
+"id": "Building-14",
+"floors": 4,
+"name": "Building 14",
+"last_confirmed_source": "drone_vision",
+"created_at": "2026-09-25T00:35:07.881000+00:00",
+"lat": 37.3352,
+"lon": -121.8893,
+"last_confirmed_evidence_ref": "drone/cam1/frame_000450.jpg",
+"status": "collapsed",
+"previous_status_since": "2026-09-25T13:00:00+00:00",
+"confidence": 0.91,
+"confirmed_sources": [
+"drone_vision"
+],
+"status_event_id": "evt-0002",
+"previous_status": "intact",
+"status_since": "2026-09-25T14:00:15+00:00",
+"updated_at": "2026-09-25T00:35:09.273000+00:00",
+"source": "drone_vision",
+"seeded": true,
+"conflict": false,
+"_labels": [
+"Entity",
+"Building"
+]
+},
+{
+"lon": -121.887,
+"occupancy_est": 60,
+"last_confirmed": "2026-09-25T13:00:00+00:00",
+"location": [
+-121.887,
+37.3374
+],
+"status": "intact",
+"confidence": 1.0,
+"building_type": "office",
+"aliases": [
+"Building 7",
+"Bldg 7",
+"B7"
+],
+"raw_evidence_ref": "seed/static_world_v1#Building-7",
+"kind": "building",
+"id": "Building-7",
+"status_since": "2026-09-25T13:00:00+00:00",
+"updated_at": "2026-09-25T00:35:07.946000+00:00",
+"source": "seed_dataset",
+"seeded": true,
+"floors": 3,
+"name": "Building 7",
+"created_at": "2026-09-25T00:35:07.946000+00:00",
+"lat": 37.3374,
+"_labels": [
+"Entity",
+"Building"
+]
+},
+{
+"lon": -121.893,
+"occupancy_est": 40,
+"last_confirmed": "2026-09-25T13:00:00+00:00",
+"location": [
+-121.893,
+37.333
+],
+"status": "intact",
+"confidence": 1.0,
+"building_type": "retail",
+"aliases": [
+"Building 22",
+"Bldg 22",
+"B22"
+],
+"raw_evidence_ref": "seed/static_world_v1#Building-22",
+"kind": "building",
+"id": "Building-22",
+"status_since": "2026-09-25T13:00:00+00:00",
+"updated_at": "2026-09-25T00:35:07.999000+00:00",
+"source": "seed_dataset",
+"seeded": true,
+"floors": 2,
+"name": "Building 22",
+"created_at": "2026-09-25T00:35:07.999000+00:00",
+"lat": 37.333,
+"_labels": [
+"Entity",
+"Building"
+]
+},
+{
+"lon": -121.8862,
+"occupancy_est": 10,
+"last_confirmed": "2026-09-25T13:00:00+00:00",
+"location": [
+-121.8862,
+37.339
+],
+"status": "intact",
+"confidence": 1.0,
+"building_type": "warehouse",
+"aliases": [
+"Building 3",
+"Bldg 3",
+"B3"
+],
+"raw_evidence_ref": "seed/static_world_v1#Building-3",
+"kind": "building",
+"id": "Building-3",
+"status_since": "2026-09-25T13:00:00+00:00",
+"updated_at": "2026-09-25T00:35:08.021000+00:00",
+"source": "seed_dataset",
+"seeded": true,
+"floors": 1,
+"name": "Building 3",
+"created_at": "2026-09-25T00:35:08.021000+00:00",
+"lat": 37.339,
+"_labels": [
+"Entity",
+"Building"
+]
+},
+{
+"lon": -121.885,
+"last_confirmed": "2026-09-25T13:00:00+00:00",
+"location": [
+-121.885,
+37.34
+],
+"status": "open",
+"facility_type": "hospital",
+"confidence": 1.0,
+"aliases": [
+"County General Hospital",
+"County General",
+"the hospital",
+"hospital"
+],
+"raw_evidence_ref": "seed/static_world_v1#Facility-CountyGeneral",
+"kind": "facility",
+"beds_available": 18,
+"id": "Facility-CountyGeneral",
+"status_since": "2026-09-25T13:00:00+00:00",
+"updated_at": "2026-09-25T00:35:08.048000+00:00",
+"source": "seed_dataset",
+"seeded": true,
+"name": "County General Hospital",
+"created_at": "2026-09-25T00:35:08.048000+00:00",
+"capacity": 200,
+"lat": 37.34,
+"_labels": [
+"Entity",
+"Facility"
+]
+},
+{
+"lon": -121.895,
+"last_confirmed": "2026-09-25T13:00:00+00:00",
+"location": [
+-121.895,
+37.332
+],
+"status": "open",
+"facility_type": "shelter",
+"confidence": 1.0,
+"aliases": [
+"Lincoln High School",
+"Lincoln High",
+"the shelter",
+"shelter",
+"staging area"
+],
+"raw_evidence_ref": "seed/static_world_v1#Facility-LincolnHS",
+"kind": "facility",
+"beds_available": 300,
+"id": "Facility-LincolnHS",
+"status_since": "2026-09-25T13:00:00+00:00",
+"updated_at": "2026-09-25T00:35:08.092000+00:00",
+"source": "seed_dataset",
+"seeded": true,
+"name": "Lincoln High School Shelter",
+"created_at": "2026-09-25T00:35:08.092000+00:00",
+"capacity": 300,
+"lat": 37.332,
+"_labels": [
+"Entity",
+"Facility"
+]
+},
+{
+"confirmations": 0,
+"last_confirmed": "2026-09-25T14:02:00+00:00",
+"location": [
+-121.8891,
+37.3353
+],
+"callsign": "Rescue 4",
+"aliases": [
+"Rescue Team 4",
+"Rescue 4",
+"RT4",
+"Team 4",
+"Rescue-4"
+],
+"previous_source": "seed_dataset",
+"raw_evidence_ref": "fieldreport/msg_000118",
+"kind": "team",
+"id": "Team-Rescue4",
+"personnel": 6,
+"position_since": "2026-09-25T14:00:40+00:00",
+"name": "Rescue Team 4",
+"last_confirmed_source": "field_report",
+"created_at": "2026-09-25T00:35:08.112000+00:00",
+"lat": 37.3353,
+"lon": -121.8891,
+"last_confirmed_evidence_ref": "fieldreport/msg_000118",
+"status": "on_scene",
+"speed_mps": 0.4,
+"previous_status_since": "2026-09-25T13:00:00+00:00",
+"confidence": 0.9,
+"confirmed_sources": [
+"field_report"
+],
+"status_event_id": "evt-0008",
+"position_evidence_ref": "mqtt/gps/team-rescue4/1790344840",
+"previous_status": "available",
+"status_since": "2026-09-25T14:02:00+00:00",
+"updated_at": "2026-09-25T00:35:10.276000+00:00",
+"source": "field_report",
+"seeded": true,
+"position_source": "gps",
+"unit_type": "rescue",
+"conflict": false,
+"position_event_id": "evt-0004",
+"_labels": [
+"Entity",
+"Team"
+]
+},
+{
+"lon": -121.8947,
+"last_confirmed": "2026-09-25T13:00:00+00:00",
+"location": [
+-121.8947,
+37.3322
+],
+"status": "available",
+"speed_mps": 0.0,
+"confidence": 1.0,
+"callsign": "Medic 2",
+"aliases": [
+"Ambulance 2",
+"Ambo 2",
+"Medic 2",
+"A2",
+"Ambulance-2"
+],
+"raw_evidence_ref": "seed/static_world_v1#Team-Ambulance2",
+"kind": "team",
+"position_evidence_ref": "mqtt/gps/team-ambulance2/1790344860",
+"id": "Team-Ambulance2",
+"status_since": "2026-09-25T13:00:00+00:00",
+"updated_at": "2026-09-25T00:35:10.079000+00:00",
+"personnel": 2,
+"source": "seed_dataset",
+"seeded": true,
+"position_source": "gps",
+"name": "Ambulance 2",
+"position_since": "2026-09-25T14:01:00+00:00",
+"created_at": "2026-09-25T00:35:08.164000+00:00",
+"unit_type": "ambulance",
+"position_event_id": "evt-0006",
+"lat": 37.3322,
+"_labels": [
+"Entity",
+"Team"
+]
+},
+{
+"lon": -121.8851,
+"last_confirmed": "2026-09-25T13:00:00+00:00",
+"location": [
+-121.8851,
+37.3399
+],
+"status": "available",
+"confidence": 1.0,
+"callsign": "Medic 1",
+"aliases": [
+"Ambulance 1",
+"Ambo 1",
+"Medic 1",
+"A1",
+"Ambulance-1"
+],
+"raw_evidence_ref": "seed/static_world_v1#Team-Ambulance1",
+"kind": "team",
+"position_evidence_ref": "seed/static_world_v1#staging",
+"id": "Team-Ambulance1",
+"status_since": "2026-09-25T13:00:00+00:00",
+"updated_at": "2026-09-25T00:35:08.183000+00:00",
+"personnel": 2,
+"source": "seed_dataset",
+"seeded": true,
+"position_source": "seed_dataset",
+"name": "Ambulance 1",
+"position_since": "2026-09-25T13:00:00+00:00",
+"created_at": "2026-09-25T00:35:08.183000+00:00",
+"unit_type": "ambulance",
+"lat": 37.3399,
+"_labels": [
+"Entity",
+"Team"
+]
+},
+{
+"lon": -121.886,
+"last_confirmed": "2026-09-25T13:00:00+00:00",
+"location": [
+-121.886,
+37.338
+],
+"status": "available",
+"confidence": 1.0,
+"callsign": "Engine 7",
+"aliases": [
+"Engine 7",
+"E7",
+"Fire Engine 7"
+],
+"raw_evidence_ref": "seed/static_world_v1#Team-Engine7",
+"kind": "team",
+"position_evidence_ref": "seed/static_world_v1#staging",
+"id": "Team-Engine7",
+"status_since": "2026-09-25T13:00:00+00:00",
+"updated_at": "2026-09-25T00:35:08.210000+00:00",
+"personnel": 4,
+"source": "seed_dataset",
+"seeded": true,
+"position_source": "seed_dataset",
+"name": "Engine 7",
+"position_since": "2026-09-25T13:00:00+00:00",
+"created_at": "2026-09-25T00:35:08.210000+00:00",
+"unit_type": "fire",
+"lat": 37.338,
+"_labels": [
+"Entity",
+"Team"
+]
+},
+{
+"reading": 45.0,
+"confirmations": 0,
+"last_confirmed": "2026-09-25T14:01:30+00:00",
+"location": [
+-121.8896,
+37.335
+],
+"aliases": [
+"Gas Sensor 3",
+"GasSensor-3",
+"gas sensor 3",
+"GS3"
+],
+"previous_source": "seed_dataset",
+"raw_evidence_ref": "mqtt/sensors/gas/3/1790344890",
+"kind": "sensor",
+"id": "Sensor-Gas3",
+"reading_at": "2026-09-25T14:01:30+00:00",
+"sensor_type": "gas",
+"name": "Gas Sensor 3",
+"last_confirmed_source": "sensor",
+"created_at": "2026-09-25T00:35:08.260000+00:00",
+"lat": 37.335,
+"lon": -121.8896,
+"last_confirmed_evidence_ref": "mqtt/sensors/gas/3/1790344890",
+"status": "spike",
+"previous_status_since": "2026-09-25T13:00:00+00:00",
+"confidence": 0.97,
+"confirmed_sources": [
+"sensor"
+],
+"status_event_id": "evt-0007",
+"threshold": 25.0,
+"previous_status": "normal",
+"unit": "ppm",
+"status_since": "2026-09-25T14:01:30+00:00",
+"updated_at": "2026-09-25T00:35:10.167000+00:00",
+"source": "sensor",
+"seeded": true,
+"conflict": false,
+"_labels": [
+"Entity",
+"Sensor"
+]
+},
+{
+"reading": 5.8,
+"confirmations": 0,
+"last_confirmed": "2026-09-25T14:00:00+00:00",
+"location": [
+-121.89,
+37.336
+],
+"aliases": [
+"Seismic Sensor 1",
+"Seismic-1",
+"seismometer 1"
+],
+"previous_source": "seed_dataset",
+"raw_evidence_ref": "mqtt/sensors/seismic/1/1790344800",
+"kind": "sensor",
+"id": "Sensor-Seismic1",
+"reading_at": "2026-09-25T14:00:00+00:00",
+"sensor_type": "seismic",
+"name": "Seismic Sensor 1",
+"last_confirmed_source": "sensor",
+"created_at": "2026-09-25T00:35:08.303000+00:00",
+"lat": 37.336,
+"lon": -121.89,
+"last_confirmed_evidence_ref": "mqtt/sensors/seismic/1/1790344800",
+"status": "spike",
+"previous_status_since": "2026-09-25T13:00:00+00:00",
+"confidence": 0.99,
+"confirmed_sources": [
+"sensor"
+],
+"status_event_id": "evt-0001",
+"threshold": 4.0,
+"previous_status": "normal",
+"unit": "magnitude",
+"status_since": "2026-09-25T14:00:00+00:00",
+"updated_at": "2026-09-25T00:35:08.848000+00:00",
+"source": "sensor",
+"seeded": true,
+"conflict": false,
+"_labels": [
+"Entity",
+"Sensor"
+]
+},
+{
+"lon": -121.8936,
+"last_confirmed": "2026-09-25T13:00:00+00:00",
+"location": [
+-121.8936,
+37.3361
+],
+"status": "normal",
+"confidence": 1.0,
+"aliases": [
+"Water Level Sensor 2",
+"Water-2",
+"creek gauge 2"
+],
+"raw_evidence_ref": "seed/static_world_v1#Sensor-Water2",
+"kind": "sensor",
+"threshold": 2.5,
+"id": "Sensor-Water2",
+"unit": "m",
+"status_since": "2026-09-25T13:00:00+00:00",
+"updated_at": "2026-09-25T00:35:08.325000+00:00",
+"source": "seed_dataset",
+"seeded": true,
+"sensor_type": "water",
+"name": "Water Level Sensor 2",
+"created_at": "2026-09-25T00:35:08.325000+00:00",
+"lat": 37.3361,
+"_labels": [
+"Entity",
+"Sensor"
+]
+},
+{
+"lon": -121.89,
+"last_confirmed_evidence_ref": "mqtt/sensors/seismic/1/1790344800",
+"radius_m": 250.0,
+"last_confirmed": "2026-09-25T14:00:00+00:00",
+"location": [
+-121.89,
+37.336
+],
+"status": "active",
+"confidence": 0.99,
+"aliases": [
+"Seismic hazard at Seismic Sensor 1"
+],
+"raw_evidence_ref": "mqtt/sensors/seismic/1/1790344800",
+"status_event_id": "evt-0001",
+"hazard_type": "seismic",
+"kind": "hazard",
+"id": "Hazard-seismic-Sensor-Seismic1",
+"unit": "magnitude",
+"level": 5.8,
+"status_since": "2026-09-25T14:00:00+00:00",
+"updated_at": "2026-09-25T00:35:08.907000+00:00",
+"source": "sensor",
+"seeded": false,
+"name": "Seismic hazard at Seismic Sensor 1",
+"last_confirmed_source": "sensor",
+"created_at": "2026-09-25T00:35:08.907000+00:00",
+"lat": 37.336,
+"_labels": [
+"Entity",
+"Hazard"
+]
+},
+{
+"text": "t=0 seismic event that starts the scenario",
+"ingested_at": "2026-09-25T00:35:09.184000+00:00",
+"entity": "Sensor-Seismic1",
+"confidence": 0.99,
+"entity_id": "Sensor-Seismic1",
+"raw_evidence_ref": "mqtt/sensors/seismic/1/1790344800",
+"id": "evt-0001",
+"timestamp": "2026-09-25T14:00:00+00:00",
+"source": "sensor",
+"details": "{\"note\": \"t=0 seismic event that starts the scenario\", \"reading\": 5.8, \"unit\": \"magnitude\"}",
+"applied": true,
+"action": "override",
+"claim": "spike",
+"note": "'normal' -> 'spike' by sensor",
+"_labels": [
+"Event"
+]
+},
+{
+"ingested_at": "2026-09-25T00:35:09.309000+00:00",
+"entity": "Building-14",
+"confidence": 0.91,
+"entity_id": "Building-14",
+"raw_evidence_ref": "drone/cam1/frame_000450.jpg",
+"id": "evt-0002",
+"timestamp": "2026-09-25T14:00:15+00:00",
+"source": "drone_vision",
+"details": "{\"bbox\": [412, 188, 790, 602], \"detector\": \"yolo-collapse-v2\"}",
+"applied": true,
+"action": "override",
+"claim": "collapsed",
+"note": "'intact' -> 'collapsed' by drone_vision",
+"_labels": [
+"Event"
+]
+},
+{
+"text": "Dispatch, Engine 7, Main Street is blocked between Oak and Third, debris across all lanes.",
+"ingested_at": "2026-09-25T00:35:09.464000+00:00",
+"entity": "Main Street",
+"confidence": 0.78,
+"entity_id": "Road-Main",
+"raw_evidence_ref": "radio/ch3/clip_000032.wav",
+"id": "evt-0003",
+"timestamp": "2026-09-25T14:00:32+00:00",
+"source": "radio_asr",
+"details": "{\"speaker\": \"Engine 7\", \"transcript\": \"Dispatch, Engine 7, Main Street is blocked between Oak and Third, debris across all lanes.\"}",
+"applied": true,
+"action": "override",
+"claim": "blocked",
+"note": "'open' -> 'blocked' by radio_asr",
+"_labels": [
+"Event"
+]
+},
+{
+"text": "about 20 m from Building 14 -> should create NEAR",
+"ingested_at": "2026-09-25T00:35:09.868000+00:00",
+"entity": "Rescue Team 4",
+"confidence": 0.95,
+"entity_id": "Team-Rescue4",
+"raw_evidence_ref": "mqtt/gps/team-rescue4/1790344840",
+"id": "evt-0004",
+"timestamp": "2026-09-25T14:00:40+00:00",
+"source": "gps",
+"details": "{\"lat\": 37.3353, \"lon\": -121.8891, \"note\": \"about 20 m from Building 14 -> should create NEAR\", \"speed_mps\": 0.4}",
+"applied": true,
+"action": "position_update",
+"claim": "position_update",
+"note": "positional claim - status untouched",
+"_labels": [
+"Event"
+]
+},
+{
+"text": "vision confirms the GPS-derived NEAR: same relationship, second source, higher fused confidence",
+"ingested_at": "2026-09-25T00:35:10.020000+00:00",
+"entity": "Rescue Team 4",
+"confidence": 0.82,
+"entity_id": "Team-Rescue4",
+"raw_evidence_ref": "drone/cam1/frame_000520.jpg",
+"id": "evt-0005",
+"timestamp": "2026-09-25T14:00:45+00:00",
+"source": "drone_vision",
+"details": "{\"note\": \"vision confirms the GPS-derived NEAR: same relationship, second source, higher fused confidence\", \"target\": \"Building 14\"}",
+"applied": true,
+"action": "near",
+"claim": "near",
+"note": "positional claim - status untouched",
+"_labels": [
+"Event"
+]
+},
+{
+"text": "still at the Lincoln HS staging area",
+"ingested_at": "2026-09-25T00:35:10.114000+00:00",
+"entity": "Ambulance 2",
+"confidence": 0.95,
+"entity_id": "Team-Ambulance2",
+"raw_evidence_ref": "mqtt/gps/team-ambulance2/1790344860",
+"id": "evt-0006",
+"timestamp": "2026-09-25T14:01:00+00:00",
+"source": "gps",
+"details": "{\"lat\": 37.3322, \"lon\": -121.8947, \"note\": \"still at the Lincoln HS staging area\", \"speed_mps\": 0.0}",
+"applied": true,
+"action": "position_update",
+"claim": "position_update",
+"note": "positional claim - status untouched",
+"_labels": [
+"Event"
+]
+},
+{
+"lon": -121.8896,
+"last_confirmed_evidence_ref": "mqtt/sensors/gas/3/1790344890",
+"radius_m": 100.0,
+"last_confirmed": "2026-09-25T14:01:30+00:00",
+"location": [
+-121.8896,
+37.335
+],
+"status": "active",
+"confidence": 0.97,
+"aliases": [
+"Gas hazard at Gas Sensor 3"
+],
+"raw_evidence_ref": "mqtt/sensors/gas/3/1790344890",
+"status_event_id": "evt-0007",
+"hazard_type": "gas",
+"kind": "hazard",
+"id": "Hazard-gas-Sensor-Gas3",
+"unit": "ppm",
+"level": 45.0,
+"status_since": "2026-09-25T14:01:30+00:00",
+"updated_at": "2026-09-25T00:35:10.170000+00:00",
+"source": "sensor",
+"seeded": false,
+"name": "Gas hazard at Gas Sensor 3",
+"last_confirmed_source": "sensor",
+"created_at": "2026-09-25T00:35:10.170000+00:00",
+"lat": 37.335,
+"_labels": [
+"Entity",
+"Hazard"
+]
+},
+{
+"text": "sensor monitors Building 14 -> Hazard AFFECTS Building 14; Rescue Team 4 is NEAR it -> at risk",
+"ingested_at": "2026-09-25T00:35:10.226000+00:00",
+"entity": "Gas Sensor 3",
+"confidence": 0.97,
+"entity_id": "Sensor-Gas3",
+"raw_evidence_ref": "mqtt/sensors/gas/3/1790344890",
+"id": "evt-0007",
+"timestamp": "2026-09-25T14:01:30+00:00",
+"source": "sensor",
+"details": "{\"note\": \"sensor monitors Building 14 -> Hazard AFFECTS Building 14; Rescue Team 4 is NEAR it -> at risk\", \"reading\": 45.0, \"unit\": \"ppm\"}",
+"applied": true,
+"action": "override",
+"claim": "spike",
+"note": "'normal' -> 'spike' by sensor",
+"_labels": [
+"Event"
+]
+},
+{
+"text": "Rescue 4 on scene at Building 14, beginning search of the north stairwell.",
+"ingested_at": "2026-09-25T00:35:10.347000+00:00",
+"entity": "Rescue Team 4",
+"confidence": 0.9,
+"entity_id": "Team-Rescue4",
+"raw_evidence_ref": "fieldreport/msg_000118",
+"id": "evt-0008",
+"timestamp": "2026-09-25T14:02:00+00:00",
+"source": "field_report",
+"details": "{\"reported_by\": \"Rescue 4 lead\", \"target\": \"Building-14\", \"text\": \"Rescue 4 on scene at Building 14, beginning search of the north stairwell.\"}",
+"applied": true,
+"action": "override",
+"claim": "on_scene",
+"note": "'available' -> 'on_scene' by field_report",
+"_labels": [
+"Event"
+]
+},
+{
+"text": "Bridge Street looks open, units can use the bridge.",
+"ingested_at": "2026-09-25T00:35:10.416000+00:00",
+"entity": "Bridge Street",
+"confidence": 0.7,
+"entity_id": "Road-Bridge",
+"raw_evidence_ref": "radio/ch3/clip_000150.wav",
+"id": "evt-0009",
+"timestamp": "2026-09-25T14:02:30+00:00",
+"source": "radio_asr",
+"details": "{\"note\": \"conflict pair 1/2\", \"speaker\": \"unknown\", \"transcript\": \"Bridge Street looks open, units can use the bridge.\"}",
+"applied": true,
+"action": "confirm",
+"claim": "open",
+"note": "radio_asr re-confirms 'open'",
+"_labels": [
+"Event"
+]
+},
+{
+"text": "conflict pair 2/2: radio said open 15 s ago, drone sees debris -> surface as CONFLICTING REPORTS, do not silently pick",
+"ingested_at": "2026-09-25T00:35:10.463000+00:00",
+"entity": "Road-Bridge",
+"confidence": 0.85,
+"entity_id": "Road-Bridge",
+"raw_evidence_ref": "drone/cam2/frame_000910.jpg",
+"id": "evt-0010",
+"timestamp": "2026-09-25T14:02:45+00:00",
+"source": "drone_vision",
+"details": "{\"detector\": \"debris-seg-v1\", \"note\": \"conflict pair 2/2: radio said open 15 s ago, drone sees debris -> surface as CONFLICTING REPORTS, do not silently pick\"}",
+"applied": true,
+"action": "conflict",
+"claim": "blocked",
+"note": "drone_vision says 'blocked' (0.85) vs radio_asr 'open' (0.70) reported 15s earlier",
+"_labels": [
+"Event"
+]
+}
+],
+"rels": [
+{
+"a": "Road-Oak",
+"b": "Road-Main",
+"type": "CONNECTS_TO",
+"props": {
+"source": "seed_dataset",
+"length_m": 650
+}
+},
+{
+"a": "Road-Main",
+"b": "Road-River",
+"type": "CONNECTS_TO",
+"props": {
+"source": "seed_dataset",
+"length_m": 540
+}
+},
+{
+"a": "Road-Main",
+"b": "Road-3rd",
+"type": "CONNECTS_TO",
+"props": {
+"source": "seed_dataset",
+"length_m": 300
+}
+},
+{
+"a": "Road-3rd",
+"b": "Road-River",
+"type": "CONNECTS_TO",
+"props": {
+"source": "seed_dataset",
+"length_m": 280
+}
+},
+{
+"a": "Road-Oak",
+"b": "Road-Bridge",
+"type": "CONNECTS_TO",
+"props": {
+"source": "seed_dataset",
+"length_m": 420
+}
+},
+{
+"a": "Road-Bridge",
+"b": "Road-River",
+"type": "CONNECTS_TO",
+"props": {
+"source": "seed_dataset",
+"length_m": 900
+}
+},
+{
+"a": "Building-14",
+"b": "Road-Main",
+"type": "ON_ROAD",
+"props": {
+"source": "seed_dataset"
+}
+},
+{
+"a": "Building-7",
+"b": "Road-3rd",
+"type": "ON_ROAD",
+"props": {
+"source": "seed_dataset"
+}
+},
+{
+"a": "Building-22",
+"b": "Road-Oak",
+"type": "ON_ROAD",
+"props": {
+"source": "seed_dataset"
+}
+},
+{
+"a": "Building-3",
+"b": "Road-River",
+"type": "ON_ROAD",
+"props": {
+"source": "seed_dataset"
+}
+},
+{
+"a": "Facility-CountyGeneral",
+"b": "Road-River",
+"type": "ON_ROAD",
+"props": {
+"source": "seed_dataset"
+}
+},
+{
+"a": "Facility-LincolnHS",
+"b": "Road-Oak",
+"type": "ON_ROAD",
+"props": {
+"source": "seed_dataset"
+}
+},
+{
+"a": "Sensor-Gas3",
+"b": "Building-14",
+"type": "MONITORS",
+"props": {
+"source": "seed_dataset"
+}
+},
+{
+"a": "Sensor-Water2",
+"b": "Road-Bridge",
+"type": "MONITORS",
+"props": {
+"source": "seed_dataset"
+}
+},
+{
+"a": "Team-Rescue4",
+"b": "Facility-LincolnHS",
+"type": "STAGED_AT",
+"props": {
+"source": "seed_dataset",
+"since": "2026-09-25T13:00:00+00:00"
+}
+},
+{
+"a": "Team-Ambulance2",
+"b": "Facility-LincolnHS",
+"type": "STAGED_AT",
+"props": {
+"source": "seed_dataset",
+"since": "2026-09-25T13:00:00+00:00"
+}
+},
+{
+"a": "Team-Ambulance1",
+"b": "Facility-CountyGeneral",
+"type": "STAGED_AT",
+"props": {
+"source": "seed_dataset",
+"since": "2026-09-25T13:00:00+00:00"
+}
+},
+{
+"a": "Hazard-seismic-Sensor-Seismic1",
+"b": "Sensor-Seismic1",
+"type": "DETECTED_BY",
+"props": {
+"source": "sensor",
+"last_confirmed": "2026-09-25T14:00:00+00:00",
+"since": "2026-09-25T14:00:00+00:00"
+}
+},
+{
+"a": "evt-0001",
+"b": "Sensor-Seismic1",
+"type": "ABOUT",
+"props": {}
+},
+{
+"a": "evt-0002",
+"b": "Building-14",
+"type": "ABOUT",
+"props": {}
+},
+{
+"a": "evt-0003",
+"b": "Road-Main",
+"type": "ABOUT",
+"props": {}
+},
+{
+"a": "Team-Rescue4",
+"b": "Building-14",
+"type": "NEAR",
+"props": {
+"epochs": 1,
+"last_confirmed": "2026-09-25T14:00:45+00:00",
+"distance_m": 20.9,
+"active": true,
+"evidence_refs": [
+"mqtt/gps/team-rescue4/1790344840",
+"drone/cam1/frame_000520.jpg"
+],
+"confidence": 0.991,
+"since": "2026-09-25T14:00:40+00:00",
+"last_source": "drone_vision",
+"sources": [
+"gps",
+"drone_vision"
+],
+"event_ids": [
+"evt-0004",
+"evt-0005"
+]
+}
+},
+{
+"a": "Team-Rescue4",
+"b": "Hazard-seismic-Sensor-Seismic1",
+"type": "NEAR",
+"props": {
+"epochs": 1,
+"last_confirmed": "2026-09-25T14:00:40+00:00",
+"distance_m": 111.4,
+"active": true,
+"evidence_refs": [
+"mqtt/gps/team-rescue4/1790344840"
+],
+"confidence": 0.95,
+"since": "2026-09-25T14:00:40+00:00",
+"last_source": "gps",
+"sources": [
+"gps"
+],
+"event_ids": [
+"evt-0004"
+]
+}
+},
+{
+"a": "evt-0004",
+"b": "Team-Rescue4",
+"type": "ABOUT",
+"props": {}
+},
+{
+"a": "evt-0005",
+"b": "Team-Rescue4",
+"type": "ABOUT",
+"props": {}
+},
+{
+"a": "Team-Ambulance2",
+"b": "Facility-LincolnHS",
+"type": "NEAR",
+"props": {
+"epochs": 1,
+"last_confirmed": "2026-09-25T14:01:00+00:00",
+"distance_m": 34.7,
+"active": true,
+"evidence_refs": [
+"mqtt/gps/team-ambulance2/1790344860"
+],
+"confidence": 0.95,
+"since": "2026-09-25T14:01:00+00:00",
+"last_source": "gps",
+"sources": [
+"gps"
+],
+"event_ids": [
+"evt-0006"
+]
+}
+},
+{
+"a": "evt-0006",
+"b": "Team-Ambulance2",
+"type": "ABOUT",
+"props": {}
+},
+{
+"a": "Hazard-gas-Sensor-Gas3",
+"b": "Sensor-Gas3",
+"type": "DETECTED_BY",
+"props": {
+"source": "sensor",
+"last_confirmed": "2026-09-25T14:01:30+00:00",
+"since": "2026-09-25T14:01:30+00:00"
+}
+},
+{
+"a": "Hazard-gas-Sensor-Gas3",
+"b": "Building-14",
+"type": "AFFECTS",
+"props": {
+"source": "sensor",
+"last_confirmed": "2026-09-25T14:01:30+00:00",
+"active": true,
+"evidence_refs": [
+"mqtt/sensors/gas/3/1790344890"
+],
+"confidence": 0.97,
+"since": "2026-09-25T14:01:30+00:00",
+"event_ids": [
+"evt-0007"
+]
+}
+},
+{
+"a": "Team-Rescue4",
+"b": "Hazard-gas-Sensor-Gas3",
+"type": "NEAR",
+"props": {
+"epochs": 1,
+"last_confirmed": "2026-09-25T14:01:30+00:00",
+"distance_m": 55.4,
+"active": true,
+"evidence_refs": [
+"mqtt/sensors/gas/3/1790344890",
+"mqtt/gps/team-rescue4/1790344840"
+],
+"confidence": 0.97,
+"since": "2026-09-25T14:01:30+00:00",
+"last_source": "sensor",
+"sources": [
+"sensor",
+"gps"
+],
+"event_ids": [
+"evt-0007"
+]
+}
+},
+{
+"a": "evt-0007",
+"b": "Sensor-Gas3",
+"type": "ABOUT",
+"props": {}
+},
+{
+"a": "Team-Rescue4",
+"b": "Building-14",
+"type": "ASSIGNED_TO",
+"props": {
+"source": "field_report",
+"last_confirmed": "2026-09-25T14:02:00+00:00",
+"active": true,
+"evidence_refs": [
+"fieldreport/msg_000118"
+],
+"confidence": 0.9,
+"since": "2026-09-25T14:02:00+00:00",
+"event_ids": [
+"evt-0008"
+]
+}
+},
+{
+"a": "evt-0008",
+"b": "Team-Rescue4",
+"type": "ABOUT",
+"props": {}
+},
+{
+"a": "evt-0009",
+"b": "Road-Bridge",
+"type": "ABOUT",
+"props": {}
+},
+{
+"a": "evt-0010",
+"b": "Road-Bridge",
+"type": "ABOUT",
+"props": {}
+},
+{
+"a": "evt-0010",
+"b": "evt-0009",
+"type": "CONFLICTS_WITH",
+"props": {
+"detected_at": "2026-09-25T00:35:10.490000+00:00"
+}
+}
+]
+}
