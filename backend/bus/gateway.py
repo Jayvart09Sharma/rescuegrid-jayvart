@@ -643,6 +643,7 @@ async def start_stream(file: UploadFile = File(...), camera: str = Form("drone-1
     ents = {k: v for k, v in (("building", building.strip()), ("road", road.strip()), ("bridge", bridge.strip())) if v}
     for st in STREAMS.values():   # one stream per drone: a new upload for the same camera replaces the running one
         if st.get("camera") == camera and st["proc"].poll() is None: st["proc"].terminate()
+    REACTIVE["armed"] = True
     names = [x for x in re.split(r"[,;\n]+", plan) if x.strip()]
     fp = build_flight_plan(names) if names else {"waypoints": []}
     if fp["waypoints"]:
@@ -667,6 +668,7 @@ async def scenario_start(body: dict | None = None):
     if any(st["kind"] == "scenario" and st["proc"].poll() is None for st in STREAMS.values()): raise HTTPException(409, "a scenario replay is already running")
     try: httpx.post(f"{VISION}/v1/vision/reset", timeout=5)
     except Exception: pass
+    REACTIVE["armed"] = True
     cmd = ["python3", os.path.join(ROOT, "scenario", "replay.py"), "--speed", str(speed)]
     return spawn_stream("scenario", cmd, os.path.join(ROOT, "scenario"), {"file": "scenario.json", "speed": speed})
 
@@ -719,13 +721,21 @@ async def entities():
 async def reset_incident():
     """Wipe the shared graph back to the static seed, forget the bus counters and this gateway's history, stop running
     streams, and re-seed every connected twin. The graph is the source of truth; everything else follows it."""
+    STATE["epoch"] += 1; REACTIVE["armed"] = False
     for st in STREAMS.values():
         if st["proc"].poll() is None: st["proc"].terminate()
+    for it in RADIO_QUEUE: it["cancelled"] = True
+    try: httpx.post(f"{VISION}/v1/vision/reset", timeout=5)
+    except Exception: pass
+    for _ in range(40):   # a Qwen assessment already running would post its claim into the fresh graph: let it drain first (<= 8 s)
+        try:
+            st = httpx.get(f"{VISION}/v1/vision/stats", timeout=3).json()
+            if st["gate_triggers"] <= st["vlm_calls"] + st["vlm_merged"]: break
+        except Exception: break
+        await asyncio.sleep(0.2)
     G.reset()
     try: httpx.post(f"{BUS}/reset", timeout=10)
     except Exception as e: print("bus reset failed:", e, file=sys.stderr)
-    try: httpx.post(f"{VISION}/v1/vision/reset", timeout=5)
-    except Exception: pass
     STATE["events"].clear(); STATE["suggestions"].clear(); STATE["last_received"] = now_iso_wall(); CAM_MSG.clear()
     REACTIVE["fired"].clear(); REACTIVE["log"].clear(); RADIO_LOG.clear()
     for it in RADIO_QUEUE: it["cancelled"] = True
@@ -746,7 +756,8 @@ def now_iso_wall() -> str: return datetime.now(timezone.utc).isoformat(timespec=
 # building spike, a rescue unit roll (GPS fixes along the way), the crew call it in on the radio (spoken by Piper, heard
 # by faster-whisper, turned into a claim by the LLM). Everything simulated is marked details.simulated=true and
 # raw_evidence_ref sim/... ; vision, ASR, fusion and the graph stay real. Timings are the delays a real incident would have.
-REACTIVE = {"enabled": True, "fired": set(), "log": []}
+REACTIVE = {"enabled": True, "fired": set(), "log": [], "armed": False}   # armed by START INCIDENT / scenario / an upload; a reset disarms
+STATE["epoch"] = 0                                                              # bumped by every reset; in-flight work from before is dropped
 RADIO_PY = os.path.join(ROOT, "radio", ".venv", "bin", "python"); RADIO_SAY = os.path.join(ROOT, "radio", "say.py")
 UNIT_SPEED_MPS = {"rescue": 16.0, "ambulance": 22.0, "fire": 16.0, "police": 24.0}   # m/s with lights and sirens (58-86 km/h)
 VOICE_FOR = {"Team-Rescue4": "lessac", "Team-Engine7": "ryan", "Team-Ambulance2": "ryan", "Team-Ambulance1": "lessac", "Dispatch": "lessac"}
@@ -812,7 +823,7 @@ def nearest_available_team(lat, lon, unit_type="rescue"):
 
 def react_to(rec: dict, ev: dict):
     """Fire consequences for an applied event, once per (entity, claim) per incident."""
-    if not REACTIVE["enabled"]: return
+    if not REACTIVE["enabled"] or not REACTIVE["armed"]: return
     res = rec.get("result") or {}; src = rec["event"]
     d0 = src.get("details") or {}
     is_quake = src.get("source") == "sensor" and str(src.get("claim", "")).lower() == "spike" and (d0.get("sensor_type") == "seismic" or "Seismic" in str(src.get("entity", "")))
@@ -919,6 +930,7 @@ def seismic_incident(mag: float = 5.8):
 async def incident_start(body: dict | None = None):
     """START INCIDENT: the seismic sensor starts measuring now; the quake fires 5 s later. {magnitude?: 5.8}"""
     mag = float((body or {}).get("magnitude") or 5.8)
+    REACTIVE["armed"] = True
     threading.Thread(target=seismic_incident, args=(mag,), daemon=True).start()
     return {"started": True, "quake_in_s": 5, "magnitude": mag}
 
@@ -970,6 +982,7 @@ def radio_claim(transcript: str, speaker: str) -> dict:
 
 
 def process_radio(path: str, file_name: str, speaker: str, channel: str, note: str = "") -> dict:
+    epoch = STATE["epoch"]
     t0 = time.perf_counter()
     with open(path, "rb") as f:
         asr = httpx.post(f"{ASR}/v1/audio/transcriptions", files={"file": (file_name, f.read(), "audio/wav")}, data={"response_format": "verbose_json"}, timeout=120).json()
@@ -978,9 +991,12 @@ def process_radio(path: str, file_name: str, speaker: str, channel: str, note: s
     rec = {"id": f"radio-{uuid.uuid4().hex[:6]}", "file": file_name, "url": f"/radio/{file_name}", "speaker": speaker, "channel": channel,
            "transcript": transcript, "seconds": asr.get("duration"), "asr_ms": round((t_asr - t0) * 1000), "ts": scen_now_iso(), "note": note,
            "claim": None, "bus": None, "event_id": None}
+    if STATE["epoch"] != epoch:
+        rec["note"] = "dropped: incident was reset while this transmission was being processed"; return rec
     if transcript:
         try:
             c = radio_claim(transcript, speaker); rec["claim"] = c; rec["llm_ms"] = round((time.perf_counter() - t_asr) * 1000)
+            if STATE["epoch"] != epoch: rec["note"] = "dropped: incident was reset while this transmission was being processed"; return rec
             if c.get("entity") and c.get("claim"):
                 ev = {"source": "radio_asr", "timestamp": rec["ts"], "confidence": max(0.05, min(0.99, float(c.get("confidence") or 0.7))),
                       "entity": c["entity"], "claim": c["claim"], "raw_evidence_ref": f"radio/{file_name}",
