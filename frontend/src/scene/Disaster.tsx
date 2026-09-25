@@ -1,9 +1,6 @@
 // The earthquake, made visible. Everything here is driven by the graph mirror (store), never the other way round:
 //  - Incident / seismic spike       -> a heavy first jolt, a dust burst at the epicentre, dust haze, aftershock tremors
-//  - Building collapsed             -> dust and smoke settling over the rubble (no flames: a gas leak is not a fire)
-//                                      with a fire hazard on it: flames, black smoke, fire light
-//  - Building damaged (warning)     -> thin smoke wisps
-//  - Hazard kind 'fire'             -> flames + smoke on the entity it affects
+//  - Building collapsed             -> the rubble heap the city draws (nothing added: no flames, smoke or dust)
 //  - Road blocked (danger)          -> rubble chunks scattered across the segment
 //  - Units (ambulance / engine)     -> emergency beacons (Markers.tsx)
 import { useEffect, useMemo, useRef } from 'react'
@@ -83,32 +80,6 @@ function Plume({ x, z, y = 0, mode, h, w, n = 2500, rate = 0.35 }: { x: number; 
   return <points position={[x, y, z]} geometry={geo} material={mat} frustumCulled={false} />
 }
 
-/** Flickering fire light for the lit (mesh) twin. */
-function FireLight({ x, z, y, k = 1 }: { x: number; z: number; y: number; k?: number }) {
-  const l = useRef<THREE.PointLight>(null)
-  useFrame((s) => {
-    if (!l.current) return
-    const t = s.clock.elapsedTime
-    l.current.intensity = (60 + Math.sin(t * 17) * 18 + Math.sin(t * 5.3) * 14) * k
-  })
-  return <pointLight ref={l} position={[x, y, z]} color="#ff7a2a" distance={38 * k} decay={2} castShadow={false} />
-}
-
-function Fire({ x, z, w, big }: { x: number; z: number; w: number; big: boolean }) {
-  return (
-    <>
-      <Plume x={x} z={z} y={0.4} mode="flame" h={big ? 8 : 4.5} w={w * (big ? 0.55 : 0.35)} n={big ? 3200 : 1600} />
-      <Plume x={x} z={z} y={1.5} mode="smoke" h={big ? 44 : 28} w={w * (big ? 0.75 : 0.5)} n={big ? 4200 : 2400} />
-      {MESH && <FireLight x={x} z={z} y={3} k={big ? 1.2 : 0.6} />}
-    </>
-  )
-}
-
-/** Thin smoke wisps from a damaged building. */
-function Wisps({ x, z, w, h }: { x: number; z: number; w: number; h: number }) {
-  return <Plume x={x} z={z} y={h * 0.6} mode="smoke" h={14} w={w * 0.35} n={700} />
-}
-
 // ─── rubble on blocked roads ──────────────────────────────────────────────────
 function RoadRubble({ n }: { n: GraphNode }) {
   const a = n.props.a as number[]
@@ -183,10 +154,7 @@ export function Disaster() {
   const list = Object.values(nodes)
   const incident = list.find((n) => n.label === 'Incident') ?? list.find((n) => n.label === 'Sensor' && (n.props.kind === 'seismic') && n.status === 'danger')
   const quake = Boolean(incident) || list.some((n) => n.label === 'Building' && n.props.collapsed)
-  const fires = list.filter((n) => n.label === 'Hazard' && n.props.kind === 'fire' && n.status === 'danger')
-  const fireAt = new Set(fires.map((f) => f.props.at as string | undefined).filter(Boolean))
   const collapsed = list.filter((n) => n.label === 'Building' && n.props.collapsed)
-  const damaged = list.filter((n) => n.label === 'Building' && !n.props.collapsed && n.status === 'warning' && typeof n.props.x === 'number')
   const blocked = list.filter((n) => (n.label === 'Road' || n.label === 'Bridge') && n.status === 'danger' && Array.isArray(n.props.a) && Array.isArray(n.props.b))
   const epi = incident ? nodePos(incident) : null
   return (
@@ -195,17 +163,7 @@ export function Disaster() {
       <Shocks active={quake} />
       {/* no fissure lines: they did not read well; the quake shows as the jolt, the dust burst and haze, aftershocks, and what falls */}
       {epi && <Plume x={epi[0]} z={epi[1]} y={0.2} mode="burst" h={16} w={22} n={3000} rate={0.12} />}
-      {collapsed.map((b) => {
-        const w = (b.props.w as number) ?? 6
-        return fireAt.has(b.id)
-          ? <Fire key={b.id} x={b.props.x as number} z={b.props.z as number} w={w} big />
-          : <Plume key={b.id} x={b.props.x as number} z={b.props.z as number} y={0.3} mode="smoke" h={20} w={w * 0.9} n={2200} />
-      })}
-      {damaged.map((b) => <Wisps key={b.id} x={b.props.x as number} z={b.props.z as number} w={(b.props.w as number) ?? 6} h={(b.props.h as number) ?? 6} />)}
-      {fires.filter((f) => !collapsed.some((b) => b.id === f.props.at)).map((f) => {
-        const p = nodePos(f)
-        return p ? <Fire key={f.id} x={p[0]} z={p[1]} w={5} big={false} /> : null
-      })}
+      {/* collapsed buildings: the rubble heap the city draws is the whole statement; no flames, smoke or dust columns */}
       {blocked.map((r) => <RoadRubble key={r.id} n={r} />)}
     </group>
   )
