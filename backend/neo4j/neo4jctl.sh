@@ -19,8 +19,8 @@ wait_ready() {
 # Managed by the systemd --user unit rescuegrid-neo4j (enabled; linger on => starts at boot, restarts on failure).
 UNIT=rescuegrid-neo4j
 have_unit() { [ "${NEO4J_USE_SYSTEMD:-1}" != "0" ] && systemctl --user cat "$UNIT" >/dev/null 2>&1; }   # NEO4J_USE_SYSTEMD=0 forces the plain neo4j start/stop path
-start()   { if have_unit; then systemctl --user start "$UNIT"; else "$NEO4J_HOME/bin/neo4j" start >/dev/null; fi; wait_ready; }
-stop()    { if have_unit; then systemctl --user stop "$UNIT"; else "$NEO4J_HOME/bin/neo4j" stop >/dev/null || true; fi; echo ">> stopped"; }
+start()   { if have_unit; then systemctl --user start "$UNIT"; else "$NEO4J_HOME/bin/neo4j" start >/dev/null 2>&1; fi; wait_ready; }
+stop()    { if have_unit; then systemctl --user stop "$UNIT"; else "$NEO4J_HOME/bin/neo4j" stop >/dev/null 2>&1 || true; fi; echo ">> stopped"; }
 restart() { stop; start; }
 status()  { if have_unit; then systemctl --user --no-pager status "$UNIT" 2>&1 | sed -n '1,4p'; else "$NEO4J_HOME/bin/neo4j" status 2>&1 | head -2; fi; cypher "MATCH (n) RETURN count(n) AS nodes" 2>/dev/null | tail -1 | sed 's/^/   nodes: /' || true; }
 logs()    { tail -n "${2:-50}" "$NEO4J_HOME/logs/neo4j.log"; }
