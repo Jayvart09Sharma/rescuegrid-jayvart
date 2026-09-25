@@ -48,7 +48,8 @@ VLM_MODEL       = os.environ.get("VLM_MODEL", "vision")
 VLM_MAX_SIDE    = int(os.environ.get("VLM_MAX_SIDE", "640"))     # resize longest side before sending to the VLM
 VLM_MAX_TOKENS  = int(os.environ.get("VLM_MAX_TOKENS", "120"))
 VLM_FRAMES      = int(os.environ.get("VLM_FRAMES", "4"))         # frames per Qwen request (benchmark: 4 frames ~2.0 s vs 1 frame ~1.8 s)
-GATE_SCENE_CONF = float(os.environ.get("GATE_SCENE_CONF", "0.5"))  # a hazard scene counts for the gate at/above this
+GATE_SCENE_CONF = float(os.environ.get("GATE_SCENE_CONF", "0.5"))
+MIN_CLAIM_CONF  = float(os.environ.get("MIN_CLAIM_CONF", "0.5"))    # a claim Qwen does not back must still reach this to be posted (2026-09-25, Shresth)  # a hazard scene counts for the gate at/above this
 GATE_OBJ_CONF   = float(os.environ.get("GATE_OBJ_CONF", "0.35"))   # a hazard object counts for the gate at/above this
 GATE_PERSIST    = int(os.environ.get("GATE_PERSIST", "3"))       # consecutive frames before a hazard is confirmed
 GATE_CLEAR      = int(os.environ.get("GATE_CLEAR", "5"))         # consecutive frames without it before it is dropped
@@ -369,6 +370,9 @@ def make_claims(job: dict, a: Optional[dict], err: Optional[str], refs: list, vi
         if etype == "road" and a and a["road_passable"] is True: claim = "restricted"
         # Qwen agrees -> the weaker of the two; Qwen saw no hazard -> halve; Qwen unavailable -> detector alone, discounted
         conf = min(det_c, vlm_c) if vlm_c is not None else det_c * (0.5 if a else 0.8)
+        if a and vlm_c is None and conf < MIN_CLAIM_CONF:   # detector flicker that Qwen does not back (e.g. a facade close-up read as 'blocked road'): keep local
+            STATS["claims_dropped"] = STATS.get("claims_dropped", 0) + 1
+            log.info("claim %s %s %s dropped: Qwen saw no hazard, conf %.2f < %.2f", job["source"]["id"], entity, claim, conf, MIN_CLAIM_CONF); continue
         key = (entity, claim)
         if key in out:
             out[key]["confidence"] = max(out[key]["confidence"], round(conf, 3)); out[key]["details"]["hazard"].append(kind)

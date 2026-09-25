@@ -788,14 +788,14 @@ function Lighting() {
   }, [])
   return (
     <>
-      <Sky distance={450} sunPosition={SUN.toArray()} turbidity={quake ? 14 : 3.5} rayleigh={quake ? 0.35 : 0.9} mieCoefficient={quake ? 0.03 : 0.004} mieDirectionalG={quake ? 0.92 : 0.8} />
-      <hemisphereLight args={quake ? ['#c9b39a', '#4a3a2e', 1.3] : ['#d6e6ff', '#6b5a45', 1.7]} />
-      <ambientLight intensity={quake ? 0.3 : 0.35} color={quake ? '#d9c4a6' : '#ffffff'} />
+      <Sky distance={450} sunPosition={SUN.toArray()} turbidity={quake ? 16 : 9} rayleigh={quake ? 0.3 : 0.45} mieCoefficient={quake ? 0.035 : 0.012} mieDirectionalG={quake ? 0.92 : 0.85} />
+      <hemisphereLight args={quake ? ['#c9b39a', '#4a3a2e', 1.3] : ['#c8d0d8', '#5a544d', 1.5]} />
+      <ambientLight intensity={quake ? 0.3 : 0.45} color={quake ? '#d9c4a6' : '#dfe4ea'} />
       <directionalLight
         ref={sun}
         position={SUN.clone().multiplyScalar(2.2).toArray()}
-        color={quake ? '#ffb070' : '#fff1dc'}
-        intensity={quake ? 2.4 : 3.8}
+        color={quake ? '#ffb070' : '#e9e6e0'}
+        intensity={quake ? 2.4 : 2.2}
         castShadow
         shadow-mapSize={[4096, 4096]}
         shadow-bias={-0.0004}

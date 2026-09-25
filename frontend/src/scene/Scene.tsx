@@ -138,8 +138,9 @@ export function Scene() {
     >
       {TWIN === 'mesh' ? (
         <>
-          <color attach="background" args={['#cfe0ef']} />
-          <fog attach="fog" args={['#d7e3ec', 170, 480]} />
+          {/* overcast, like the demo footage: grey sky, muted distance */}
+          <color attach="background" args={['#b9c0c6']} />
+          <fog attach="fog" args={['#c3c9ce', 150, 460]} />
         </>
       ) : (
         <>
