@@ -289,7 +289,9 @@ async def fanout():
 
 
 def clock_t() -> float:
+    """Scenario seconds. Frozen at t until the first real input of an incident arrives (after a reset nothing runs)."""
     c = STATE["clock"]
+    if c.get("first") is None and not STATE["events"]: return round(c["t"], 2)
     return round(c["t"] + (time.time() - c["wall"]) * c["speed"], 2)
 
 
@@ -429,10 +431,10 @@ async def start():
             STATE["last_received"] = rec["received_at"]
             try: STATE["events"].append(logged_event(rec, STATE["names"]))
             except Exception as e: print("gateway: skipped record at start:", repr(e)[:160], file=sys.stderr)
-        if STATE["events"]: STATE["clock"].update(t=max(e["t"] for e in STATE["events"]), wall=time.time())
+        if STATE["events"]: STATE["clock"].update(t=max(e["t"] for e in STATE["events"]), wall=time.time(), first=(0.0, time.time()))
         else:
             latest = G.replay_now()   # bus history empty (restart) but the graph remembers where the incident clock is
-            if latest: STATE["clock"].update(t=(latest - T0).total_seconds(), wall=time.time())
+            if latest: STATE["clock"].update(t=(latest - T0).total_seconds(), wall=time.time(), first=(0.0, time.time()))
     except Exception as e: print("gateway: bus not reachable at start:", e, file=sys.stderr)
     load_cameras()
     asyncio.create_task(fanout())

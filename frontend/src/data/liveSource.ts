@@ -140,10 +140,13 @@ function handle(msg: Msg) {
       useStore.setState({ radioQueue: msg.items })
       break
     case 'reset':
-      // the backend wiped the incident: drop the mirror; a fresh seed follows on the same socket
+      // the backend wiped the incident: drop the mirror; a fresh seed follows on the same socket.
+      // Nothing may run afterwards: no placeholder drones, no flight state, no radio, until real inputs arrive.
       seen.clear()
+      flight.clear()
       s.resetGraph()
-      useStore.setState({ streams: s.streams.filter((x) => x.state === 'running') })
+      dropPlaceholderDrones()
+      useStore.setState({ streams: s.streams.filter((x) => x.state === 'running'), radio: [], radioPlaying: null, radioQueue: [] })
       break
     case 'camera': {
       const { type: _t, ...rest } = msg
@@ -183,6 +186,13 @@ function handle(msg: Msg) {
       clock.speed = msg.speed ?? clock.speed
       break
   }
+}
+
+/** The seed city's placeholder drones are not real feeds: in live mode a drone exists only while its camera streams. */
+function dropPlaceholderDrones() {
+  const st = useStore.getState()
+  const gone = Object.values(st.nodes).filter((n) => n.label === 'Unit' && n.props.kind === 'drone').map((n) => ({ op: 'removeNode' as const, id: n.id }))
+  if (gone.length) st.applyPatches(gone)
 }
 
 /** A drone exists in the twin only while its camera has a video stream (frames arriving or an upload running). */
@@ -229,9 +239,7 @@ export const live = {
     seen.clear()
     flight.clear()
     paintAll()
-    // the seed city's placeholder drones are not real feeds: only drones with a video stream exist in live mode
-    const st = useStore.getState()
-    st.applyPatches(Object.values(st.nodes).filter((n) => n.label === 'Unit' && n.props.kind === 'drone').map((n) => ({ op: 'removeNode' as const, id: n.id })))
+    dropPlaceholderDrones()
     let ws: WebSocket | null = null
     let stop = false
     const connect = () => {

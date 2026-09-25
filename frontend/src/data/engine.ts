@@ -1,7 +1,8 @@
 // The one facade the UI talks to. Mode is chosen at RUNTIME (LIVE / SIMULATION toggle in the top bar):
 //  - live:   the Nano backend through Shresth's gateway (WS /stream, /qa, /netsim, /evidence). Nothing scripted.
-//  - replay: the in-browser simulation of the same scenario (src/data/scenario.ts). No backend needed.
-// At startup the gateway is probed once; live if it answers, simulation otherwise.
+//            If the gateway is not reachable the twin waits and keeps reconnecting; nothing runs.
+//  - replay: the in-browser simulation of the same scenario (src/data/scenario.ts). ONLY behind the SIMULATION button;
+//            it never starts on its own.
 import { ENV } from '../config'
 import { useStore } from '../store'
 import type { NetworkState } from '../types'
@@ -29,7 +30,7 @@ async function gatewayUp(): Promise<boolean> {
 export const engine = {
   start() {
     const stopCloud = startCloudSim()
-    void gatewayUp().then((up) => this.setMode(up ? 'live' : 'replay'))
+    this.setMode('live')
     return () => { stopSource?.(); stopSource = null; stopCloud() }
   },
 
@@ -43,16 +44,13 @@ export const engine = {
     s.setMode(mode)
     resetCoverage(0)
     if (mode === 'live') {
+      // live source reconnects on its own; a gateway that is down means an empty console, never the simulation
+      stopSource = live.start()
+      useStore.setState({ starter: true })
       void gatewayUp().then((up) => {
-        if (!up) {
-          useStore.setState({
-            alerts: [...useStore.getState().alerts.slice(-2), { id: `al-gw-${Date.now()}`, title: 'Gateway not reachable', severity: 'warning', sub: `${ENV.restUrl ?? 'no VITE_RG_LIVE_URL'} · staying on SIMULATION` }],
-          })
-          this.setMode('replay')
-          return
-        }
-        stopSource = live.start()
-        useStore.setState({ starter: true })
+        if (!up) useStore.setState({
+          alerts: [...useStore.getState().alerts.slice(-2), { id: `al-gw-${Date.now()}`, title: 'Gateway not reachable', severity: 'warning', sub: `${ENV.restUrl ?? 'no VITE_RG_LIVE_URL'} · waiting for the Nano` }],
+        })
       })
     } else {
       stopSource = replay.start()
