@@ -1,0 +1,29 @@
+{
+ "label": "cloud-none-auto",
+ "git": "d982fed",
+ "repeats": 3,
+ "correct_mean": 0.467,
+ "correct_se": 0.015,
+ "pass_k": 0.38,
+ "runs": [
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/cloud_vs_local/cloud-none-auto-d982fed-r1.json",
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/cloud_vs_local/cloud-none-auto-d982fed-r2.json",
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/cloud_vs_local/cloud-none-auto-d982fed-r3.json"
+ ],
+ "flaky_ids": [
+  "hag04",
+  "hag08",
+  "hcf07",
+  "hcf09",
+  "hna19",
+  "hpv09",
+  "hpx01",
+  "hpx06",
+  "hrt08",
+  "hst03",
+  "hst04",
+  "hst07",
+  "hst08",
+  "hun06"
+ ]
+}

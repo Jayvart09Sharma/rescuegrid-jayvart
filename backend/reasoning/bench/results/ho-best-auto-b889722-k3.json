@@ -1,0 +1,16 @@
+{
+ "label": "ho-best-auto",
+ "git": "b889722",
+ "repeats": 3,
+ "correct_mean": 0.473,
+ "correct_se": 0.003,
+ "pass_k": 0.47,
+ "runs": [
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/ho-best-auto-b889722-r1.json",
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/ho-best-auto-b889722-r2.json",
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/ho-best-auto-b889722-r3.json"
+ ],
+ "flaky_ids": [
+  "hrt04"
+ ]
+}

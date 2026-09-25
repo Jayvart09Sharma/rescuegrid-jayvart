@@ -1,0 +1,29 @@
+{
+ "label": "cloud-throttled-auto",
+ "git": "d982fed",
+ "repeats": 3,
+ "correct_mean": 0.467,
+ "correct_se": 0.003,
+ "pass_k": 0.4,
+ "runs": [
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/cloud_vs_local/cloud-throttled-auto-d982fed-r1.json",
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/cloud_vs_local/cloud-throttled-auto-d982fed-r2.json",
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/cloud_vs_local/cloud-throttled-auto-d982fed-r3.json"
+ ],
+ "flaky_ids": [
+  "hag01",
+  "hag04",
+  "hag08",
+  "hcf02",
+  "hcf07",
+  "hna03",
+  "hna17",
+  "hna19",
+  "hpx06",
+  "hrt08",
+  "hst04",
+  "htm01",
+  "htm02",
+  "hun03"
+ ]
+}

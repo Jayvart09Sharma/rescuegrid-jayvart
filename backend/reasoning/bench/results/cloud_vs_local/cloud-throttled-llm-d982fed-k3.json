@@ -1,0 +1,35 @@
+{
+ "label": "cloud-throttled-llm",
+ "git": "d982fed",
+ "repeats": 3,
+ "correct_mean": 0.483,
+ "correct_se": 0.009,
+ "pass_k": 0.38,
+ "runs": [
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/cloud_vs_local/cloud-throttled-llm-d982fed-r1.json",
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/cloud_vs_local/cloud-throttled-llm-d982fed-r2.json",
+  "/home/hp2/kenil/rescuegrid-reasoning/bench/results/cloud_vs_local/cloud-throttled-llm-d982fed-r3.json"
+ ],
+ "flaky_ids": [
+  "hag04",
+  "hag08",
+  "hcf01",
+  "hcf07",
+  "hcf09",
+  "hna03",
+  "hna19",
+  "hpv02",
+  "hpv03",
+  "hpv06",
+  "hpx06",
+  "hpx07",
+  "hrt08",
+  "hst03",
+  "hst04",
+  "htm01",
+  "htm04",
+  "htm09",
+  "hun03",
+  "hun06"
+ ]
+}

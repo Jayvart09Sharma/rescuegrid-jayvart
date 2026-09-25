@@ -19,7 +19,6 @@ backend/bus/bus.log*.jsonl
 *.out
 backend/reasoning/.env
 backend/reasoning/out/
-backend/reasoning/bench/results/
 frontend/dist/
 # large stock clips (see videos/README.md for the download links)
 videos/High-angle-multi-lane-traffic.mp4
