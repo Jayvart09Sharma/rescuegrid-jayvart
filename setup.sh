@@ -63,16 +63,13 @@ fi
 if [ ! -x "$B/neo4j/neo4j/bin/neo4j" ]; then
   curl -sL -o /tmp/neo4j.tgz "https://dist.neo4j.org/neo4j-community-5.26.0-unix.tar.gz"
   mkdir -p "$B/neo4j/neo4j" && tar -xzf /tmp/neo4j.tgz -C "$B/neo4j/neo4j" --strip-components=1 && rm /tmp/neo4j.tgz
-  cat >> "$B/neo4j/neo4j/conf/neo4j.conf" <<'EOF'
-
-# RescueGrid shared graph (setup.sh): localhost only, non-default ports so a teammate's own Neo4j can keep 7687
-server.default_listen_address=127.0.0.1
-server.bolt.listen_address=:7688
-server.http.listen_address=:7475
-server.https.enabled=false
-server.memory.heap.initial_size=1g
-server.memory.heap.max_size=2g
-EOF
+  CONF="$B/neo4j/neo4j/conf/neo4j.conf"
+  # RescueGrid shared graph: localhost only, non-default ports so a teammate's own Neo4j can keep 7687.
+  # Replace any existing (possibly commented) declaration so no key is declared twice.
+  for kv in server.default_listen_address=127.0.0.1 server.bolt.listen_address=:7688 server.http.listen_address=:7475 \
+            server.https.enabled=false server.memory.heap.initial_size=1g server.memory.heap.max_size=2g; do
+    k=${kv%%=*}; sed -i "/^#\?${k}=/d" "$CONF"; echo "$kv" >> "$CONF"
+  done
   JAVA_HOME="$B/neo4j/jdk" "$B/neo4j/neo4j/bin/neo4j-admin" dbms set-initial-password rescuegrid >/dev/null
 fi
 "$B/neo4j/neo4jctl.sh" start
