@@ -308,6 +308,7 @@ def submit(job: dict):
             STATS["vlm_merged"] += 1
             job["kinds"] = {**old["kinds"], **job["kinds"]}; job["confirmed"] = old["confirmed"] | job["confirmed"]
             job["ts"], job["t_trigger"] = old["ts"], old["t_trigger"]
+            job["entities"] = old["entities"]     # a moving camera: the claim belongs where the FIRST trigger frame was taken (2026-09-25, Shresth)
             job["reason"] = old["reason"] + " + " + job["reason"]
         PENDING[job["source"]["id"]] = job
         COND.notify()
