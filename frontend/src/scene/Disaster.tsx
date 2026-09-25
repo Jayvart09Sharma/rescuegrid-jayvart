@@ -1,6 +1,5 @@
 // The earthquake, made visible. Everything here is driven by the graph mirror (store), never the other way round:
-//  - Incident / seismic spike       -> a heavy first jolt, fissures with real width radiating from the epicentre with
-//                                      rubble along their lips, a dust burst, dust haze, aftershock tremors
+//  - Incident / seismic spike       -> a heavy first jolt, a dust burst at the epicentre, dust haze, aftershock tremors
 //  - Building collapsed             -> dust and smoke settling over the rubble (no flames: a gas leak is not a fire)
 //                                      with a fire hazard on it: flames, black smoke, fire light
 //  - Building damaged (warning)     -> thin smoke wisps
@@ -110,117 +109,6 @@ function Wisps({ x, z, w, h }: { x: number; z: number; w: number; h: number }) {
   return <Plume x={x} z={z} y={h * 0.6} mode="smoke" h={14} w={w * 0.35} n={700} />
 }
 
-// ─── fissures from the epicentre: ribbons with width, rubble along the lips ────
-function crackPath(cx: number, cz: number, angle: number, len: number, seed: number): [number, number][] {
-  let s = seed >>> 0
-  const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
-  const pts: [number, number][] = [[cx, cz]]
-  let a = angle
-  let x = cx
-  let z = cz
-  const steps = 12 + Math.floor(rnd() * 8)
-  for (let i = 0; i < steps; i++) {
-    a += (rnd() - 0.5) * 1.1
-    const d = (len / steps) * (0.5 + rnd())
-    x += Math.cos(a) * d
-    z += Math.sin(a) * d
-    pts.push([x, z])
-  }
-  return pts
-}
-
-/** A crack as a flat ribbon: wide near the epicentre, tapering, jagged edges. */
-function ribbonGeometry(path: [number, number][], w0: number, seed: number): THREE.BufferGeometry {
-  let s = seed >>> 0
-  const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
-  const pos: number[] = []
-  const idx: number[] = []
-  for (let i = 0; i < path.length; i++) {
-    const [x, z] = path[i]
-    const [px, pz] = path[Math.max(0, i - 1)]
-    const [nx, nz] = path[Math.min(path.length - 1, i + 1)]
-    const dx = nx - px
-    const dz = nz - pz
-    const L = Math.hypot(dx, dz) || 1
-    const ox = -dz / L
-    const oz = dx / L
-    const w = w0 * (1 - i / path.length) * (0.6 + rnd() * 0.8) + 0.08
-    pos.push(x + ox * w, 0.07, z + oz * w, x - ox * w, 0.07, z - oz * w)
-    if (i > 0) { const b = i * 2; idx.push(b - 2, b - 1, b, b - 1, b + 1, b) }
-  }
-  const g = new THREE.BufferGeometry()
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
-  g.setIndex(idx)
-  g.computeVertexNormals()
-  return g
-}
-
-function Fissures({ x, z }: { x: number; z: number }) {
-  const { geos, chunks } = useMemo(() => {
-    const paths: [number, number][][] = []
-    const N = 11
-    for (let i = 0; i < N; i++) {
-      const a = (i / N) * Math.PI * 2 + 0.3
-      paths.push(crackPath(x, z, a, 36 + (i % 3) * 16, 1000 + i))
-      if (i % 2 === 0) paths.push(crackPath(x + Math.cos(a) * 14, z + Math.sin(a) * 14, a + 1.1, 16, 2000 + i))
-    }
-    const geos = paths.map((p, i) => ribbonGeometry(p, 1.1, 3000 + i))
-    // rubble along the crack lips, denser near the epicentre
-    const chunks: { x: number; z: number; s: number; r: number }[] = []
-    let sd = 777
-    const rnd = () => { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296 }
-    for (const p of paths) for (let i = 0; i < p.length; i += 2) {
-      if (rnd() < 0.55) chunks.push({ x: p[i][0] + (rnd() - 0.5) * 2.2, z: p[i][1] + (rnd() - 0.5) * 2.2, s: 0.25 + rnd() * 0.7 * (1 - i / p.length), r: rnd() * 6 })
-    }
-    return { geos, chunks }
-  }, [x, z])
-  const mesh = useRef<THREE.InstancedMesh>(null)
-  useEffect(() => {
-    const m = mesh.current
-    if (!m) return
-    const d = new THREE.Object3D()
-    chunks.forEach((c, i) => { d.position.set(c.x, c.s * 0.35, c.z); d.rotation.set(c.r, c.r * 1.7, c.r * 0.6); d.scale.set(c.s, c.s * 0.7, c.s * 0.9); d.updateMatrix(); m.setMatrixAt(i, d.matrix) })
-    m.instanceMatrix.needsUpdate = true
-  }, [chunks])
-  const grow = useRef(0)
-  const g = useRef<THREE.Group>(null)
-  useFrame((_, dt) => {
-    grow.current = Math.min(1, grow.current + dt * 0.5)
-    if (g.current) g.current.scale.setScalar(0.2 + 0.8 * grow.current)
-  })
-  const dark = MESH ? '#120c09' : '#2a100c'
-  const glow = MESH ? '#3a1a10' : '#ff3a2a'
-  return (
-    <group ref={g} position={[x, 0, z]}>
-      <group position={[-x, 0, -z]}>
-        {geos.map((geo, i) => (
-          <mesh key={i} geometry={geo} renderOrder={2}>
-            <meshBasicMaterial color={dark} depthWrite={false} side={THREE.DoubleSide} polygonOffset polygonOffsetFactor={-2} />
-          </mesh>
-        ))}
-        {geos.map((geo, i) => (
-          <mesh key={`g${i}`} geometry={geo} scale={[1, 1, 1]} position-y={0.02} renderOrder={3}>
-            <meshBasicMaterial color={glow} transparent opacity={MESH ? 0.25 : 0.3} depthWrite={false} side={THREE.DoubleSide} blending={MESH ? THREE.NormalBlending : THREE.AdditiveBlending} />
-          </mesh>
-        ))}
-        <instancedMesh ref={mesh} args={[undefined, undefined, chunks.length]} castShadow={MESH} receiveShadow={MESH}>
-          <dodecahedronGeometry args={[0.6, 0]} />
-          {MESH ? <meshStandardMaterial color="#5f564d" roughness={1} /> : <meshBasicMaterial color="#4a2a24" />}
-        </instancedMesh>
-        {/* epicentre: sunken dark disc with a raised rim */}
-        <mesh position={[x, 0.05, z]} rotation-x={-Math.PI / 2}>
-          <circleGeometry args={[5.5, 48]} />
-          <meshBasicMaterial color={dark} transparent opacity={0.85} depthWrite={false} />
-        </mesh>
-        <mesh position={[x, 0.08, z]} rotation-x={-Math.PI / 2}>
-          <ringGeometry args={[5.5, 7.5, 48]} />
-          <meshBasicMaterial color={MESH ? '#4a3d33' : '#3a1611'} transparent opacity={0.7} depthWrite={false} />
-        </mesh>
-      </group>
-    </group>
-  )
-}
-
 // ─── rubble on blocked roads ──────────────────────────────────────────────────
 function RoadRubble({ n }: { n: GraphNode }) {
   const a = n.props.a as number[]
@@ -305,7 +193,7 @@ export function Disaster() {
     <group>
       <Haze active={quake} />
       <Shocks active={quake} />
-      {epi && <Fissures x={epi[0]} z={epi[1]} />}
+      {/* no fissure lines: they did not read well; the quake shows as the jolt, the dust burst and haze, aftershocks, and what falls */}
       {epi && <Plume x={epi[0]} z={epi[1]} y={0.2} mode="burst" h={16} w={22} n={3000} rate={0.12} />}
       {collapsed.map((b) => {
         const w = (b.props.w as number) ?? 6
