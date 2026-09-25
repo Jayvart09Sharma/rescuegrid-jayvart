@@ -199,6 +199,10 @@ export interface CameraFrame {
   /** URL of the newest analysed frame (gateway proxy of the vision service's buffer). */
   frame?: string
   frame_ref?: string
+  /** drone position from its flight telemetry (twin coordinates), when a flight plan is running */
+  position?: { x: number; z: number } | null
+  /** the waypoint the drone is over right now */
+  over?: string | null
   /** camera motion between this frame and the previous one (phase correlation, px at ref_width) */
   motion?: { dx: number; dy: number; response: number; ref_width: number } | null
   image?: { w: number; h: number }

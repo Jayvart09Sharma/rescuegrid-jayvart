@@ -5,7 +5,6 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { useStore } from '../store'
-import { drawAerial } from '../data/frames'
 import { DRONE_ALT, DRONE_FOOTPRINT } from '../data/scenario'
 import { paint } from './coverage'
 
@@ -84,7 +83,7 @@ function Drone({ id }: { id: string }) {
   const pos = useRef(new THREE.Vector3(NaN, DRONE_ALT, 0))
   const acc = useRef(0)
 
-  const { ctx, tex } = useMemo(() => {
+  const { tex } = useMemo(() => {
     const canvas = document.createElement('canvas')
     canvas.width = FW
     canvas.height = FH
@@ -93,7 +92,7 @@ function Drone({ id }: { id: string }) {
     return { ctx: canvas.getContext('2d')!, tex }
   }, [])
 
-  const { geo, projMat, coneMat } = useMemo(() => {
+  const { projMat, coneMat } = useMemo(() => {
     const uv: number[] = []
     const ph: number[] = []
     const pos: number[] = []
@@ -131,7 +130,7 @@ function Drone({ id }: { id: string }) {
       blending: THREE.AdditiveBlending,
       uniforms: { uTime: { value: 0 } },
     })
-    return { geo, projMat, coneMat }
+    return { projMat, coneMat }
   }, [gl, tex])
 
   useFrame((state, dt) => {

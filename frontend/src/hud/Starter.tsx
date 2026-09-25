@@ -12,7 +12,7 @@ import { fmtClock } from '../data/clock'
 
 interface EntityOpt { id: string; name: string }
 interface RadioLine { id: string; speaker: string; channel: string; text: string; seconds: number }
-interface Row { on: boolean; file: File | null; building: string; road: string; bridge: string }
+interface Row { on: boolean; file: File | null; building: string; road: string; bridge: string; plan: string }
 interface RadioPick { key: string; library_id?: string; file?: File; speaker: string; label: string }
 
 export function Starter() {
@@ -39,7 +39,7 @@ export function Starter() {
   useEffect(() => {
     setRows((prev) => {
       const next = { ...prev }
-      for (const c of drones) if (!next[c.camera]) next[c.camera] = { on: false, file: null, building: c.entities?.building ?? '', road: c.entities?.road ?? '', bridge: c.entities?.bridge ?? '' }
+      for (const c of drones) if (!next[c.camera]) next[c.camera] = { on: false, file: null, building: c.entities?.building ?? '', road: c.entities?.road ?? '', bridge: c.entities?.bridge ?? '', plan: [c.entities?.building, c.entities?.road, c.entities?.bridge].filter(Boolean).join(', ') }
       return next
     })
   }, [cams]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -82,7 +82,7 @@ export function Starter() {
       for (const c of selected) {
         const row = rows[c.camera]
         const fd = new FormData()
-        fd.append('file', row.file!); fd.append('camera', c.camera); fd.append('building', row.building); fd.append('road', row.road); fd.append('bridge', row.bridge)
+        fd.append('file', row.file!); fd.append('camera', c.camera); fd.append('building', row.building); fd.append('road', row.road); fd.append('bridge', row.bridge); fd.append('plan', row.plan)
         fd.append('fps', String(fps)); fd.append('speed', '1'); fd.append('loop', 'true')
         setMsg(`Uploading ${row.file!.name} for ${c.callsign}…`)
         await post('/streams', { method: 'POST', body: fd })
@@ -145,7 +145,7 @@ export function Starter() {
                 <p className="dim small">Tick the drones that fly and give each its footage. Only ticked drones exist in the twin. Each file is played into the ZGX Nano's vision service as that camera at {fps} fps; the drone moves with its footage; only what the detector confirms reaches the graph.</p>
                 {!live && <p className="warn">Switch to LIVE to stream to the backend (the gateway is not connected).</p>}
                 {drones.map((c) => {
-                  const r = rows[c.camera] ?? { on: false, file: null, building: '', road: '', bridge: '' }
+                  const r = rows[c.camera] ?? { on: false, file: null, building: '', road: '', bridge: '', plan: '' }
                   return (
                     <div key={c.camera} className={`drone-row ${r.on ? 'on' : ''}`}>
                       <label className="check big"><input type="checkbox" checked={r.on} onChange={(e) => setRow(c.camera, { on: e.target.checked })} /> {c.callsign.toUpperCase()}</label>
@@ -153,9 +153,9 @@ export function Starter() {
                         <input type="file" accept="video/*" onChange={(e) => setRow(c.camera, { file: e.target.files?.[0] ?? null, on: true })} />
                         <span>{r.file ? `${r.file.name} · ${(r.file.size / 1e6).toFixed(1)} MB` : 'Choose video…'}</span>
                       </label>
-                      <label>BUILDING<input list="rg-buildings" value={r.building} onChange={(e) => setRow(c.camera, { building: e.target.value })} placeholder="Building-14" /></label>
-                      <label>ROAD<input list="rg-roads" value={r.road} onChange={(e) => setRow(c.camera, { road: e.target.value })} placeholder="Main Street" /></label>
-                      <label>BRIDGE<input list="rg-roads" value={r.bridge} onChange={(e) => setRow(c.camera, { bridge: e.target.value })} placeholder="Bridge Street" /></label>
+                      <label className="plan">FLIGHT PLAN · places it flies over, in order
+                        <input value={r.plan} onChange={(e) => setRow(c.camera, { plan: e.target.value })} placeholder="Building-14, Main Street, Bridge Street, Building 7" />
+                      </label>
                     </div>
                   )
                 })}
@@ -163,7 +163,7 @@ export function Starter() {
                 <datalist id="rg-roads">{(entities.road ?? []).map((r) => <option key={r.id} value={r.name}>{r.id}</option>)}</datalist>
                 <div className="row">
                   <label>FPS TO DETECTOR<input type="number" min={0.5} max={10} step={0.5} value={fps} onChange={(e) => setFps(Number(e.target.value))} /></label>
-                  <p className="dim small">Building / road / bridge = what the camera looks at (seeded names): a collapse is claimed on the building, debris or flooding on the road, a broken span on the bridge. Videos loop until stopped.</p>
+                  <p className="dim small">The drone flies the plan across the clip: it hovers at each place, moves between them at 12 m/s, and every frame is tagged with the building, road and bridge nearest to it at that moment. Whatever the detector confirms lands on those. Order the places like the scenes in the footage. Videos loop until stopped.</p>
                 </div>
 
                 <h4 style={{ marginTop: 14 }}>02 · RADIO CH3 · IN ORDER</h4>

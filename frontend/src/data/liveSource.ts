@@ -34,6 +34,7 @@ type Msg =
   | { type: 'radio'; radio: Omit<RadioMsg, 'receivedAt'>; silent?: boolean }
   | { type: 'reactive'; enabled: boolean }
   | { type: 'radioqueue'; items: RadioQueueItem[] }
+  | { type: 'telemetry'; camera: string; unit: string | null; x: number | null; z: number | null; over?: string | null; watching?: string[]; t?: number }
   | { type: 'reset' }
 
 // Scenario clock as last told by the gateway; advanced locally between ticks.
@@ -46,6 +47,7 @@ const cameras = new Map<string, CameraInfo>()
 const MOTION_K = 17 / 320
 const MOTION_MIN_RESPONSE = 0.12
 const flight = new Map<string, { x: number; z: number; clip: string | null; idx: number }>()
+const telemetry = new Map<string, { x: number; z: number; at: number; over: string | null }>() // camera -> flight position
 const patrol = new Map<string, number>()   // camera -> patrol phase
 const patrolAt = new Map<string, number>() // camera -> last tick (ms)
 
@@ -166,6 +168,16 @@ function handle(msg: Msg) {
     case 'radioqueue':
       useStore.setState({ radioQueue: msg.items })
       break
+    case 'telemetry': {
+      // the drone's own position from its flight plan: this is where it is, so no optical-flow guess and no patrol drift
+      if (msg.unit && typeof msg.x === 'number' && typeof msg.z === 'number') {
+        telemetry.set(msg.camera, { x: msg.x, z: msg.z, at: performance.now(), over: msg.over ?? null })
+        const c = cameras.get(msg.camera)
+        if (c && msg.watching?.length) c.watching = msg.watching
+        ensureDrone(msg.camera)
+      }
+      break
+    }
     case 'reset':
       // the backend wiped the incident: drop the mirror; a fresh seed follows on the same socket.
       // Nothing may run afterwards: no placeholder drones, no flight state, no radio, until real inputs arrive.
@@ -251,6 +263,11 @@ function placeCameras() {
     const streaming = Boolean(frame && !frame.replayed && now - frame.receivedAt < 3000)
     const running = s.streams.some((st) => st.camera === c.camera && st.state === 'running')
     if (!running && (!frame || frame.replayed || now - frame.receivedAt > 10000)) { retireDrone(c.camera); continue }
+    const tel = telemetry.get(c.camera)
+    if (tel && now - tel.at < 15000) {
+      patches.push({ op: 'setProps', id: c.unit, props: { x: tel.x, z: tel.z, streaming, over: tel.over } })
+      continue
+    }
     const f = flight.get(c.camera)
     const anchor = c.watching.map((id) => nodePos(s.nodes[id])).find(Boolean)
     const base = f ? [f.x, f.z] : anchor

@@ -392,7 +392,9 @@ def camera_msg(e: dict, now: float) -> dict:
     return {"type": "camera", "camera": cam, "unit": info["unit"], "watching": info["watching"], "cameraType": info["type"], "callsign": info["callsign"],
             "ts": e.get("ts"), "t": scen_t(e.get("ts") or ""), "scene": e.get("scene"), "gate": (e.get("gate") or {}).get("decision"),
             "hazards": (e.get("gate") or {}).get("active"), "detections": e.get("detections"), "latency_ms": e.get("latency_ms"),
-            "frame": f"/evidence/latest/{cam}.jpg?v={int(now * 1000)}", "frame_ref": e.get("frame_ref"), "motion": e.get("motion"), "image": e.get("image")}
+            "frame": f"/evidence/latest/{cam}.jpg?v={int(now * 1000)}", "frame_ref": e.get("frame_ref"), "motion": e.get("motion"), "image": e.get("image"),
+            "position": (lambda xz: {"x": xz[0], "z": xz[1]} if xz else None)(to_xz(CAM_POS.get(cam, {}).get("lat"), CAM_POS.get(cam, {}).get("lon"))) if cam in CAM_POS else None,
+            "over": CAM_POS.get(cam, {}).get("over")}
 
 
 def camera_poller():
@@ -581,9 +583,54 @@ def spawn_stream(kind: str, cmd: list, cwd: str, meta: dict) -> dict:
     st = stream_status(STREAMS[sid]); broadcast({"type": "stream", "stream": st}); return st
 
 
+FLIGHT_ADAPTER = os.environ.get("RESCUEGRID_FLIGHT_ADAPTER", os.path.join(ROOT, "vision", "flight_stream.py"))
+CAM_POS: dict[str, dict] = {}   # camera -> latest telemetry (lat, lon, over, entities)
+
+
+def nearest_of_kind(lat: float, lon: float, kind: str, radius_m: float = 320.0):
+    rows = G.read_dicts("MATCH (n:Entity {kind:$k}) WHERE n.lat IS NOT NULL RETURN n.id AS id, n.name AS name, n.lat AS lat, n.lon AS lon", k=kind)
+    best = min(rows, key=lambda r: haversine_m(lat, lon, r["lat"], r["lon"]), default=None)
+    return best if best and haversine_m(lat, lon, best["lat"], best["lon"]) <= radius_m else None
+
+
+def build_flight_plan(names: list[str]) -> dict:
+    """Ordered entity names -> waypoints with lat/lon and, for each, the building / road / bridge the camera can
+    see from there (nearest of each kind within 320 m). Unknown names are skipped."""
+    alias = {}
+    for n in G.all_entity_names():
+        alias[n["id"].lower()] = n["id"]; alias[(n.get("name") or "").lower()] = n["id"]
+    wps = []
+    for nm in names:
+        gid = alias.get(nm.strip().lower())
+        e = G.get_entity(gid) if gid else None
+        if not e or e.get("lat") is None: continue
+        ents = {}
+        b = nearest_of_kind(e["lat"], e["lon"], "building"); r = nearest_of_kind(e["lat"], e["lon"], "road")
+        if b: ents["building"] = b["id"]
+        if r: ents["road"] = r["name"]
+        if e["id"] == "Road-Bridge" or (r and r["id"] == "Road-Bridge"): ents["bridge"] = "Bridge Street"
+        if e.get("kind") == "building": ents["building"] = e["id"]
+        if e.get("kind") == "road": ents["road"] = e.get("name")
+        wps.append({"id": e["id"], "name": e.get("name"), "kind": e.get("kind"), "lat": e["lat"], "lon": e["lon"], "entities": ents})
+    return {"waypoints": wps, "speed_mps": 12.0}
+
+
+@app.post("/cameras/{camera}/telemetry")
+async def camera_telemetry(camera: str, body: dict):
+    """Where the drone is right now (from the flight adapter; a live drone would send its GPS)."""
+    CAM_POS[camera] = {**body, "at": time.time()}
+    xz = to_xz(body.get("lat"), body.get("lon"))
+    if camera in CAMERAS:
+        CAMERAS[camera]["over"] = body.get("over"); CAMERAS[camera]["entities"] = body.get("entities") or CAMERAS[camera].get("entities")
+        CAMERAS[camera]["watching"] = [twin_id(v) for v in (body.get("entities") or {}).values()] or CAMERAS[camera]["watching"]
+    broadcast({"type": "telemetry", "camera": camera, "unit": CAMERAS.get(camera, {}).get("unit"), "x": xz[0] if xz else None, "z": xz[1] if xz else None,
+               "over": body.get("over"), "watching": [twin_id(v) for v in (body.get("entities") or {}).values()], "t": body.get("t")})
+    return {"ok": True}
+
+
 @app.post("/streams")
 async def start_stream(file: UploadFile = File(...), camera: str = Form("drone-1"), building: str = Form(""), road: str = Form(""), bridge: str = Form(""),
-                       fps: float = Form(2.0), speed: float = Form(1.0), loop: bool = Form(True)):
+                       plan: str = Form(""), fps: float = Form(2.0), speed: float = Form(1.0), loop: bool = Form(True)):
     """Upload a video and play it into the vision service as `camera`, one frame per request at `fps`, exactly like a live
     feed. `building` / `road` say what the camera is looking at (seeded names; default = camera_entities.json). Claims are
     whatever the detector confirms; nothing about the file is assumed."""
@@ -596,6 +643,16 @@ async def start_stream(file: UploadFile = File(...), camera: str = Form("drone-1
     ents = {k: v for k, v in (("building", building.strip()), ("road", road.strip()), ("bridge", bridge.strip())) if v}
     for st in STREAMS.values():   # one stream per drone: a new upload for the same camera replaces the running one
         if st.get("camera") == camera and st["proc"].poll() is None: st["proc"].terminate()
+    names = [x for x in re.split(r"[,;\n]+", plan) if x.strip()]
+    fp = build_flight_plan(names) if names else {"waypoints": []}
+    if fp["waypoints"]:
+        # the drone flies the plan across the clip; each frame is tagged with what is nearest to it at that moment
+        plan_path = path + ".plan.json"; json.dump(fp, open(plan_path, "w"))
+        cmd = [VISION_PY, FLIGHT_ADAPTER, path, "--url", VISION, "--source-id", camera, "--plan", plan_path, "--ts-start", scen_now_iso(),
+               "--speed", str(speed), "--fps", str(fps), "--telemetry", f"http://127.0.0.1:{os.environ.get('RESCUEGRID_GATEWAY_PORT', '8097')}"]
+        if loop: cmd.append("--loop")
+        return spawn_stream("stream", cmd, os.path.dirname(FLIGHT_ADAPTER), {"camera": camera, "file": file.filename, "path": path, "bytes": size,
+                            "plan": [w["name"] for w in fp["waypoints"]], "fps": fps, "speed": speed, "loop": loop})
     cmd = [VISION_PY, VISION_ADAPTER, path, "--url", VISION, "--source-id", camera, "--source-type", "roadcam" if camera.startswith("roadcam") else "drone",
            "--ts-start", scen_now_iso(), "--speed", str(speed), "--fps", str(fps)]
     if ents: cmd += ["--entities", json.dumps(ents)]
