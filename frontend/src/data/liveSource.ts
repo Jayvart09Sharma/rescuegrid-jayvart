@@ -85,6 +85,17 @@ function mapMatch(patches: GraphPatch[]): GraphPatch[] {
   })
 }
 
+/** Nodes the gateway cannot place itself (a hazard seen by a camera at a building) carry props.at = the entity's id;
+ *  give them that entity's position from the twin's own geometry. */
+function placeAt(patches: GraphPatch[]): GraphPatch[] {
+  const { nodes } = useStore.getState()
+  return patches.map((p) => {
+    if (p.op !== 'upsertNode' || typeof p.node.props?.at !== 'string' || typeof p.node.props.x === 'number') return p
+    const pos = nodePos(nodes[p.node.props.at as string])
+    return pos ? { ...p, node: { ...p.node, props: { ...p.node.props, x: pos[0], z: pos[1], r: p.node.props.r ?? 8 } } } : p
+  })
+}
+
 function handle(msg: Msg) {
   const s = useStore.getState()
   switch (msg.type) {
