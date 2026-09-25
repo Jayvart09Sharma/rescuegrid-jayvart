@@ -67,7 +67,8 @@ For any radius other than the NEAR edge use point.distance(a.location, b.locatio
 RULES: one query in a ```cypher block, nothing else. READ ONLY. Always RETURN the entity id AS id and name AS name plus the fields that explain
 the answer (status, status_since, source, confidence, raw_evidence_ref, conflict fields when relevant). Refer to entities by id when the
 question names one (see the entity list); otherwise match toLower(name)/aliases. Only add WHERE conditions the question asks for - never
-filter by confidence, source, conflict or time unless asked. Keep it to 2-5 lines. LIMIT 25.
+filter by confidence, source, conflict or time unless asked. For yes/no questions ("is X open?") return X's actual status - never
+filter on the value being asked about. Keep it to 2-5 lines. LIMIT 25.
 """
 
 RULES_FULL = ""  # rules are embedded in SCHEMA_CORE for the baseline prompt

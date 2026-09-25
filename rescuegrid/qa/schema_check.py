@@ -44,7 +44,7 @@ REL_PROPS = {
     "DETECTED_BY": {"since", "last_confirmed", "source"}, "CONNECTS_TO": {"length_m", "source"}, "ON_ROAD": {"source"}, "MONITORS": {"source"},
     "STAGED_AT": {"since", "source"}, "ABOUT": set(), "CONFLICTS_WITH": {"detected_at"},
 }
-ID_RX = re.compile(r"^[A-Z][A-Za-z]+-[\w-]+$")
+ID_RX = re.compile(r"^(?:[A-Z][A-Za-z]+-[\w-]+|evt-[\w-]+)$")  # entity ids and Event ids
 
 _TIME_WORDS = {"timestamp", "time", "date", "datetime", "created", "updated", "when", "at"}
 _PRIMARY = ["id", "name", "status", "status_since", "last_confirmed", "source", "confidence", "raw_evidence_ref", "conflict"]
@@ -94,9 +94,37 @@ def _bind_labels(cypher: str) -> dict[str, str]:
     return labels
 
 
+ENUMS = {
+    "source": {"drone_vision", "radio_asr", "gps", "sensor", "field_report", "seed_dataset"},
+    "hazard_type": {"gas", "seismic", "water"}, "sensor_type": {"gas", "seismic", "water"},
+    "facility_type": {"hospital", "shelter"}, "unit_type": {"rescue", "ambulance", "fire", "police"},
+    "kind": {"building", "road", "team", "hazard", "sensor", "facility"},
+}
+_ENUM_LIT = re.compile(r"\b(?:\w+\.)?(source|hazard_type|sensor_type|facility_type|unit_type|kind)\s*(?:=|:)\s*'([^']*)'", re.IGNORECASE)
+_BOUND = re.compile(r"[\(\[]\s*(\w+)\s*[:\)\]\{]|\bAS\s+`?(\w+)`?|\b(\w+)\s*=\s*\(|\bUNWIND\b.*?\bAS\s+(\w+)|\b(\w+)\s+IN\s+", re.IGNORECASE)
+_KEYWORDS = {"n", "e", "t", "r", "b", "s", "h", "f", "x", "a", "p"}
+
+
+def _bound_vars(cypher: str) -> set[str]:
+    out = set()
+    for m in _BOUND.finditer(cypher):
+        out.update(g for g in m.groups() if g)
+    return out
+
+
 def check_cypher(cypher: str, known_ids: set[str] | None = None, name_to_id: dict[str, str] | None = None) -> Check:
     c = Check()
     labels = _bind_labels(cypher)
+    # 0) variables used as var.prop but never bound (e.g. WHERE n.active with an anonymous -[:NEAR]->)
+    bound = _bound_vars(cypher)
+    for var in sorted({v for v, _ in _PROP.findall(cypher)} - bound - _FUNCS):
+        if re.fullmatch(r"[a-z]\w{0,11}", var):
+            c.problems.append(f"variable {var} is used but never bound; name it in the pattern, e.g. -[{var}:NEAR]-> or ({var}:Label)")
+    # 0b) enumerated values
+    for m in _ENUM_LIT.finditer(cypher):
+        prop, val = m.group(1).lower(), m.group(2)
+        if val not in ENUMS[prop]:
+            c.problems.append(f"{prop} '{val}' is not a valid value; use one of {', '.join(sorted(ENUMS[prop]))}")
     # 1) relationship patterns: label compatibility + direction
     for m in _PATTERN.finditer(cypher):
         rel = (m.group("rel") or "").upper()
@@ -142,7 +170,7 @@ def check_cypher(cypher: str, known_ids: set[str] | None = None, name_to_id: dic
             if v and not ID_RX.match(v):
                 hint = f" -> use id '{name_to_id[v.lower()]}'" if name_to_id and v.lower() in name_to_id else " (ids look like Building-14, Road-Main, Team-Rescue4; match spoken names on name/aliases instead)"
                 c.problems.append(f"'{v}' is not an entity id{hint}")
-            elif known_ids and v not in known_ids:
+            elif known_ids and v not in known_ids and not v.startswith("evt-"):
                 c.problems.append(f"id '{v}' does not exist in the graph")
     # 4) RETURN must expose an entity id (or a count/sum)
     rm = _RETURN.search(cypher)

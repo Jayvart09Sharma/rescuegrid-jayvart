@@ -19,6 +19,9 @@ from tests.conftest import requires_neo4j
     ("MATCH (e:Event) RETURN e.claim AS claim ORDER BY e.timestamp LIMIT 1", "RETURN must include the entity id"),
     ("MATCH (r:Road) WHERE r.blocked = true RETURN r.id AS id", "does not exist on Road"),
     ("MATCH (a)-[:FLOWS_TO]->(b) RETURN a.id AS id", "does not exist; known"),
+    ("MATCH (t:Team {id: 'Team-Ambulance2'})-[:NEAR]->(x) WHERE n.active = true RETURN x.id AS id", "variable n is used but never bound"),
+    ("MATCH (e:Event {source:'radio'})-[:ABOUT]->(r) RETURN r.id AS id", "source 'radio' is not a valid value"),
+    ("MATCH (h:Hazard) WHERE h.hazard_type = 'fire' RETURN h.id AS id", "hazard_type 'fire' is not a valid value"),
 ])
 def test_schema_check_catches_baseline_failure_classes(bad, needle):
     problems = check_cypher(bad, name_to_id={"gas sensor 3": "Sensor-Gas3"}).problems
